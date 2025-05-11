@@ -5,18 +5,19 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\AdminProfile;
-use App\Models\CoachProfile;
+use App\Models\ProviderProfile;
 use App\Models\MemberProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
+
 class AuthController extends Controller
 {
     // 科定規範角色
     private const ROLE_MEMBER = 'member';
-    private const ROLE_COACH = 'coach';
+    private const ROLE_PROVIDER = 'provider';
     private const ROLE_ADMIN = 'admin';
     
     /**
@@ -65,13 +66,13 @@ class AuthController extends Controller
         if ($role === self::ROLE_MEMBER) {
             $targetUser->load('memberProfile');
         } else {
-            $targetUser->load('coachProfile');
+            $targetUser->load('providerProfile');
         }
         
         return response()->json([
             'status' => true,
             'data' => $userData,
-            'profile' => $role === self::ROLE_MEMBER ? $targetUser->memberProfile : $targetUser->coachProfile,
+            'profile' => $role === self::ROLE_MEMBER ? $targetUser->memberProfile : $targetUser->providerProfile,
         ]);
     }
     
@@ -144,7 +145,7 @@ class AuthController extends Controller
         // 撤銷目前的 token
         $request->user()->currentAccessToken()->delete();
         
-        $roleText = $role === self::ROLE_MEMBER ? '會員' : ($role === self::ROLE_COACH ? '教練' : '管理員');
+        $roleText = $role === self::ROLE_MEMBER ? '會員' : ($role === self::ROLE_PROVIDER ? '服務提供者' : '管理員');
 
         return response()->json([
             'status' => true,
@@ -197,8 +198,8 @@ class AuthController extends Controller
         // 根據角色加載對應的資料
         if ($user->isAdmin()) {
             $user->load('adminProfile');
-        } elseif ($user->isCoach()) {
-            $user->load('coachProfile');
+        } elseif ($user->isProvider()) {
+            $user->load('providerProfile');
         } elseif ($user->isMember()) {
             $user->load('memberProfile');
         }
@@ -209,9 +210,9 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * 會員註冊
-     */
+/**
+ * 會員註冊
+ */
     public function registerMember(Request $request)
     {
         // 驗證請求數據
@@ -262,9 +263,9 @@ class AuthController extends Controller
         ], 201);
     }
 
-    /**
-     * 會員登入
-     */
+/**
+ * 會員登入
+ */
     public function loginMember(Request $request)
     {
         // 驗證請求數據
@@ -319,9 +320,9 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * 會員登出
-     */
+/**
+ * 會員登出
+ */
     public function logoutMember(Request $request)
     {
         // 確保只有會員可以使用這個方法
@@ -342,9 +343,9 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * 取得會員個人資料
-     */
+/**
+ * 取得會員個人資料
+ */
     public function memberProfile(Request $request)
     {
         $user = auth()->user();
@@ -365,9 +366,9 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * 更新會員個人資料
-     */
+/**
+ * 更新會員個人資料
+ */
     public function updateMemberProfile(Request $request)
     {
         $user = auth()->user();
@@ -416,9 +417,9 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * 修改會員密碼
-     */
+/**
+ * 修改會員密碼
+ */
     public function changeMemberPassword(Request $request)
     {
         $user = auth()->user();
@@ -462,10 +463,10 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * 教練註冊
-     */
-    public function registerCoach(Request $request)
+/**
+ * 服務提供者註冊
+ */
+    public function registerProvider(Request $request)
     {
         // 驗證請求數據
         $validator = Validator::make($request->all(), [
@@ -473,8 +474,13 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'phone' => 'nullable|string|max:20',
-            'bio' => 'nullable|string',
-            'expertise' => 'nullable|string|max:100',
+            'business_name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'contact_person' => 'nullable|string|max:100',
+            'contact_phone' => 'nullable|string|max:20',
+            'contact_email' => 'nullable|string|email|max:255',
+            'address' => 'nullable|string|max:255',
+            'business_hours' => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -491,22 +497,27 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
-            'role' => 'coach', // 強制為教練角色
+            'role' => 'provider', // 強制為服務提供者角色
         ]);
 
-        // 創建教練資料
-        CoachProfile::create([
+        // 創建服務提供者資料
+        ProviderProfile::create([
             'user_id' => $user->id,
-            'bio' => $request->bio,
-            'expertise' => $request->expertise,
+            'business_name' => $request->business_name,
+            'description' => $request->description ?? null,
+            'contact_person' => $request->contact_person ?? null,
+            'contact_phone' => $request->contact_phone ?? null,
+            'contact_email' => $request->contact_email ?? null,
+            'address' => $request->address ?? null,
+            'business_hours' => $request->business_hours ?? null,
         ]);
 
         // 創建 API token
         $token = $user->createToken('auth_token')->plainTextToken;
-
+        
         return response()->json([
             'status' => true,
-            'message' => '教練註冊成功',
+            'message' => '服務提供者註冊成功',
             'data' => [
                 'user' => $user,
                 'token' => $token,
@@ -515,10 +526,10 @@ class AuthController extends Controller
         ], 201);
     }
 
-    /**
-     * 教練登入
-     */
-    public function loginCoach(Request $request)
+/**
+ * 服務提供者登入
+ */
+    public function loginProvider(Request $request)
     {
         // 驗證請求數據
         $validator = Validator::make($request->all(), [
@@ -536,7 +547,7 @@ class AuthController extends Controller
 
         // 檢查用戶是否存在
         $user = User::where('email', $request->email)
-                   ->where('role', 'coach') // 只驗證教練
+                   ->where('role', 'provider') // 只驗證服務提供者
                    ->first();
 
         // 檢查密碼
@@ -558,8 +569,8 @@ class AuthController extends Controller
         // 創建 API token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // 加載教練資料
-        $user->load('coachProfile');
+        // 加載服務提供者資料
+        $user->load('providerProfile');
 
         return response()->json([
             'status' => true,
@@ -572,14 +583,14 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * 教練登出
-     */
-    public function logoutCoach(Request $request)
+/**
+ * 服務提供者登出
+ */
+    public function logoutProvider(Request $request)
     {
-        // 確保只有教練可以使用這個方法
+        // 確保只有服務提供者可以使用這個方法
         $user = $request->user();
-        if ($user->role !== 'coach') {
+        if ($user->role !== 'provider') {
             return response()->json([
                 'status' => false,
                 'message' => '無權限存取'
@@ -591,26 +602,26 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => '教練登出成功'
+            'message' => '服務提供者登出成功'
         ]);
     }
 
-    /**
-     * 取得教練個人資料
-     */
-    public function coachProfile(Request $request)
+/**
+ * 取得服務提供者資料
+ */
+    public function providerProfile(Request $request)
     {
         $user = auth()->user();
-        // 確保只有教練可以使用這個方法
-        if ($user->role !== 'coach') {
+        // 確保只有服務提供者可以使用這個方法
+        if ($user->role !== 'provider') {
             return response()->json([
                 'status' => false,
                 'message' => '無權限存取'
             ], 403);
         }
 
-        // 加載教練資料
-        $user->load('coachProfile');
+        // 加載服務提供者資料
+        $user->load('providerProfile');
         
         return response()->json([
             'status' => true,
@@ -618,14 +629,14 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * 更新教練個人資料
-     */
-    public function updateCoachProfile(Request $request)
+/**
+ * 更新服務提供者資料
+ */
+    public function updateProviderProfile(Request $request)
     {
         $user = auth()->user();
-        // 確保只有教練可以使用這個方法
-        if ($user->role !== 'coach') {
+        // 確保只有服務提供者可以使用這個方法
+        if ($user->role !== 'provider') {
             return response()->json([
                 'status' => false,
                 'message' => '無權限存取'
@@ -637,8 +648,13 @@ class AuthController extends Controller
             'name' => 'nullable|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
-            'bio' => 'nullable|string',
-            'expertise' => 'nullable|string|max:100',
+            'business_name' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'contact_person' => 'nullable|string|max:100',
+            'contact_phone' => 'nullable|string|max:20',
+            'contact_email' => 'nullable|string|email|max:255',
+            'address' => 'nullable|string|max:255',
+            'business_hours' => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -661,36 +677,51 @@ class AuthController extends Controller
         }
         $user->save();
 
-        // 更新教練資料
-        if ($request->has('bio') || $request->has('expertise')) {
-            $coachProfile = $user->coachProfile;
-            if ($request->has('bio')) {
-                $coachProfile->bio = $request->bio;
-            }
-            if ($request->has('expertise')) {
-                $coachProfile->expertise = $request->expertise;
-            }
-            $coachProfile->save();
+        // 更新服務提供者資料
+        $providerProfile = $user->providerProfile;
+        
+        if ($request->has('business_name')) {
+            $providerProfile->business_name = $request->business_name;
         }
+        if ($request->has('description')) {
+            $providerProfile->description = $request->description;
+        }
+        if ($request->has('contact_person')) {
+            $providerProfile->contact_person = $request->contact_person;
+        }
+        if ($request->has('contact_phone')) {
+            $providerProfile->contact_phone = $request->contact_phone;
+        }
+        if ($request->has('contact_email')) {
+            $providerProfile->contact_email = $request->contact_email;
+        }
+        if ($request->has('address')) {
+            $providerProfile->address = $request->address;
+        }
+        if ($request->has('business_hours')) {
+            $providerProfile->business_hours = $request->business_hours;
+        }
+        
+        $providerProfile->save();
 
-        // 加載教練資料
-        $user->load('coachProfile');
+        // 加載服務提供者資料
+        $user->load('providerProfile');
 
         return response()->json([
             'status' => true,
-            'message' => '教練資料已更新',
+            'message' => '服務提供者資料已更新',
             'data' => $user,
         ]);
     }
 
-    /**
-     * 修改教練密碼
-     */
-    public function changeCoachPassword(Request $request)
+/**
+ * 修改服務提供者密碼
+ */
+    public function changeProviderPassword(Request $request)
     {
         $user = auth()->user();
-        // 確保只有教練可以使用這個方法
-        if ($user->role !== 'coach') {
+        // 確保只有服務提供者可以使用這個方法
+        if ($user->role !== 'provider') {
             return response()->json([
                 'status' => false,
                 'message' => '無權限存取'
@@ -1006,11 +1037,11 @@ class AuthController extends Controller
     }
 
     /**
-     * 查詢教練資料
+     * 查詢服務提供者資料
      * 只有管理員可以使用這個方法
      */
-    public function checkCoach(int $id)
+    public function checkProvider(int $id)
     {
-        return $this->checkUser(self::ROLE_COACH, $id);
+        return $this->checkUser(self::ROLE_PROVIDER, $id);
     }
 }

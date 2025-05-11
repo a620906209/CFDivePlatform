@@ -5,6 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @OA\Schema(
+ *     schema="AdminProfile",
+ *     title="管理員個人資料",
+ *     description="管理員的詳細個人資料",
+ *     @OA\Property(property="id", type="integer", format="int64", example=1, description="資料ID"),
+ *     @OA\Property(property="user_id", type="integer", format="int64", example=1, description="關聯的使用者ID"),
+ *     @OA\Property(property="position", type="string", example="系統管理員", description="職位"),
+ *     @OA\Property(property="department", type="string", example="IT部門", description="部門"),
+ *     @OA\Property(property="permissions", type="array", description="權限列表",
+ *         @OA\Items(type="string", example="manage_users")
+ *     ),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2023-01-01T00:00:00.000000Z", description="創建時間"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-01-01T00:00:00.000000Z", description="更新時間")
+ * )
+ */
 class AdminProfile extends Model
 {
     use HasFactory;

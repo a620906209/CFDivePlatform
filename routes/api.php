@@ -39,21 +39,21 @@ Route::middleware(['auth:sanctum'])->prefix('member')->group(function () {
     // Route::get('/favorites', [FavoriteController::class, 'memberFavorites']);
 });
 
-// 教練註冊／登入
-Route::post('/coach/register', [AuthController::class, 'registerCoach']);
-Route::post('/coach/login', [AuthController::class, 'loginCoach']);
+// 服務提供者註冊／登入
+Route::post('/provider/register', [AuthController::class, 'registerProvider']);
+Route::post('/provider/login', [AuthController::class, 'loginProvider']);
 
-// 教練專屬 API（需登入）
-Route::middleware(['auth:sanctum'])->prefix('coach')->group(function () {
-    // 教練登出
-    Route::post('/logout', [AuthController::class, 'logoutCoach']);
-    // 取得教練個人資料
-    Route::get('/profile', [AuthController::class, 'coachProfile']);
-    // 更新教練個人資料
-    Route::put('/profile', [AuthController::class, 'updateCoachProfile']);
+// 服務提供者專屬 API（需登入）
+Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
+    // 服務提供者登出
+    Route::post('/logout', [AuthController::class, 'logoutProvider']);
+    // 取得服務提供者資料
+    Route::get('/profile', [AuthController::class, 'providerProfile']);
+    // 更新服務提供者資料
+    Route::put('/profile', [AuthController::class, 'updateProviderProfile']);
     // 修改密碼
-    Route::put('/change-password', [AuthController::class, 'changeCoachPassword']);
-    // 其他教練專屬 API
+    Route::put('/change-password', [AuthController::class, 'changeProviderPassword']);
+    // 其他服務提供者專屬 API
 });
 
 // 管理員註冊／登入
@@ -72,8 +72,8 @@ Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
     Route::put('/change-password', [AuthController::class, 'changeAdminPassword']);
     // 查詢會員資料
     Route::get('/check-member/{id}', [AuthController::class, 'checkMember']);
-    // 查詢教練資料
-    Route::get('/check-coach/{id}', [AuthController::class, 'checkCoach']);
+    // 查詢服務提供者資料
+    Route::get('/check-provider/{id}', [AuthController::class, 'checkProvider']);
     // 其他管理員專屬 API
 });
 

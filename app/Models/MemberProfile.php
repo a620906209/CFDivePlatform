@@ -5,6 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @OA\Schema(
+ *     schema="MemberProfile",
+ *     title="會員個人資料",
+ *     description="會員的詳細個人資料",
+ *     @OA\Property(property="id", type="integer", format="int64", example=1, description="資料ID"),
+ *     @OA\Property(property="user_id", type="integer", format="int64", example=1, description="關聯的使用者ID"),
+ *     @OA\Property(property="birthday", type="string", format="date", example="1990-01-01", description="生日"),
+ *     @OA\Property(property="gender", type="string", enum={"male", "female", "other"}, example="male", description="性別"),
+ *     @OA\Property(property="address", type="string", example="台北市信義區某街123號", description="地址"),
+ *     @OA\Property(property="emergency_contact", type="string", example="王大明", description="緊急聯絡人"),
+ *     @OA\Property(property="emergency_phone", type="string", example="0987654321", description="緊急聯絡電話"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2023-01-01T00:00:00.000000Z", description="創建時間"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-01-01T00:00:00.000000Z", description="更新時間")
+ * )
+ */
 class MemberProfile extends Model
 {
     use HasFactory;
@@ -67,17 +83,17 @@ class MemberProfile extends Model
     }
 
     /**
-     * 獲取會員的教練
+     * 獲取會員的服務提供者
      */
-    public function coaches()
+    public function providers()
     {
         return $this->hasManyThrough(
-            CoachProfile::class,
-            'coach_member',
+            ProviderProfile::class,
+            'provider_member',
             'member_id',
             'user_id',
             'user_id',
-            'coach_id'
+            'provider_id'
         );
     }
 

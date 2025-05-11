@@ -11,6 +11,24 @@ use Laravel\Sanctum\HasApiTokens;
  * User 使用者模型
  *
  * 對應 users 資料表，並提供角色判斷、關聯資料取得等功能。
+ *
+ * @OA\Schema(
+ *     schema="User",
+ *     title="使用者",
+ *     description="使用者資料模型",
+ *     @OA\Property(property="id", type="integer", format="int64", example=1, description="使用者ID"),
+ *     @OA\Property(property="name", type="string", example="王小明", description="使用者姓名"),
+ *     @OA\Property(property="email", type="string", format="email", example="user@example.com", description="電子郵件"),
+ *     @OA\Property(property="phone", type="string", example="0912345678", description="電話號碼"),
+ *     @OA\Property(property="role", type="string", enum={"member", "provider", "admin"}, example="member", description="角色"),
+ *     @OA\Property(property="is_active", type="boolean", example=true, description="是否啟用"),
+ *     @OA\Property(property="email_verified_at", type="string", format="date-time", example="2023-01-01T00:00:00.000000Z", description="電子郵件驗證時間"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2023-01-01T00:00:00.000000Z", description="創建時間"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-01-01T00:00:00.000000Z", description="更新時間"),
+ *     @OA\Property(property="memberProfile", type="object", ref="#/components/schemas/MemberProfile", description="會員詳細資料"),
+ *     @OA\Property(property="providerProfile", type="object", ref="#/components/schemas/ProviderProfile", description="服務提供者詳細資料"),
+ *     @OA\Property(property="adminProfile", type="object", ref="#/components/schemas/AdminProfile", description="管理員詳細資料")
+ * )
  */
 class User extends Authenticatable
 {
@@ -75,15 +93,15 @@ class User extends Authenticatable
     }
 
     /**
-     * 判斷用戶是否為教練
+     * 判斷用戶是否為服務提供者
      */
     /**
-     * 判斷用戶是否為教練
+     * 判斷用戶是否為服務提供者
      * @return bool
      */
-    public function isCoach()
+    public function isProvider()
     {
-        return $this->role === 'coach';
+        return $this->role === 'provider';
     }
 
     /**
@@ -111,15 +129,15 @@ class User extends Authenticatable
     }
 
     /**
-     * 獲取用戶的教練資料
+     * 獲取用戶的服務提供者資料
      */
     /**
-     * 取得用戶的教練詳細資料（關聯 coach_profiles）
+     * 取得用戶的服務提供者詳細資料（關聯 provider_profiles）
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function coachProfile()
+    public function providerProfile()
     {
-        return $this->hasOne(CoachProfile::class);
+        return $this->hasOne(ProviderProfile::class);
     }
 
     /**
@@ -145,45 +163,45 @@ class User extends Authenticatable
     {
         if ($this->isAdmin()) {
             return $this->adminProfile;
-        } elseif ($this->isCoach()) {
-            return $this->coachProfile;
+        } elseif ($this->isProvider()) {
+            return $this->providerProfile;
         } else {
             return $this->memberProfile;
         }
     }
 
     /**
-     * 獲取教練的會員 (僅適用於教練角色)
+     * 獲取服務提供者的會員 (僅適用於服務提供者角色)
      */
     /**
-     * 取得教練所帶的會員（僅教練角色適用）
+     * 取得服務提供者所帶的會員（僅服務提供者角色適用）
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany|null
      */
     public function members()
     {
-        if (!$this->isCoach()) {
+        if (!$this->isProvider()) {
             return null;
         }
         
-        return $this->belongsToMany(User::class, 'coach_member', 'coach_id', 'member_id')
+        return $this->belongsToMany(User::class, 'provider_member', 'provider_id', 'member_id')
                     ->where('role', 'member');
     }
 
     /**
-     * 獲取會員的教練 (僅適用於會員角色)
+     * 獲取會員的服務提供者 (僅適用於會員角色)
      */
     /**
-     * 取得會員對應的教練（僅會員角色適用）
+     * 取得會員對應的服務提供者（僅會員角色適用）
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany|null
      */
-    public function coaches()
+    public function providers()
     {
         if (!$this->isMember()) {
             return null;
         }
         
-        return $this->belongsToMany(User::class, 'coach_member', 'member_id', 'coach_id')
-                    ->where('role', 'coach');
+        return $this->belongsToMany(User::class, 'provider_member', 'member_id', 'provider_id')
+                    ->where('role', 'provider');
     }
 
     /**
