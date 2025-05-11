@@ -1,0 +1,2966 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "CFDive Platform API",
+        "description": "CFDive Platform API 文檔",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api",
+            "description": "API 伺服器"
+        }
+    ],
+    "paths": {
+        "/register/member": {
+            "post": {
+                "tags": [
+                    "會員"
+                ],
+                "summary": "會員註冊",
+                "description": "建立新的會員帳號",
+                "operationId": "registerMember",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "使用者姓名",
+                                        "type": "string",
+                                        "example": "王小明"
+                                    },
+                                    "email": {
+                                        "description": "電子郵件",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "member@example.com"
+                                    },
+                                    "password": {
+                                        "description": "密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "確認密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "phone": {
+                                        "description": "電話號碼",
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    },
+                                    "birthday": {
+                                        "description": "生日",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "gender": {
+                                        "description": "性別",
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female",
+                                            "other"
+                                        ],
+                                        "example": "male"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "會員註冊成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "會員註冊成功"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "王小明"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "user@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "role": {
+                                                            "type": "string",
+                                                            "example": "member"
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "email_verified_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "memberProfile": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "birthday": {
+                                                                    "type": "string",
+                                                                    "example": "1990-01-01"
+                                                                },
+                                                                "gender": {
+                                                                    "type": "string",
+                                                                    "example": "male"
+                                                                },
+                                                                "address": {
+                                                                    "type": "string",
+                                                                    "example": "台北市信義區某街123號"
+                                                                },
+                                                                "emergency_contact": {
+                                                                    "type": "string",
+                                                                    "example": "王大明"
+                                                                },
+                                                                "emergency_phone": {
+                                                                    "type": "string",
+                                                                    "example": "0987654321"
+                                                                },
+                                                                "created_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                },
+                                                                "updated_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abcdef1234567890"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login/member": {
+            "post": {
+                "tags": [
+                    "會員"
+                ],
+                "summary": "會員登入",
+                "description": "會員帳號登入系統",
+                "operationId": "loginMember",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "電子郵件",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "member@example.com"
+                                    },
+                                    "password": {
+                                        "description": "密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "登入成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "登入成功"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 11
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "測試會員"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "test_member@example.com"
+                                                        },
+                                                        "email_verified_at": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "role": {
+                                                            "type": "string",
+                                                            "example": "member"
+                                                        },
+                                                        "is_active": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2025-05-08T17:19:22.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2025-05-08T17:19:22.000000Z"
+                                                        },
+                                                        "member_profile": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 5
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "integer",
+                                                                    "example": 11
+                                                                },
+                                                                "birthday": {
+                                                                    "type": "string",
+                                                                    "example": "1990-01-01T00:00:00.000000Z"
+                                                                },
+                                                                "gender": {
+                                                                    "type": "string",
+                                                                    "example": "male"
+                                                                },
+                                                                "address": {
+                                                                    "type": "string",
+                                                                    "example": null,
+                                                                    "nullable": true
+                                                                },
+                                                                "emergency_contact": {
+                                                                    "type": "string",
+                                                                    "example": null,
+                                                                    "nullable": true
+                                                                },
+                                                                "emergency_phone": {
+                                                                    "type": "string",
+                                                                    "example": null,
+                                                                    "nullable": true
+                                                                },
+                                                                "created_at": {
+                                                                    "type": "string",
+                                                                    "example": "2025-05-08T17:19:22.000000Z"
+                                                                },
+                                                                "updated_at": {
+                                                                    "type": "string",
+                                                                    "example": "2025-05-08T17:19:22.000000Z"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "23|ZuJ6m0Ls4FSJITsOoqWtFtacazXyXwUtZtkcTb960e5a08"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "身份驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "電子郵件或密碼錯誤"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "帳號已被停用",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "帳號已被停用"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logout/member": {
+            "post": {
+                "tags": [
+                    "會員"
+                ],
+                "summary": "會員登出",
+                "description": "會員登出系統並撤銷當前令牌",
+                "operationId": "logoutMember",
+                "responses": {
+                    "200": {
+                        "description": "登出成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "會員登出成功"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/profile/member": {
+            "get": {
+                "tags": [
+                    "會員"
+                ],
+                "summary": "取得會員個人資料",
+                "description": "取得當前登入會員的個人資料",
+                "operationId": "memberProfile",
+                "responses": {
+                    "200": {
+                        "description": "取得資料成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "王小明"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "user@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "role": {
+                                                            "type": "string",
+                                                            "example": "member"
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "email_verified_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "memberProfile": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "birthday": {
+                                                                    "type": "string",
+                                                                    "example": "1990-01-01"
+                                                                },
+                                                                "gender": {
+                                                                    "type": "string",
+                                                                    "example": "male"
+                                                                },
+                                                                "address": {
+                                                                    "type": "string",
+                                                                    "example": "台北市信義區某街123號"
+                                                                },
+                                                                "emergency_contact": {
+                                                                    "type": "string",
+                                                                    "example": "王大明"
+                                                                },
+                                                                "emergency_phone": {
+                                                                    "type": "string",
+                                                                    "example": "0987654321"
+                                                                },
+                                                                "created_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                },
+                                                                "updated_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "會員"
+                ],
+                "summary": "更新會員個人資料",
+                "description": "更新當前登入會員的個人資料",
+                "operationId": "updateMemberProfile",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "使用者姓名",
+                                        "type": "string",
+                                        "example": "王大明"
+                                    },
+                                    "email": {
+                                        "description": "電子郵件",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "newmail@example.com"
+                                    },
+                                    "phone": {
+                                        "description": "電話號碼",
+                                        "type": "string",
+                                        "example": "0987654321"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "會員資料已更新"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "王大明"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "user@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "role": {
+                                                            "type": "string",
+                                                            "example": "member"
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "email_verified_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "memberProfile": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "birthday": {
+                                                                    "type": "string",
+                                                                    "example": "1990-01-01"
+                                                                },
+                                                                "gender": {
+                                                                    "type": "string",
+                                                                    "example": "male"
+                                                                },
+                                                                "address": {
+                                                                    "type": "string",
+                                                                    "example": "台北市信義區某街123號"
+                                                                },
+                                                                "emergency_contact": {
+                                                                    "type": "string",
+                                                                    "example": "王大明"
+                                                                },
+                                                                "emergency_phone": {
+                                                                    "type": "string",
+                                                                    "example": "0987654321"
+                                                                },
+                                                                "created_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                },
+                                                                "updated_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/password/member": {
+            "post": {
+                "tags": [
+                    "會員"
+                ],
+                "summary": "修改會員密碼",
+                "description": "修改當前登入會員的密碼",
+                "operationId": "changeMemberPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "description": "目前密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "oldpassword"
+                                    },
+                                    "password": {
+                                        "description": "新密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "確認新密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "密碼修改成功"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "目前密碼錯誤",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "目前密碼錯誤"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/register/provider": {
+            "post": {
+                "tags": [
+                    "服務提供者"
+                ],
+                "summary": "服務提供者註冊",
+                "description": "建立新的服務提供者帳號",
+                "operationId": "registerProvider",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "使用者姓名",
+                                        "type": "string",
+                                        "example": "林教練"
+                                    },
+                                    "email": {
+                                        "description": "電子郵件",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "coach@example.com"
+                                    },
+                                    "password": {
+                                        "description": "密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "確認密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "phone": {
+                                        "description": "電話號碼",
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    },
+                                    "business_name": {
+                                        "description": "業者名稱",
+                                        "type": "string",
+                                        "example": "藍海潛水中心"
+                                    },
+                                    "description": {
+                                        "description": "業者描述",
+                                        "type": "string",
+                                        "example": "專業潛水中心，提供各種潛水服務"
+                                    },
+                                    "contact_person": {
+                                        "description": "聯絡人",
+                                        "type": "string",
+                                        "example": "羅大師"
+                                    },
+                                    "contact_phone": {
+                                        "description": "聯絡電話",
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "服務提供者註冊成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "服務提供者註冊成功"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abcdef1234567890"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login/provider": {
+            "post": {
+                "tags": [
+                    "服務提供者"
+                ],
+                "summary": "服務提供者登入",
+                "description": "服務提供者帳號登入系統",
+                "operationId": "loginProvider",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "電子郵件",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "coach@example.com"
+                                    },
+                                    "password": {
+                                        "description": "密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "登入成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 11
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "測試服務提供者"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "test_provider@example.com"
+                                                },
+                                                "email_verified_at": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "0912345678"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "provider"
+                                                },
+                                                "is_active": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-05-08T17:19:22.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-05-08T17:19:22.000000Z"
+                                                },
+                                                "providerProfile": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "user_id": {
+                                                            "type": "integer",
+                                                            "example": 11
+                                                        },
+                                                        "business_name": {
+                                                            "type": "string",
+                                                            "example": "藍海潛水中心"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "專業潛水中心，提供各種潛水服務"
+                                                        },
+                                                        "contact_person": {
+                                                            "type": "string",
+                                                            "example": "王大師"
+                                                        },
+                                                        "contact_phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "contact_email": {
+                                                            "type": "string",
+                                                            "example": "contact@example.com"
+                                                        },
+                                                        "address": {
+                                                            "type": "string",
+                                                            "example": "台灣屏東縣恆春鎮XXX路123號"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2025-05-08T17:19:22.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2025-05-08T17:19:22.000000Z"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "身份驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "電子郵件或密碼錯誤"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "帳號已被停用",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "帳號已被停用"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logout/provider": {
+            "post": {
+                "tags": [
+                    "服務提供者"
+                ],
+                "summary": "服務提供者登出",
+                "description": "服務提供者登出系統並撤銷當前令牌",
+                "operationId": "logoutProvider",
+                "responses": {
+                    "200": {
+                        "description": "登出成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "服務提供者登出成功"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/profile/provider": {
+            "get": {
+                "tags": [
+                    "服務提供者"
+                ],
+                "summary": "取得服務提供者資料",
+                "description": "取得當前登入服務提供者的資料",
+                "operationId": "providerProfile",
+                "responses": {
+                    "200": {
+                        "description": "取得資料成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "測試服務提供者"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "provider@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "role": {
+                                                            "type": "string",
+                                                            "example": "provider"
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "email_verified_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "providerProfile": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "business_name": {
+                                                                    "type": "string",
+                                                                    "example": "藍海潛水中心"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "example": "專業潛水中心，提供各種潛水服務"
+                                                                },
+                                                                "contact_person": {
+                                                                    "type": "string",
+                                                                    "example": "王大師"
+                                                                },
+                                                                "contact_phone": {
+                                                                    "type": "string",
+                                                                    "example": "0912345678"
+                                                                },
+                                                                "contact_email": {
+                                                                    "type": "string",
+                                                                    "example": "contact@example.com"
+                                                                },
+                                                                "address": {
+                                                                    "type": "string",
+                                                                    "example": "台灣屏東縣恆春鎮XXX路123號"
+                                                                },
+                                                                "business_hours": {
+                                                                    "type": "string",
+                                                                    "example": "週一至週五 09:00-18:00"
+                                                                },
+                                                                "created_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                },
+                                                                "updated_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "服務提供者"
+                ],
+                "summary": "更新服務提供者資料",
+                "description": "更新當前登入服務提供者的資料",
+                "operationId": "updateProviderProfile",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "使用者姓名",
+                                        "type": "string",
+                                        "example": "藍海潛水中心"
+                                    },
+                                    "email": {
+                                        "description": "電子郵件",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "newprovider@example.com"
+                                    },
+                                    "phone": {
+                                        "description": "電話號碼",
+                                        "type": "string",
+                                        "example": "0987654321"
+                                    },
+                                    "business_name": {
+                                        "description": "業者名稱",
+                                        "type": "string",
+                                        "example": "藍海潛水中心新分院"
+                                    },
+                                    "description": {
+                                        "description": "業者描述",
+                                        "type": "string",
+                                        "example": "專業潛水中心，提供各種高品質潛水課程與行程"
+                                    },
+                                    "contact_person": {
+                                        "description": "聯絡人",
+                                        "type": "string",
+                                        "example": "王大師"
+                                    },
+                                    "address": {
+                                        "description": "營業地址",
+                                        "type": "string",
+                                        "example": "台灣屏東縣恆春鎮XXX路456號"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "服務提供者資料已更新"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "藍海潛水中心"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "provider@example.com"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "role": {
+                                                            "type": "string",
+                                                            "example": "provider"
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "email_verified_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "providerProfile": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "business_name": {
+                                                                    "type": "string",
+                                                                    "example": "藍海潛水中心"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "example": "專業潛水中心，提供各種潛水服務"
+                                                                },
+                                                                "contact_person": {
+                                                                    "type": "string",
+                                                                    "example": "王大師"
+                                                                },
+                                                                "contact_phone": {
+                                                                    "type": "string",
+                                                                    "example": "0912345678"
+                                                                },
+                                                                "contact_email": {
+                                                                    "type": "string",
+                                                                    "example": "contact@example.com"
+                                                                },
+                                                                "address": {
+                                                                    "type": "string",
+                                                                    "example": "台灣屏東縣恆春鎮XXX路123號"
+                                                                },
+                                                                "business_hours": {
+                                                                    "type": "string",
+                                                                    "example": "週一至週五 09:00-18:00"
+                                                                },
+                                                                "created_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                },
+                                                                "updated_at": {
+                                                                    "type": "string",
+                                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/password/provider": {
+            "post": {
+                "tags": [
+                    "服務提供者"
+                ],
+                "summary": "修改服務提供者密碼",
+                "description": "修改當前登入服務提供者的密碼",
+                "operationId": "changeProviderPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "description": "目前密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "oldpassword"
+                                    },
+                                    "password": {
+                                        "description": "新密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "確認新密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "密碼修改成功"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "目前密碼錯誤",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "目前密碼錯誤"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/register/admin": {
+            "post": {
+                "tags": [
+                    "管理員"
+                ],
+                "summary": "管理員註冊",
+                "description": "建立新的管理員帳號",
+                "operationId": "registerAdmin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "使用者姓名",
+                                        "type": "string",
+                                        "example": "張管理"
+                                    },
+                                    "email": {
+                                        "description": "電子郵件",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@example.com"
+                                    },
+                                    "password": {
+                                        "description": "密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "確認密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "phone": {
+                                        "description": "電話號碼",
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    },
+                                    "position": {
+                                        "description": "職位",
+                                        "type": "string",
+                                        "example": "系統管理員"
+                                    },
+                                    "department": {
+                                        "description": "部門",
+                                        "type": "string",
+                                        "example": "IT部門"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "管理員註冊成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "管理員註冊成功"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abcdef1234567890"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login/admin": {
+            "post": {
+                "tags": [
+                    "管理員"
+                ],
+                "summary": "管理員登入",
+                "description": "管理員帳號登入系統",
+                "operationId": "loginAdmin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "電子郵件",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@example.com"
+                                    },
+                                    "password": {
+                                        "description": "密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "登入成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 11
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "測試管理員"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "test_admin@example.com"
+                                                },
+                                                "email_verified_at": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "0912345678"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "admin"
+                                                },
+                                                "is_active": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-05-08T17:19:22.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2025-05-08T17:19:22.000000Z"
+                                                },
+                                                "adminProfile": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "user_id": {
+                                                            "type": "integer",
+                                                            "example": 11
+                                                        },
+                                                        "birthday": {
+                                                            "type": "string",
+                                                            "example": "1990-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "gender": {
+                                                            "type": "string",
+                                                            "example": "male"
+                                                        },
+                                                        "address": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "emergency_contact": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "emergency_phone": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2025-05-08T17:19:22.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2025-05-08T17:19:22.000000Z"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "身份驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "電子郵件或密碼錯誤"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "帳號已被停用",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "帳號已被停用"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logout/admin": {
+            "post": {
+                "tags": [
+                    "管理員"
+                ],
+                "summary": "管理員登出",
+                "description": "管理員登出系統並撤銷當前令牌",
+                "operationId": "logoutAdmin",
+                "responses": {
+                    "200": {
+                        "description": "登出成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "管理員登出成功"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/profile/admin": {
+            "get": {
+                "tags": [
+                    "管理員"
+                ],
+                "summary": "取得管理員個人資料",
+                "description": "取得當前登入管理員的個人資料",
+                "operationId": "adminProfile",
+                "responses": {
+                    "200": {
+                        "description": "取得資料成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "管理員"
+                ],
+                "summary": "更新管理員個人資料",
+                "description": "更新當前登入管理員的個人資料",
+                "operationId": "updateAdminProfile",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "使用者姓名",
+                                        "type": "string",
+                                        "example": "張總管"
+                                    },
+                                    "email": {
+                                        "description": "電子郵件",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "newadmin@example.com"
+                                    },
+                                    "phone": {
+                                        "description": "電話號碼",
+                                        "type": "string",
+                                        "example": "0987654321"
+                                    },
+                                    "position": {
+                                        "description": "職位",
+                                        "type": "string",
+                                        "example": "資深系統管理員"
+                                    },
+                                    "department": {
+                                        "description": "部門",
+                                        "type": "string",
+                                        "example": "系統維護部"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "管理員資料已更新"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/password/admin": {
+            "post": {
+                "tags": [
+                    "管理員"
+                ],
+                "summary": "修改管理員密碼",
+                "description": "修改當前登入管理員的密碼",
+                "operationId": "changeAdminPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "description": "目前密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "oldpassword"
+                                    },
+                                    "password": {
+                                        "description": "新密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "確認新密碼",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "密碼修改成功"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "目前密碼錯誤",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "目前密碼錯誤"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "無權限存取",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無權限存取"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "驗證失敗"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AdminProfile": {
+                "title": "管理員個人資料",
+                "description": "管理員的詳細個人資料",
+                "properties": {
+                    "id": {
+                        "description": "資料ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "description": "關聯的使用者ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "position": {
+                        "description": "職位",
+                        "type": "string",
+                        "example": "系統管理員"
+                    },
+                    "department": {
+                        "description": "部門",
+                        "type": "string",
+                        "example": "IT部門"
+                    },
+                    "permissions": {
+                        "description": "權限列表",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "manage_users"
+                        }
+                    },
+                    "created_at": {
+                        "description": "創建時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "description": "更新時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "CoachProfile": {
+                "title": "教練個人資料",
+                "description": "教練的詳細個人資料",
+                "properties": {
+                    "id": {
+                        "description": "資料ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "description": "關聯的使用者ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "bio": {
+                        "description": "個人簡介",
+                        "type": "string",
+                        "example": "專業潛水教練，擁有10年教學經驗"
+                    },
+                    "expertise": {
+                        "description": "專長領域",
+                        "type": "string",
+                        "example": "自由潛水,水肺潛水"
+                    },
+                    "certification": {
+                        "description": "證照資訊",
+                        "type": "string",
+                        "example": "PADI專業潛水教練"
+                    },
+                    "experience": {
+                        "description": "教學經驗",
+                        "type": "string",
+                        "example": "10年教學經驗，帶領超過500名學員"
+                    },
+                    "rating": {
+                        "description": "評分",
+                        "type": "number",
+                        "format": "float",
+                        "example": 4.8
+                    },
+                    "availability": {
+                        "description": "可授課時間",
+                        "type": "string",
+                        "example": "週一至週五 09:00-18:00"
+                    },
+                    "created_at": {
+                        "description": "創建時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "description": "更新時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "MemberProfile": {
+                "title": "會員個人資料",
+                "description": "會員的詳細個人資料",
+                "properties": {
+                    "id": {
+                        "description": "資料ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "description": "關聯的使用者ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "birthday": {
+                        "description": "生日",
+                        "type": "string",
+                        "format": "date",
+                        "example": "1990-01-01"
+                    },
+                    "gender": {
+                        "description": "性別",
+                        "type": "string",
+                        "enum": [
+                            "male",
+                            "female",
+                            "other"
+                        ],
+                        "example": "male"
+                    },
+                    "address": {
+                        "description": "地址",
+                        "type": "string",
+                        "example": "台北市信義區某街123號"
+                    },
+                    "emergency_contact": {
+                        "description": "緊急聯絡人",
+                        "type": "string",
+                        "example": "王大明"
+                    },
+                    "emergency_phone": {
+                        "description": "緊急聯絡電話",
+                        "type": "string",
+                        "example": "0987654321"
+                    },
+                    "created_at": {
+                        "description": "創建時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "description": "更新時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "ProviderProfile": {
+                "title": "潛水業者資料",
+                "description": "潛水業者的詳細資料",
+                "properties": {
+                    "id": {
+                        "description": "資料ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "description": "關聯的使用者ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "business_name": {
+                        "description": "業者名稱",
+                        "type": "string",
+                        "example": "藍海潛水中心"
+                    },
+                    "business_license": {
+                        "description": "營業執照號碼",
+                        "type": "string",
+                        "example": "A123456789"
+                    },
+                    "description": {
+                        "description": "業者描述",
+                        "type": "string",
+                        "example": "專業潛水中心，提供各種潛水課程和裝備租賃服務"
+                    },
+                    "contact_person": {
+                        "description": "聯絡人",
+                        "type": "string",
+                        "example": "張三"
+                    },
+                    "contact_phone": {
+                        "description": "聯絡電話",
+                        "type": "string",
+                        "example": "0912345678"
+                    },
+                    "contact_email": {
+                        "description": "聯絡電子郵件",
+                        "type": "string",
+                        "example": "contact@bluedive.com"
+                    },
+                    "address": {
+                        "description": "營業地址",
+                        "type": "string",
+                        "example": "台灣屏東縣恆春鎮XXX路123號"
+                    },
+                    "dive_sites": {
+                        "description": "提供的潛點",
+                        "type": "string",
+                        "example": "墾丁,綠島,蘭嶼"
+                    },
+                    "services": {
+                        "description": "提供的服務",
+                        "type": "string",
+                        "example": "體驗潛水,初級潛水課程,進階潛水課程,裝備租賃"
+                    },
+                    "certifications": {
+                        "description": "業者相關認證",
+                        "type": "string",
+                        "example": "PADI五星級潛水中心,SSI認證中心"
+                    },
+                    "facilities": {
+                        "description": "設施",
+                        "type": "string",
+                        "example": "空氣填充站,沖洗區,更衣室,休息區"
+                    },
+                    "business_hours": {
+                        "description": "營業時間",
+                        "type": "string",
+                        "example": "週一至週五 09:00-18:00，週六日 08:00-19:00"
+                    },
+                    "is_verified": {
+                        "description": "是否通過平台驗證",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "rating": {
+                        "description": "評分",
+                        "type": "number",
+                        "format": "float",
+                        "example": 4.8
+                    },
+                    "website": {
+                        "description": "官方網站",
+                        "type": "string",
+                        "example": "https://www.bluedive.com"
+                    },
+                    "social_media": {
+                        "description": "社群媒體連結",
+                        "type": "string",
+                        "example": "https://www.facebook.com/bluedive"
+                    },
+                    "logo_url": {
+                        "description": "業者標誌URL",
+                        "type": "string",
+                        "example": "https://example.com/logo.png"
+                    },
+                    "banner_url": {
+                        "description": "業者橫幅URL",
+                        "type": "string",
+                        "example": "https://example.com/banner.png"
+                    },
+                    "is_active": {
+                        "description": "是否啟用",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "description": "創建時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "description": "更新時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "使用者",
+                "description": "使用者資料模型",
+                "properties": {
+                    "id": {
+                        "description": "使用者ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "使用者姓名",
+                        "type": "string",
+                        "example": "王小明"
+                    },
+                    "email": {
+                        "description": "電子郵件",
+                        "type": "string",
+                        "format": "email",
+                        "example": "user@example.com"
+                    },
+                    "phone": {
+                        "description": "電話號碼",
+                        "type": "string",
+                        "example": "0912345678"
+                    },
+                    "role": {
+                        "description": "角色",
+                        "type": "string",
+                        "enum": [
+                            "member",
+                            "provider",
+                            "admin"
+                        ],
+                        "example": "member"
+                    },
+                    "is_active": {
+                        "description": "是否啟用",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "email_verified_at": {
+                        "description": "電子郵件驗證時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "created_at": {
+                        "description": "創建時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "description": "更新時間",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T00:00:00.000000Z"
+                    },
+                    "memberProfile": {
+                        "$ref": "#/components/schemas/MemberProfile"
+                    },
+                    "providerProfile": {
+                        "$ref": "#/components/schemas/ProviderProfile"
+                    },
+                    "adminProfile": {
+                        "$ref": "#/components/schemas/AdminProfile"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "會員",
+            "description": "會員相關操作"
+        },
+        {
+            "name": "服務提供者",
+            "description": "服務提供者相關操作"
+        },
+        {
+            "name": "管理員",
+            "description": "管理員相關操作"
+        }
+    ]
+}
