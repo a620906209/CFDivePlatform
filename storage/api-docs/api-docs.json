@@ -2618,68 +2618,6 @@
                 },
                 "type": "object"
             },
-            "CoachProfile": {
-                "title": "教練個人資料",
-                "description": "教練的詳細個人資料",
-                "properties": {
-                    "id": {
-                        "description": "資料ID",
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "user_id": {
-                        "description": "關聯的使用者ID",
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "bio": {
-                        "description": "個人簡介",
-                        "type": "string",
-                        "example": "專業潛水教練，擁有10年教學經驗"
-                    },
-                    "expertise": {
-                        "description": "專長領域",
-                        "type": "string",
-                        "example": "自由潛水,水肺潛水"
-                    },
-                    "certification": {
-                        "description": "證照資訊",
-                        "type": "string",
-                        "example": "PADI專業潛水教練"
-                    },
-                    "experience": {
-                        "description": "教學經驗",
-                        "type": "string",
-                        "example": "10年教學經驗，帶領超過500名學員"
-                    },
-                    "rating": {
-                        "description": "評分",
-                        "type": "number",
-                        "format": "float",
-                        "example": 4.8
-                    },
-                    "availability": {
-                        "description": "可授課時間",
-                        "type": "string",
-                        "example": "週一至週五 09:00-18:00"
-                    },
-                    "created_at": {
-                        "description": "創建時間",
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2023-01-01T00:00:00.000000Z"
-                    },
-                    "updated_at": {
-                        "description": "更新時間",
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2023-01-01T00:00:00.000000Z"
-                    }
-                },
-                "type": "object"
-            },
             "MemberProfile": {
                 "title": "會員個人資料",
                 "description": "會員的詳細個人資料",
@@ -2743,8 +2681,8 @@
                 "type": "object"
             },
             "ProviderProfile": {
-                "title": "潛水業者資料",
-                "description": "潛水業者的詳細資料",
+                "title": "服務提供者資料",
+                "description": "服務提供者的詳細資料",
                 "properties": {
                     "id": {
                         "description": "資料ID",

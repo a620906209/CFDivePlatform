@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @OA\Schema(
  *     schema="ProviderProfile",
- *     title="潛水業者資料",
- *     description="潛水業者的詳細資料",
+ *     title="服務提供者資料",
+ *     description="服務提供者的詳細資料",
  *     @OA\Property(property="id", type="integer", format="int64", example=1, description="資料ID"),
  *     @OA\Property(property="user_id", type="integer", format="int64", example=1, description="關聯的使用者ID"),
  *     @OA\Property(property="business_name", type="string", example="藍海潛水中心", description="業者名稱"),
