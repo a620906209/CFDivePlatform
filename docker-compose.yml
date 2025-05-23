@@ -1,0 +1,131 @@
+# Docker Compose 版本
+version: '3.8'
+
+# 定義所有服務
+services:
+  # PHP-FPM 服務
+  app:
+    # 構建配置
+    build:
+      context: .  # 使用當前目錄作為構建上下文
+      dockerfile: Dockerfile  # 指定 Dockerfile 路徑
+    image: cfdive-platform  # 構建的鏡像名稱
+    container_name: cfdive-app  # 容器名稱
+    restart: unless-stopped  # 自動重啟策略：除非手動停止，否則自動重啟
+    working_dir: /var/www/  # 工作目錄
+    
+    # 卷掛載：將本地代碼掛載到容器中
+    volumes:
+      - ./:/var/www  # 本地代碼目錄掛載到容器中的 /var/www
+    
+    # 環境變數：設置 Laravel 數據庫連接
+    environment:
+      - DB_CONNECTION=mysql  # 數據庫類型
+      - DB_HOST=db  # 數據庫主機名
+      - DB_PORT=3306  # 數據庫端口
+      - DB_DATABASE=CFDivePlatform  # 數據庫名稱
+      - DB_USERNAME=cfdiveuser  # 數據庫用戶名
+      - DB_PASSWORD=**REMOVED**  # 數據庫密碼
+    
+    # 網絡配置
+    networks:
+      - cfdive-network  # 連接到自定義網絡
+    
+    # 依賴關係：確保 db 和 redis 服務先啟動
+    depends_on:
+      db:  # 依賴 db 服務
+        condition: service_healthy  # 等待數據庫健康檢查通過
+      redis:  # 依賴 redis 服務
+        condition: service_started  # 等待服務啟動
+    
+    # 健康檢查配置
+    healthcheck:
+      test: ["CMD", "php", "-v"]  # 檢查 PHP 版本確認服務正常
+      interval: 30s  # 每30秒檢查一次
+      timeout: 10s  # 超時時間10秒
+      retries: 3  # 重試3次
+      start_period: 40s  # 容器啟動後40秒開始檢查
+
+  nginx:
+    image: nginx:alpine
+    container_name: cfdive-nginx
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - cfdive-network
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  db:
+    image: mysql:8.0
+    container_name: cfdive-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: CFDivePlatform
+      MYSQL_ROOT_PASSWORD: **REMOVED**
+      MYSQL_USER: cfdiveuser
+      MYSQL_PASSWORD: **REMOVED**
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - cfdive-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "cfdiveuser", "-p**REMOVED**"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: cfdive-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: cfdiveuser
+      PMA_PASSWORD: **REMOVED**
+      MYSQL_ROOT_PASSWORD: **REMOVED**
+    networks:
+      - cfdive-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: redis:alpine
+    container_name: cfdive-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - cfdive-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  cfdive-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
