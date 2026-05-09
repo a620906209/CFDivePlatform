@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\DivingOfferController;
 use App\Http\Controllers\API\ProviderOfferController;
+use App\Http\Controllers\API\AdminStatsController;
+use App\Http\Controllers\API\AdminUserController;
+use App\Http\Controllers\API\AdminOfferController;
 
 // 這裡可以定義 API 路由，例如：
 Route::get('/ping', function () {
@@ -85,7 +88,19 @@ Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
     Route::get('/check-member/{id}', [AuthController::class, 'checkMember']);
     // 查詢服務提供者資料
     Route::get('/check-provider/{id}', [AuthController::class, 'checkProvider']);
-    // 其他管理員專屬 API
+    // 統計數據
+    Route::get('/stats', [AdminStatsController::class, 'index']);
+    // 用戶管理
+    Route::get('/members',                          [AdminUserController::class, 'members']);
+    Route::get('/members/{id}',                     [AdminUserController::class, 'member']);
+    Route::put('/members/{id}/toggle-active',       [AdminUserController::class, 'toggleMemberActive']);
+    Route::get('/providers',                        [AdminUserController::class, 'providers']);
+    Route::get('/providers/{id}',                   [AdminUserController::class, 'provider']);
+    Route::put('/providers/{id}/toggle-active',     [AdminUserController::class, 'toggleProviderActive']);
+    Route::put('/providers/{id}/toggle-verified',   [AdminUserController::class, 'toggleProviderVerified']);
+    // 課程管理
+    Route::get('/offers',           [AdminOfferController::class, 'index']);
+    Route::delete('/offers/{id}',   [AdminOfferController::class, 'destroy']);
 });
 
 // 需要認證的通用路由
