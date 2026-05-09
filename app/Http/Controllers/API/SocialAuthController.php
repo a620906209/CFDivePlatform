@@ -105,24 +105,10 @@ class SocialAuthController extends Controller
             
             // 生成 Sanctum token
             $token = $user->createToken('google-auth')->plainTextToken;
-            
-            // 載入會員資料
-            $user->load('memberProfile');
-            
-            return response()->json([
-                'status' => true,
-                'message' => 'Google 登入成功',
-                'data' => [
-                    'user' => $user,
-                    'token' => $token,
-                    'token_type' => 'Bearer',
-                ]
-            ]);
+
+            return redirect(env('FRONTEND_URL') . '/auth/callback?token=' . $token);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Google 登入失敗：' . $e->getMessage()
-            ], 500);
+            return redirect(env('FRONTEND_URL') . '/login?error=oauth_failed');
         }
     }
 }

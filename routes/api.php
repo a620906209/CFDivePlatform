@@ -2,11 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\DivingOfferController;
 
 // 這裡可以定義 API 路由，例如：
 Route::get('/ping', function () {
     return response()->json(['message' => 'pong']);
 });
+
+// 潛水課程（公開）
+Route::get('/diving-offers', [DivingOfferController::class, 'index']);
+Route::get('/diving-offers/{id}', [DivingOfferController::class, 'show']);
 
 // 你可以在這裡繼續新增 API 路由
 Route::post('/testpost', function () {
