@@ -11,6 +11,7 @@ class DivingOffer extends Model
     protected $table = 'diving_offers';
 
     protected $fillable = [
+        'provider_id',
         'title',
         'location',
         'spot',

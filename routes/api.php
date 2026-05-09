@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\DivingOfferController;
+use App\Http\Controllers\API\ProviderOfferController;
 
 // 這裡可以定義 API 路由，例如：
 Route::get('/ping', function () {
@@ -58,7 +59,12 @@ Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
     Route::put('/profile', [AuthController::class, 'updateProviderProfile']);
     // 修改密碼
     Route::put('/change-password', [AuthController::class, 'changeProviderPassword']);
-    // 其他服務提供者專屬 API
+    // 教練課程管理
+    Route::get('/offers',          [ProviderOfferController::class, 'index']);
+    Route::post('/offers',         [ProviderOfferController::class, 'store']);
+    Route::get('/offers/{id}',     [ProviderOfferController::class, 'show']);
+    Route::put('/offers/{id}',     [ProviderOfferController::class, 'update']);
+    Route::delete('/offers/{id}',  [ProviderOfferController::class, 'destroy']);
 });
 
 // 管理員註冊／登入

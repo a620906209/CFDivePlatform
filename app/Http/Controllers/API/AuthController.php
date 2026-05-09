@@ -474,7 +474,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'phone' => 'nullable|string|max:20',
-            'business_name' => 'required|string|max:255',
+            'business_name' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'contact_person' => 'nullable|string|max:100',
             'contact_phone' => 'nullable|string|max:20',
@@ -655,6 +655,12 @@ class AuthController extends Controller
             'contact_email' => 'nullable|string|email|max:255',
             'address' => 'nullable|string|max:255',
             'business_hours' => 'nullable|string|max:100',
+            'certifications' => 'nullable|string',
+            'dive_sites' => 'nullable|string',
+            'services' => 'nullable|string',
+            'facilities' => 'nullable|string',
+            'website' => 'nullable|string|max:255',
+            'social_media' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -701,7 +707,25 @@ class AuthController extends Controller
         if ($request->has('business_hours')) {
             $providerProfile->business_hours = $request->business_hours;
         }
-        
+        if ($request->has('certifications')) {
+            $providerProfile->certifications = $request->certifications;
+        }
+        if ($request->has('dive_sites')) {
+            $providerProfile->dive_sites = $request->dive_sites;
+        }
+        if ($request->has('services')) {
+            $providerProfile->services = $request->services;
+        }
+        if ($request->has('facilities')) {
+            $providerProfile->facilities = $request->facilities;
+        }
+        if ($request->has('website')) {
+            $providerProfile->website = $request->website;
+        }
+        if ($request->has('social_media')) {
+            $providerProfile->social_media = $request->social_media;
+        }
+
         $providerProfile->save();
 
         // 加載服務提供者資料

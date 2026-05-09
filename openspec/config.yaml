@@ -1,20 +1,57 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  ## 專案：CFDivePlatform
+  潛水課程媒合平台，連結潛水教練（Provider）與學員（Member）。
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  ## 架構
+  - 後端：Laravel 11 + Sanctum（Bearer token）+ MySQL，跑在 Docker（cfdive-app / cfdive-nginx:8080）
+  - 前端：Vue 3 + Vite + Tailwind CSS + Pinia + Vue Router 4 + Axios
+    - 原始碼在 `frontend/`（同一個 repo）
+    - Docker image: cfdive-frontend，對外 port 5173
+  - DB：MySQL 8（Docker），ORM 使用 Eloquent
+  - 部署：docker-compose，`docker-compose up --build` 即可啟動全部服務
+
+  ## 使用者角色
+  - `member`：一般會員，瀏覽/搜尋課程，Google OAuth 登入
+  - `provider`：教練/業者，管理自己的課程（CRUD），使用 ProviderProfile
+  - `admin`：平台管理員，尚未實作
+
+  ## 已完成模組
+  - Member Portal（`/`、`/courses`、`/login`、`/register`、`/profile`）
+  - Coach Portal（`/coach/*`）：登入、註冊、課程 CRUD Dashboard、個人資料
+  - Diving Offers 公開 API（`GET /api/diving-offers`、`GET /api/diving-offers/{id}`）
+  - Provider Auth API（`/api/provider/login|register|logout|profile`）
+  - Provider Offers API（`/api/provider/offers` CRUD，含 provider_id 所有權驗證）
+
+  ## 關鍵資料模型
+  - `users`：role enum（member / provider / admin），`is_active`
+  - `provider_profiles`：業者資料（business_name、certifications、dive_sites 等）
+  - `member_profiles`：會員資料（birthday、gender、emergency_contact 等）
+  - `diving_offers`：課程（title、location、spot、price、region、tag、badges JSON、provider_id nullable FK）
+  - `subscriptions` / `plans`：訂閱方案（尚未實作 API）
+
+  ## 前端慣例
+  - Member 認證：`src/stores/auth.js`，localStorage key `token` / `user`
+  - Coach 認證：`src/stores/coachAuth.js`，localStorage key `coach_token` / `coach_user`
+  - Member Axios：`src/api/axios.js`
+  - Coach Axios：`src/api/coachAxios.js`
+  - Coach 頁面包在 `src/layouts/CoachLayout.vue`（含 CoachNavBar）
+  - 所有 `/coach/*` protected 路由：`meta: { requiresCoach: true }`
+
+  ## API 回應格式
+  成功：`{ status: true, message?: "...", data: {...} 或 [...] }`
+  失敗：`{ status: false, message: "...", errors?: {...} }`
+
+  ## 尚未實作
+  - Admin Panel
+  - 預約/訂單系統
+  - 金流整合
+  - 課程圖片上傳
+  - 教練審核流程
+
+rules:
+  tasks:
+    - 後端任務標記 [後端]，前端任務標記 [前端]，整合測試標記 [整合測試]
+    - 每個 task 描述應包含具體的檔案路徑或方法名稱
+    - 手動驗證類 task 放在最後一個 group
