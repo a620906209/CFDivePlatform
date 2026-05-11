@@ -18,8 +18,10 @@ async function handleLogout() {
         <RouterLink to="/coach/dashboard" class="text-lg font-bold tracking-wide hover:text-gray-300 transition">
           🤿 Coach Portal
         </RouterLink>
-        <RouterLink to="/coach/dashboard" class="text-sm hover:text-gray-300 transition">我的課程</RouterLink>
-        <RouterLink to="/coach/profile"   class="text-sm hover:text-gray-300 transition">個人資料</RouterLink>
+        <RouterLink to="/coach/dashboard"  class="text-sm hover:text-gray-300 transition">我的課程</RouterLink>
+        <RouterLink to="/coach/schedules"  class="text-sm hover:text-gray-300 transition">時段管理</RouterLink>
+        <RouterLink to="/coach/bookings"   class="text-sm hover:text-gray-300 transition">預約管理</RouterLink>
+        <RouterLink to="/coach/profile"    class="text-sm hover:text-gray-300 transition">個人資料</RouterLink>
       </div>
 
       <div class="flex items-center gap-4 text-sm">

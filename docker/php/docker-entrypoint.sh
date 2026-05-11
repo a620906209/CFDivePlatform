@@ -110,5 +110,9 @@ fi
 
 echo "✅ CFDivePlatform 初始化完成！"
 
+# 啟動 cron daemon（Laravel Scheduler）
+echo "⏰ 啟動 Laravel Scheduler cron..."
+service cron start || cron || true
+
 # 執行傳入的命令
 exec "$@"

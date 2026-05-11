@@ -72,6 +72,7 @@ async function submit() {
             minlength="8"
             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-ocean-400"
           />
+          <p class="text-xs text-gray-400 mt-1">至少 8 個字元</p>
         </div>
         <div>
           <label class="block text-sm text-gray-600 mb-1">確認密碼</label>
@@ -80,7 +81,9 @@ async function submit() {
             type="password"
             required
             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-ocean-400"
+            :class="confirm && confirm !== password ? 'border-red-400' : ''"
           />
+          <p v-if="confirm && confirm !== password" class="text-xs text-red-500 mt-1">密碼不一致</p>
         </div>
 
         <button

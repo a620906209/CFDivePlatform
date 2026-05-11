@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\DivingOfferController;
 use App\Http\Controllers\API\ProviderOfferController;
+use App\Http\Controllers\API\ScheduleController;
+use App\Http\Controllers\API\ProviderBookingController;
+use App\Http\Controllers\API\MemberBookingController;
 use App\Http\Controllers\API\AdminStatsController;
 use App\Http\Controllers\API\AdminUserController;
 use App\Http\Controllers\API\AdminOfferController;
@@ -16,6 +19,7 @@ Route::get('/ping', function () {
 // 潛水課程（公開）
 Route::get('/diving-offers', [DivingOfferController::class, 'index']);
 Route::get('/diving-offers/{id}', [DivingOfferController::class, 'show']);
+Route::get('/diving-offers/{id}/schedules', [ScheduleController::class, 'publicList']);
 
 // 你可以在這裡繼續新增 API 路由
 Route::post('/testpost', function () {
@@ -43,9 +47,11 @@ Route::middleware(['auth:sanctum'])->prefix('member')->group(function () {
     Route::put('/profile', [AuthController::class, 'updateMemberProfile']);
     // 修改密碼
     Route::put('/change-password', [AuthController::class, 'changeMemberPassword']);
-    // 你可以再加上訂單、收藏、通知等API
-    // Route::get('/orders', [OrderController::class, 'memberOrders']);
-    // Route::get('/favorites', [FavoriteController::class, 'memberFavorites']);
+    // 預約
+    Route::get('/bookings',          [MemberBookingController::class, 'index']);
+    Route::post('/bookings',         [MemberBookingController::class, 'store']);
+    Route::get('/bookings/{id}',     [MemberBookingController::class, 'show']);
+    Route::delete('/bookings/{id}',  [MemberBookingController::class, 'destroy']);
 });
 
 // 服務提供者註冊／登入
@@ -68,6 +74,16 @@ Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
     Route::get('/offers/{id}',     [ProviderOfferController::class, 'show']);
     Route::put('/offers/{id}',     [ProviderOfferController::class, 'update']);
     Route::delete('/offers/{id}',  [ProviderOfferController::class, 'destroy']);
+    // 時段管理
+    Route::get('/schedules',            [ScheduleController::class, 'index']);
+    Route::post('/schedules',           [ScheduleController::class, 'store']);
+    Route::put('/schedules/{id}',       [ScheduleController::class, 'update']);
+    Route::delete('/schedules/{id}',    [ScheduleController::class, 'destroy']);
+    // 預約管理
+    Route::get('/bookings',                      [ProviderBookingController::class, 'index']);
+    Route::put('/bookings/{id}/confirm',         [ProviderBookingController::class, 'confirm']);
+    Route::put('/bookings/{id}/reject',          [ProviderBookingController::class, 'reject']);
+    Route::put('/bookings/{id}/cancel',          [ProviderBookingController::class, 'cancel']);
 });
 
 // 管理員註冊／登入

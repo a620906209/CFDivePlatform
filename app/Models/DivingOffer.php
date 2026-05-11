@@ -30,4 +30,9 @@ class DivingOffer extends Model
         'price'  => 'integer',
         'reviews'=> 'integer',
     ];
+
+    public function schedules()
+    {
+        return $this->hasMany(CourseSchedule::class, 'diving_offer_id');
+    }
 }

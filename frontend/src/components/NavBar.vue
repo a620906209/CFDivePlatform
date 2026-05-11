@@ -25,6 +25,7 @@ async function handleLogout() {
           <span class="text-ocean-200 hidden sm:inline">
             👤 {{ auth.user?.name }}
           </span>
+          <RouterLink to="/my-bookings" class="hover:text-ocean-100 transition">我的預約</RouterLink>
           <RouterLink to="/profile" class="hover:text-ocean-100 transition">個人資料</RouterLink>
           <button
             @click="handleLogout"

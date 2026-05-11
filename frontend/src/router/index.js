@@ -11,7 +11,8 @@ const routes = [
   { path: '/login',          component: () => import('../views/LoginView.vue') },
   { path: '/register',       component: () => import('../views/RegisterView.vue') },
   { path: '/auth/callback',  component: () => import('../views/AuthCallbackView.vue') },
-  { path: '/profile',        component: () => import('../views/ProfileView.vue'), meta: { requiresAuth: true } },
+  { path: '/profile',     component: () => import('../views/ProfileView.vue'),    meta: { requiresAuth: true } },
+  { path: '/my-bookings', component: () => import('../views/MyBookingsView.vue'), meta: { requiresAuth: true } },
 
   // Coach (public)
   { path: '/coach/login',    component: () => import('../views/coach/LoginView.vue') },
@@ -26,6 +27,8 @@ const routes = [
       { path: 'offers/new',      component: () => import('../views/coach/OfferFormView.vue') },
       { path: 'offers/:id/edit', component: () => import('../views/coach/OfferFormView.vue') },
       { path: 'profile',         component: () => import('../views/coach/ProfileView.vue') },
+      { path: 'schedules',       component: () => import('../views/coach/ScheduleManagerView.vue') },
+      { path: 'bookings',        component: () => import('../views/coach/BookingManagerView.vue') },
     ],
   },
 

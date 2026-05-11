@@ -76,13 +76,16 @@ async function submit() {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm text-gray-600 mb-1">密碼 <span class="text-red-400">*</span></label>
-              <input v-model="form.password" type="password" required minlength="6"
+              <input v-model="form.password" type="password" required minlength="8"
                 class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-400" />
+              <p class="text-xs text-gray-400 mt-1">至少 8 個字元</p>
             </div>
             <div>
               <label class="block text-sm text-gray-600 mb-1">確認密碼 <span class="text-red-400">*</span></label>
               <input v-model="form.password_confirmation" type="password" required
-                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-400" />
+                class="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-400"
+                :class="form.password_confirmation && form.password_confirmation !== form.password ? 'border-red-400' : 'border-gray-300'" />
+              <p v-if="form.password_confirmation && form.password_confirmation !== form.password" class="text-xs text-red-500 mt-1">密碼不一致</p>
             </div>
           </div>
 

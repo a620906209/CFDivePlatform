@@ -70,10 +70,12 @@ async function submit() {
   try {
     if (isEdit.value) {
       await coachApi.put(`/provider/offers/${route.params.id}`, payload)
+      router.push('/coach/dashboard')
     } else {
-      await coachApi.post('/provider/offers', payload)
+      const res = await coachApi.post('/provider/offers', payload)
+      const newId = res.data.data?.id
+      router.push(`/coach/schedules?offer_id=${newId}&new=1`)
     }
-    router.push('/coach/dashboard')
   } catch (e) {
     const data   = e.response?.data
     error.value  = data?.message || '儲存失敗'

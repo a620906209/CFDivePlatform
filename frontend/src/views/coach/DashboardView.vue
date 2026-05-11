@@ -66,6 +66,7 @@ onMounted(fetchOffers)
             <th class="px-6 py-3 text-left">地點</th>
             <th class="px-6 py-3 text-left">地區</th>
             <th class="px-6 py-3 text-right">價格</th>
+            <th class="px-6 py-3 text-center">時段</th>
             <th class="px-6 py-3 text-center">操作</th>
           </tr>
         </thead>
@@ -75,6 +76,12 @@ onMounted(fetchOffers)
             <td class="px-6 py-4 text-gray-500">{{ offer.location }}</td>
             <td class="px-6 py-4 text-gray-500">{{ offer.region }}</td>
             <td class="px-6 py-4 text-right font-medium">NT$ {{ offer.price?.toLocaleString() }}</td>
+            <td class="px-6 py-4 text-center">
+              <RouterLink :to="`/coach/schedules?offer_id=${offer.id}`"
+                class="text-xs bg-ocean-50 hover:bg-ocean-100 text-ocean-700 px-3 py-1 rounded-lg transition font-medium">
+                管理時段
+              </RouterLink>
+            </td>
             <td class="px-6 py-4 text-center">
               <div class="flex justify-center gap-2">
                 <RouterLink :to="`/coach/offers/${offer.id}/edit`"

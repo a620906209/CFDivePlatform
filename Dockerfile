@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     default-mysql-client \
     netcat-openbsd \
-    grep
+    grep \
+    cron
 
 # 清理 apt 快取以減小鏡像大小
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -47,6 +48,12 @@ COPY docker/php/local.ini /usr/local/etc/php/conf.d/local.ini
 # 這個腳本將在容器啟動時執行
 COPY docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# 加入 Laravel Scheduler cron job
+RUN echo "* * * * * www-data php /var/www/artisan schedule:run >> /var/log/laravel-scheduler.log 2>&1" \
+    > /etc/cron.d/laravel-scheduler \
+    && chmod 0644 /etc/cron.d/laravel-scheduler \
+    && crontab /etc/cron.d/laravel-scheduler
 
 # 設置容器啟動時執行的入口點
 # 這將在 CMD 指令之前執行
