@@ -7,6 +7,9 @@ use App\Http\Controllers\API\ProviderOfferController;
 use App\Http\Controllers\API\ScheduleController;
 use App\Http\Controllers\API\ProviderBookingController;
 use App\Http\Controllers\API\MemberBookingController;
+use App\Http\Controllers\API\ReviewController;
+use App\Http\Controllers\API\AdminReviewController;
+use App\Http\Controllers\API\AdminBookingController;
 use App\Http\Controllers\API\AdminStatsController;
 use App\Http\Controllers\API\AdminUserController;
 use App\Http\Controllers\API\AdminOfferController;
@@ -20,6 +23,7 @@ Route::get('/ping', function () {
 Route::get('/diving-offers', [DivingOfferController::class, 'index']);
 Route::get('/diving-offers/{id}', [DivingOfferController::class, 'show']);
 Route::get('/diving-offers/{id}/schedules', [ScheduleController::class, 'publicList']);
+Route::get('/diving-offers/{id}/reviews',  [ReviewController::class, 'publicList']);
 
 // 你可以在這裡繼續新增 API 路由
 Route::post('/testpost', function () {
@@ -52,7 +56,14 @@ Route::middleware(['auth:sanctum'])->prefix('member')->group(function () {
     Route::post('/bookings',         [MemberBookingController::class, 'store']);
     Route::get('/bookings/{id}',     [MemberBookingController::class, 'show']);
     Route::delete('/bookings/{id}',  [MemberBookingController::class, 'destroy']);
+    // 評價
+    Route::post('/reviews',       [ReviewController::class, 'store']);
+    Route::put('/reviews/{id}',   [ReviewController::class, 'update']);
+    Route::delete('/reviews/{id}',[ReviewController::class, 'destroy']);
 });
+
+// 有幫助投票（需登入，但不限 member prefix）
+Route::middleware('auth:sanctum')->post('/reviews/{id}/helpful', [ReviewController::class, 'toggleHelpful']);
 
 // 服務提供者註冊／登入
 Route::post('/provider/register', [AuthController::class, 'registerProvider']);
@@ -84,6 +95,7 @@ Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
     Route::put('/bookings/{id}/confirm',         [ProviderBookingController::class, 'confirm']);
     Route::put('/bookings/{id}/reject',          [ProviderBookingController::class, 'reject']);
     Route::put('/bookings/{id}/cancel',          [ProviderBookingController::class, 'cancel']);
+    Route::put('/bookings/{id}/complete',        [ProviderBookingController::class, 'complete']);
 });
 
 // 管理員註冊／登入
@@ -91,7 +103,7 @@ Route::post('/admin/register', [AuthController::class, 'registerAdmin']);
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 
 // 管理員專屬 API（需登入）
-Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // 管理員登出
     Route::post('/logout', [AuthController::class, 'logoutAdmin']);
     // 取得管理員個人資料
@@ -117,6 +129,12 @@ Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
     // 課程管理
     Route::get('/offers',           [AdminOfferController::class, 'index']);
     Route::delete('/offers/{id}',   [AdminOfferController::class, 'destroy']);
+    // 預約管理
+    Route::get('/bookings',                   [AdminBookingController::class, 'index']);
+    Route::put('/bookings/{id}/complete',     [AdminBookingController::class, 'complete']);
+    // 評價管理
+    Route::get('/reviews',          [AdminReviewController::class, 'index']);
+    Route::delete('/reviews/{id}',  [AdminReviewController::class, 'destroy']);
 });
 
 // 需要認證的通用路由

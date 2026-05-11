@@ -21,6 +21,7 @@ async function handleLogout() {
         <RouterLink to="/coach/dashboard"  class="text-sm hover:text-gray-300 transition">我的課程</RouterLink>
         <RouterLink to="/coach/schedules"  class="text-sm hover:text-gray-300 transition">時段管理</RouterLink>
         <RouterLink to="/coach/bookings"   class="text-sm hover:text-gray-300 transition">預約管理</RouterLink>
+        <RouterLink to="/coach/reviews"    class="text-sm hover:text-gray-300 transition">課程評價</RouterLink>
         <RouterLink to="/coach/profile"    class="text-sm hover:text-gray-300 transition">個人資料</RouterLink>
       </div>
 

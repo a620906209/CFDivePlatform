@@ -20,6 +20,8 @@ async function handleLogout() {
         <RouterLink to="/admin/members"   class="text-sm hover:text-slate-300 transition">會員管理</RouterLink>
         <RouterLink to="/admin/providers" class="text-sm hover:text-slate-300 transition">教練管理</RouterLink>
         <RouterLink to="/admin/offers"    class="text-sm hover:text-slate-300 transition">課程管理</RouterLink>
+        <RouterLink to="/admin/bookings"  class="text-sm hover:text-slate-300 transition">預約管理</RouterLink>
+        <RouterLink to="/admin/reviews"   class="text-sm hover:text-slate-300 transition">評價管理</RouterLink>
       </div>
       <div class="flex items-center gap-4 text-sm">
         <span class="text-slate-400">{{ adminAuth.user?.name }}</span>

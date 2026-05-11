@@ -94,6 +94,20 @@ class ProviderBookingController extends Controller
         return response()->json(['status' => true, 'message' => '預約已取消']);
     }
 
+    public function complete(Request $request, int $id)
+    {
+        $booking = Booking::with('schedule')->findOrFail($id);
+        $this->authorizeProvider($request, $booking);
+
+        if (!$booking->canTransitionTo(BookingStatus::Completed)) {
+            return response()->json(['status' => false, 'message' => '只有已確認的預約才能標記完成'], 422);
+        }
+
+        $booking->update(['status' => BookingStatus::Completed]);
+
+        return response()->json(['status' => true, 'message' => '預約已標記為完成']);
+    }
+
     private function authorizeProvider(Request $request, Booking $booking): void
     {
         if ($booking->schedule->provider_id !== $request->user()->id) {

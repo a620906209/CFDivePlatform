@@ -35,4 +35,9 @@ class DivingOffer extends Model
     {
         return $this->hasMany(CourseSchedule::class, 'diving_offer_id');
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

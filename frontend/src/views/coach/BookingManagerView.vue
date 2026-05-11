@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getProviderBookings, confirmBooking, rejectBooking, cancelBooking } from '../../api/coachBookingApi'
+import { getProviderBookings, confirmBooking, rejectBooking, cancelBooking, completeBooking } from '../../api/coachBookingApi'
 
 const bookings = ref([])
 const loading  = ref(true)
@@ -48,9 +48,10 @@ async function doAction(booking, action) {
   const labels = { confirm: '確認', reject: '拒絕', cancel: '取消' }
   if (!confirm(`確定要${labels[action]}此預約？`)) return
   try {
-    if (action === 'confirm') await confirmBooking(booking.id)
-    if (action === 'reject')  await rejectBooking(booking.id)
-    if (action === 'cancel')  await cancelBooking(booking.id)
+    if (action === 'confirm')  await confirmBooking(booking.id)
+    if (action === 'reject')   await rejectBooking(booking.id)
+    if (action === 'cancel')   await cancelBooking(booking.id)
+    if (action === 'complete') await completeBooking(booking.id)
     await fetchBookings()
   } catch (e) {
     alert(e.response?.data?.message || '操作失敗')
@@ -114,6 +115,10 @@ async function doAction(booking, action) {
                 <button v-if="b.status === 'pending'" @click="doAction(b, 'reject')"
                   class="text-xs bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded-full transition">
                   拒絕
+                </button>
+                <button v-if="b.status === 'confirmed'" @click="doAction(b, 'complete')"
+                  class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-full transition">
+                  完成
                 </button>
                 <button v-if="b.status === 'confirmed'" @click="doAction(b, 'cancel')"
                   class="text-xs text-orange-500 hover:text-orange-700 underline">

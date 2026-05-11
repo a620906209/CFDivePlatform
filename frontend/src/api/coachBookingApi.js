@@ -15,3 +15,7 @@ export function rejectBooking(id) {
 export function cancelBooking(id) {
   return coachApi.put(`/provider/bookings/${id}/cancel`)
 }
+
+export function completeBooking(id) {
+  return coachApi.put(`/provider/bookings/${id}/complete`)
+}

@@ -29,6 +29,7 @@ const routes = [
       { path: 'profile',         component: () => import('../views/coach/ProfileView.vue') },
       { path: 'schedules',       component: () => import('../views/coach/ScheduleManagerView.vue') },
       { path: 'bookings',        component: () => import('../views/coach/BookingManagerView.vue') },
+      { path: 'reviews',         component: () => import('../views/coach/ReviewsView.vue') },
     ],
   },
 
@@ -44,6 +45,8 @@ const routes = [
       { path: 'members',   component: () => import('../views/admin/MembersView.vue') },
       { path: 'providers', component: () => import('../views/admin/ProvidersView.vue') },
       { path: 'offers',    component: () => import('../views/admin/OffersView.vue') },
+      { path: 'bookings',  component: () => import('../views/admin/BookingsView.vue') },
+      { path: 'reviews',   component: () => import('../views/admin/ReviewsView.vue') },
     ],
   },
 ]
