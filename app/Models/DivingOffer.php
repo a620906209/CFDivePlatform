@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class DivingOffer extends Model
 {
@@ -22,6 +23,7 @@ class DivingOffer extends Model
         'description',
         'tag',
         'region',
+        'cover_image',
     ];
 
     protected $casts = [
@@ -31,9 +33,28 @@ class DivingOffer extends Model
         'reviews'=> 'integer',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function ($offer) {
+            Storage::disk('public')->deleteDirectory("offers/{$offer->id}");
+        });
+    }
+
+    public function getCoverImageUrlAttribute(): ?string
+    {
+        return $this->cover_image
+            ? Storage::disk('public')->url($this->cover_image)
+            : null;
+    }
+
     public function schedules()
     {
         return $this->hasMany(CourseSchedule::class, 'diving_offer_id');
+    }
+
+    public function courseImages()
+    {
+        return $this->hasMany(CourseImage::class)->orderBy('sort_order');
     }
 
     public function reviews()

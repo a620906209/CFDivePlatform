@@ -10,6 +10,7 @@ use App\Http\Controllers\API\MemberBookingController;
 use App\Http\Controllers\API\ReviewController;
 use App\Http\Controllers\API\AdminReviewController;
 use App\Http\Controllers\API\AdminBookingController;
+use App\Http\Controllers\API\CourseImageController;
 use App\Http\Controllers\API\AdminStatsController;
 use App\Http\Controllers\API\AdminUserController;
 use App\Http\Controllers\API\AdminOfferController;
@@ -85,6 +86,11 @@ Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
     Route::get('/offers/{id}',     [ProviderOfferController::class, 'show']);
     Route::put('/offers/{id}',     [ProviderOfferController::class, 'update']);
     Route::delete('/offers/{id}',  [ProviderOfferController::class, 'destroy']);
+    // 課程圖片
+    Route::post('/offers/{id}/cover',    [CourseImageController::class, 'uploadCover']);
+    Route::delete('/offers/{id}/cover',  [CourseImageController::class, 'deleteCover']);
+    Route::post('/offers/{id}/images',   [CourseImageController::class, 'uploadImage']);
+    Route::delete('/images/{id}',        [CourseImageController::class, 'deleteImage']);
     // 時段管理
     Route::get('/schedules',            [ScheduleController::class, 'index']);
     Route::post('/schedules',           [ScheduleController::class, 'store']);

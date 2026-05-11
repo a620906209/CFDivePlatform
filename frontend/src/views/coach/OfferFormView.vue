@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import coachApi from '../../api/coachAxios'
+import { uploadCover, deleteCover, uploadImage, deleteImage } from '../../api/courseImageApi'
 
 const route  = useRoute()
 const router = useRouter()
@@ -25,6 +26,12 @@ const form = ref({
   description: '',
 })
 
+// 圖片管理
+const coverUrl    = ref(null)
+const galleryImgs = ref([])
+const imgUploading = ref(false)
+const imgError     = ref('')
+
 onMounted(async () => {
   if (!isEdit.value) return
   loading.value = true
@@ -41,12 +48,57 @@ onMounted(async () => {
       badges:      Array.isArray(o.badges) ? o.badges.join(', ') : (o.badges || ''),
       description: o.description || '',
     }
+    coverUrl.value    = o.cover_image_url || null
+    galleryImgs.value = o.images || []
   } catch (e) {
     error.value = e.response?.data?.message || '無法載入課程資料'
   } finally {
     loading.value = false
   }
 })
+
+async function onCoverChange(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  imgUploading.value = true
+  imgError.value = ''
+  try {
+    const res = await uploadCover(route.params.id, file)
+    coverUrl.value = res.data.cover_image_url
+  } catch (e) {
+    imgError.value = e.response?.data?.message || '封面上傳失敗'
+  } finally {
+    imgUploading.value = false
+    e.target.value = ''
+  }
+}
+
+async function onDeleteCover() {
+  if (!confirm('確定刪除封面？')) return
+  await deleteCover(route.params.id)
+  coverUrl.value = null
+}
+
+async function onGalleryChange(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  imgUploading.value = true
+  imgError.value = ''
+  try {
+    const res = await uploadImage(route.params.id, file)
+    galleryImgs.value.push(res.data.data)
+  } catch (e) {
+    imgError.value = e.response?.data?.message || '圖片上傳失敗'
+  } finally {
+    imgUploading.value = false
+    e.target.value = ''
+  }
+}
+
+async function onDeleteImage(img) {
+  await deleteImage(img.id)
+  galleryImgs.value = galleryImgs.value.filter(i => i.id !== img.id)
+}
 
 async function submit() {
   errors.value = {}
@@ -159,6 +211,51 @@ async function submit() {
         <label class="block text-sm text-gray-600 mb-1">課程說明</label>
         <textarea v-model="form.description" rows="4"
           class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none" />
+      </div>
+
+      <!-- 圖片管理（僅編輯模式） -->
+      <div v-if="isEdit" class="border border-gray-200 rounded-xl p-5 space-y-5">
+        <h3 class="text-sm font-semibold text-gray-700">課程圖片</h3>
+        <p v-if="imgError" class="text-red-500 text-xs">{{ imgError }}</p>
+
+        <!-- 封面 -->
+        <div>
+          <label class="block text-xs text-gray-500 mb-2">封面圖片（1 張）</label>
+          <div class="flex items-center gap-4">
+            <div class="w-32 h-24 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+              <img v-if="coverUrl" :src="coverUrl" class="w-full h-full object-cover" />
+              <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-2xl">🤿</div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label class="cursor-pointer text-xs bg-gray-900 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700 transition text-center">
+                {{ coverUrl ? '更換封面' : '上傳封面' }}
+                <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="onCoverChange" :disabled="imgUploading" />
+              </label>
+              <button v-if="coverUrl" @click="onDeleteCover" type="button"
+                class="text-xs text-red-500 hover:text-red-700 underline">刪除封面</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 相簿 -->
+        <div>
+          <label class="block text-xs text-gray-500 mb-2">相簿圖片（最多 3 張）</label>
+          <div class="flex gap-3 flex-wrap">
+            <div v-for="img in galleryImgs" :key="img.id" class="relative w-24 h-20 rounded-lg overflow-hidden">
+              <img :src="img.url" class="w-full h-full object-cover" />
+              <button @click="onDeleteImage(img)" type="button"
+                class="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center hover:bg-black/80">
+                ✕
+              </button>
+            </div>
+            <label v-if="galleryImgs.length < 3"
+              class="w-24 h-20 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-ocean-400 transition text-gray-400 text-xl">
+              +
+              <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="onGalleryChange" :disabled="imgUploading" />
+            </label>
+          </div>
+          <p v-if="imgUploading" class="text-xs text-gray-400 mt-1">上傳中...</p>
+        </div>
       </div>
 
       <div class="flex gap-3 justify-end pt-2">

@@ -9,7 +9,17 @@ defineProps({
     :to="`/courses/${offer.id}`"
     class="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden flex flex-col"
   >
-    <div class="bg-ocean-700 h-40 flex items-center justify-center text-white text-5xl">🤿</div>
+    <div class="h-40 overflow-hidden">
+      <img
+        v-if="offer.cover_image_url"
+        :src="offer.cover_image_url"
+        :alt="offer.title"
+        class="w-full h-full object-cover"
+      />
+      <div v-else class="bg-gradient-to-br from-ocean-700 to-ocean-500 h-full flex items-center justify-center text-white text-5xl">
+        🤿
+      </div>
+    </div>
 
     <div class="p-4 flex flex-col gap-2 flex-1">
       <div class="flex gap-2 flex-wrap">

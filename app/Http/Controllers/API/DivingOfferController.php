@@ -32,9 +32,11 @@ class DivingOfferController extends Controller
 
         $paginated = $query->paginate($perPage);
 
+        $items = collect($paginated->items())->map(fn($o) => $this->formatOffer($o, false));
+
         return response()->json([
             'status' => true,
-            'data'   => $paginated->items(),
+            'data'   => $items,
             'meta'   => [
                 'total'        => $paginated->total(),
                 'per_page'     => $paginated->perPage(),
@@ -46,18 +48,29 @@ class DivingOfferController extends Controller
 
     public function show(int $id)
     {
-        $offer = DivingOffer::find($id);
+        $offer = DivingOffer::with('courseImages')->find($id);
 
         if (!$offer) {
-            return response()->json([
-                'status'  => false,
-                'message' => '課程不存在',
-            ], 404);
+            return response()->json(['status' => false, 'message' => '課程不存在'], 404);
         }
 
-        return response()->json([
-            'status' => true,
-            'data'   => $offer,
+        return response()->json(['status' => true, 'data' => $this->formatOffer($offer, true)]);
+    }
+
+    private function formatOffer(DivingOffer $offer, bool $withImages): array
+    {
+        $data = array_merge($offer->toArray(), [
+            'cover_image_url' => $offer->cover_image_url,
         ]);
+
+        if ($withImages) {
+            $data['images'] = $offer->courseImages->map(fn($img) => [
+                'id'         => $img->id,
+                'url'        => $img->url,
+                'sort_order' => $img->sort_order,
+            ])->values();
+        }
+
+        return $data;
     }
 }

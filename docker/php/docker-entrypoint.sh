@@ -110,6 +110,10 @@ fi
 
 echo "✅ CFDivePlatform 初始化完成！"
 
+# 建立 storage symlink
+echo "🔗 建立 storage symlink..."
+php artisan storage:link --force || true
+
 # 啟動 cron daemon（Laravel Scheduler）
 echo "⏰ 啟動 Laravel Scheduler cron..."
 service cron start || cron || true

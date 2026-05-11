@@ -125,7 +125,31 @@ async function submitBooking() {
         ← 返回課程列表
       </RouterLink>
 
-      <div class="bg-ocean-700 rounded-2xl h-56 flex items-center justify-center text-white text-7xl mb-6">🤿</div>
+      <!-- 封面大圖 -->
+      <div class="rounded-2xl h-64 overflow-hidden mb-4">
+        <img
+          v-if="offer.cover_image_url"
+          :src="offer.cover_image_url"
+          :alt="offer.title"
+          class="w-full h-full object-cover"
+        />
+        <div v-else class="bg-gradient-to-br from-ocean-700 to-ocean-500 h-full flex items-center justify-center text-white text-7xl">
+          🤿
+        </div>
+      </div>
+
+      <!-- 相簿縮圖列 -->
+      <div v-if="offer.images && offer.images.length > 0" class="flex gap-2 mb-6">
+        <a
+          v-for="img in offer.images"
+          :key="img.id"
+          :href="img.url"
+          target="_blank"
+          class="w-24 h-20 rounded-xl overflow-hidden shrink-0 border-2 border-transparent hover:border-ocean-400 transition"
+        >
+          <img :src="img.url" class="w-full h-full object-cover" />
+        </a>
+      </div>
 
       <div class="flex flex-wrap gap-2 mb-3">
         <span
