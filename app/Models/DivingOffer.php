@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
 class DivingOffer extends Model
@@ -45,6 +46,11 @@ class DivingOffer extends Model
         return $this->cover_image
             ? Storage::disk('public')->url($this->cover_image)
             : null;
+    }
+
+    public function provider(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'provider_id');
     }
 
     public function schedules()

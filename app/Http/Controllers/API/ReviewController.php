@@ -9,8 +9,10 @@ use App\Models\DivingOffer;
 use App\Models\Review;
 use App\Models\ReviewEdit;
 use App\Models\ReviewVote;
+use App\Notifications\ReviewReceivedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ReviewController extends Controller
 {
@@ -118,6 +120,16 @@ class ReviewController extends Controller
             $this->recalculateOfferRating($offerId);
             return $review;
         });
+
+        try {
+            $offer    = DivingOffer::with('provider')->findOrFail($offerId);
+            $provider = $offer->provider;
+            if ($provider) {
+                $provider->notify(new ReviewReceivedNotification($review));
+            }
+        } catch (\Throwable $e) {
+            Log::error('ReviewReceivedNotification failed: ' . $e->getMessage());
+        }
 
         return response()->json(['status' => true, 'message' => '評價已送出', 'data' => $this->formatReview($review)], 201);
     }

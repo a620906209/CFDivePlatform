@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import coachApi from '../api/coachAxios'
+import { useNotificationStore } from './notifications'
 
 export const useCoachAuthStore = defineStore('coachAuth', () => {
   const user  = ref(null)
@@ -14,6 +15,7 @@ export const useCoachAuthStore = defineStore('coachAuth', () => {
     if (savedToken) {
       token.value = savedToken
       user.value  = savedUser ? JSON.parse(savedUser) : null
+      useNotificationStore().startPolling()
     }
   }
 
@@ -22,12 +24,14 @@ export const useCoachAuthStore = defineStore('coachAuth', () => {
     token.value = tokenValue
     localStorage.setItem('coach_token', tokenValue)
     localStorage.setItem('coach_user', JSON.stringify(userData))
+    useNotificationStore().startPolling()
   }
 
   async function logout() {
     try {
       await coachApi.post('/provider/logout')
     } catch {}
+    useNotificationStore().stopPolling()
     user.value  = null
     token.value = null
     localStorage.removeItem('coach_token')

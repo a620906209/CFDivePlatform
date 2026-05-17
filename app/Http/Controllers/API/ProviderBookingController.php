@@ -6,8 +6,13 @@ use App\Enums\BookingStatus;
 use App\Enums\ScheduleStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Notifications\BookingCancelledNotification;
+use App\Notifications\BookingCompletedNotification;
+use App\Notifications\BookingConfirmedNotification;
+use App\Notifications\BookingRejectedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProviderBookingController extends Controller
 {
@@ -53,6 +58,13 @@ class ProviderBookingController extends Controller
             return response()->json(['status' => false, 'message' => $e->getMessage()], 422);
         }
 
+        try {
+            $booking->load('member');
+            $booking->member->notify(new BookingConfirmedNotification($booking));
+        } catch (\Throwable $e) {
+            Log::error('BookingConfirmedNotification failed: ' . $e->getMessage());
+        }
+
         return response()->json(['status' => true, 'message' => '預約已確認', 'data' => $this->formatBooking($booking->fresh(['member', 'schedule.divingOffer']))]);
     }
 
@@ -66,6 +78,13 @@ class ProviderBookingController extends Controller
         }
 
         $booking->update(['status' => BookingStatus::Rejected]);
+
+        try {
+            $booking->load('member');
+            $booking->member->notify(new BookingRejectedNotification($booking));
+        } catch (\Throwable $e) {
+            Log::error('BookingRejectedNotification failed: ' . $e->getMessage());
+        }
 
         return response()->json(['status' => true, 'message' => '預約已拒絕']);
     }
@@ -91,6 +110,13 @@ class ProviderBookingController extends Controller
             }
         });
 
+        try {
+            $booking->load('member');
+            $booking->member->notify(new BookingCancelledNotification($booking, cancelledBy: 'provider'));
+        } catch (\Throwable $e) {
+            Log::error('BookingCancelledNotification(provider) failed: ' . $e->getMessage());
+        }
+
         return response()->json(['status' => true, 'message' => '預約已取消']);
     }
 
@@ -104,6 +130,13 @@ class ProviderBookingController extends Controller
         }
 
         $booking->update(['status' => BookingStatus::Completed]);
+
+        try {
+            $booking->load('member');
+            $booking->member->notify(new BookingCompletedNotification($booking));
+        } catch (\Throwable $e) {
+            Log::error('BookingCompletedNotification failed: ' . $e->getMessage());
+        }
 
         return response()->json(['status' => true, 'message' => '預約已標記為完成']);
     }

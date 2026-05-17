@@ -122,6 +122,37 @@ services:
       db:
         condition: service_healthy
 
+  queue-worker:
+    image: cfdive-platform
+    container_name: cfdive-queue
+    restart: unless-stopped
+    working_dir: /var/www/
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=60
+    volumes:
+      - ./:/var/www
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=CFDivePlatform
+      - DB_USERNAME=cfdiveuser
+      - DB_PASSWORD=**REMOVED**
+    networks:
+      - cfdive-network
+    depends_on:
+      app:
+        condition: service_healthy
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: cfdive-mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - cfdive-network
+
   redis:
     image: redis:alpine
     container_name: cfdive-redis

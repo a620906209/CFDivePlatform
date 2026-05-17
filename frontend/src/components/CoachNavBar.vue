@@ -1,6 +1,7 @@
 <script setup>
 import { useCoachAuthStore } from '../stores/coachAuth'
 import { useRouter } from 'vue-router'
+import NotificationBell from './NotificationBell.vue'
 
 const coachAuth = useCoachAuthStore()
 const router    = useRouter()
@@ -27,6 +28,7 @@ async function handleLogout() {
 
       <div class="flex items-center gap-4 text-sm">
         <span class="text-gray-400">{{ coachAuth.user?.name }}</span>
+        <NotificationBell />
         <button
           @click="handleLogout"
           class="bg-gray-700 hover:bg-gray-600 px-4 py-1.5 rounded-full transition"

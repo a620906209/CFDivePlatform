@@ -14,6 +14,7 @@ use App\Http\Controllers\API\CourseImageController;
 use App\Http\Controllers\API\AdminStatsController;
 use App\Http\Controllers\API\AdminUserController;
 use App\Http\Controllers\API\AdminOfferController;
+use App\Http\Controllers\API\NotificationController;
 
 // 這裡可以定義 API 路由，例如：
 Route::get('/ping', function () {
@@ -141,6 +142,15 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     // 評價管理
     Route::get('/reviews',          [AdminReviewController::class, 'index']);
     Route::delete('/reviews/{id}',  [AdminReviewController::class, 'destroy']);
+});
+
+// 通知（Member + Provider 共用）
+Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
+    Route::get('/',          [NotificationController::class, 'index']);
+    Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::patch('/read-all',   [NotificationController::class, 'markAllRead']);
+    Route::patch('/{id}/read',  [NotificationController::class, 'markRead']);
+    Route::delete('/{id}',      [NotificationController::class, 'destroy']);
 });
 
 // 需要認證的通用路由

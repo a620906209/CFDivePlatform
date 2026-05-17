@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '../api/axios'
+import { useNotificationStore } from './notifications'
 
 export const useAuthStore = defineStore('auth', () => {
   const user  = ref(null)
@@ -14,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (saved) {
       token.value = saved
       user.value  = savedUser ? JSON.parse(savedUser) : null
+      useNotificationStore().startPolling()
     }
   }
 
@@ -22,12 +24,14 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = tokenValue
     localStorage.setItem('token', tokenValue)
     localStorage.setItem('user', JSON.stringify(userData))
+    useNotificationStore().startPolling()
   }
 
   async function logout() {
     try {
       await api.post('/member/logout')
     } catch {}
+    useNotificationStore().stopPolling()
     user.value  = null
     token.value = null
     localStorage.removeItem('token')

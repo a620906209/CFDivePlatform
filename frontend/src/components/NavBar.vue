@@ -1,6 +1,7 @@
 <script setup>
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
+import NotificationBell from './NotificationBell.vue'
 
 const auth   = useAuthStore()
 const router = useRouter()
@@ -27,6 +28,7 @@ async function handleLogout() {
           </span>
           <RouterLink to="/my-bookings" class="hover:text-ocean-100 transition">我的預約</RouterLink>
           <RouterLink to="/profile" class="hover:text-ocean-100 transition">個人資料</RouterLink>
+          <NotificationBell />
           <button
             @click="handleLogout"
             class="bg-ocean-600 hover:bg-ocean-500 px-4 py-1.5 rounded-full transition"

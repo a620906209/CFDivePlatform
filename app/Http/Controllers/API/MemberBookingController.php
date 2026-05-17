@@ -7,9 +7,12 @@ use App\Enums\ScheduleStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\CourseSchedule;
+use App\Notifications\BookingCreatedNotification;
+use App\Notifications\BookingCancelledNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MemberBookingController extends Controller
 {
@@ -84,6 +87,14 @@ class MemberBookingController extends Controller
             return response()->json(['status' => false, 'message' => $e->getMessage()], 422);
         }
 
+        try {
+            $booking->load('schedule.divingOffer.provider');
+            $provider = $booking->schedule->divingOffer->provider;
+            $provider->notify(new BookingCreatedNotification($booking));
+        } catch (\Throwable $e) {
+            Log::error('BookingCreatedNotification failed: ' . $e->getMessage());
+        }
+
         return response()->json([
             'status'  => true,
             'message' => '預約已送出，等待教練確認',
@@ -125,6 +136,14 @@ class MemberBookingController extends Controller
                 }
             }
         });
+
+        try {
+            $booking->load('schedule.divingOffer.provider');
+            $provider = $booking->schedule->divingOffer->provider;
+            $provider->notify(new BookingCancelledNotification($booking, cancelledBy: 'member'));
+        } catch (\Throwable $e) {
+            Log::error('BookingCancelledNotification(member) failed: ' . $e->getMessage());
+        }
 
         return response()->json(['status' => true, 'message' => '預約已取消']);
     }
