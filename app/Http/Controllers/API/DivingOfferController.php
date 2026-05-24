@@ -5,44 +5,51 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\DivingOffer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DivingOfferController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = min((int) $request->query('per_page', 12), 50);
+        $perPage  = min((int) $request->query('per_page', 12), 50);
+        $cacheKey = 'diving_offers_' . md5(serialize($request->all()));
 
-        $query = DivingOffer::query();
+        $result = Cache::tags(['diving_offers'])->remember($cacheKey, 180, function () use ($request, $perPage) {
+            $query = DivingOffer::query();
 
-        if ($q = $request->query('q')) {
-            $query->where(function ($sub) use ($q) {
-                $sub->where('title', 'like', "%{$q}%")
-                    ->orWhere('location', 'like', "%{$q}%")
-                    ->orWhere('spot', 'like', "%{$q}%");
-            });
-        }
+            if ($q = $request->query('q')) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('title', 'like', "%{$q}%")
+                        ->orWhere('location', 'like', "%{$q}%")
+                        ->orWhere('spot', 'like', "%{$q}%");
+                });
+            }
 
-        if ($region = $request->query('region')) {
-            $query->where('region', $region);
-        }
+            if ($region = $request->query('region')) {
+                $query->where('region', $region);
+            }
 
-        if ($tag = $request->query('tag')) {
-            $query->where('tag', 'like', "%{$tag}%");
-        }
+            if ($tag = $request->query('tag')) {
+                $query->where('tag', 'like', "%{$tag}%");
+            }
 
-        $paginated = $query->paginate($perPage);
+            $paginated = $query->paginate($perPage);
 
-        $items = collect($paginated->items())->map(fn($o) => $this->formatOffer($o, false));
+            return [
+                'items' => collect($paginated->items())->map(fn($o) => $this->formatOffer($o, false))->values(),
+                'meta'  => [
+                    'total'        => $paginated->total(),
+                    'per_page'     => $paginated->perPage(),
+                    'current_page' => $paginated->currentPage(),
+                    'last_page'    => $paginated->lastPage(),
+                ],
+            ];
+        });
 
         return response()->json([
             'status' => true,
-            'data'   => $items,
-            'meta'   => [
-                'total'        => $paginated->total(),
-                'per_page'     => $paginated->perPage(),
-                'current_page' => $paginated->currentPage(),
-                'last_page'    => $paginated->lastPage(),
-            ],
+            'data'   => $result['items'],
+            'meta'   => $result['meta'],
         ]);
     }
 

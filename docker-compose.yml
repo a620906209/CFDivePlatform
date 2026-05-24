@@ -1,7 +1,4 @@
-# Docker Compose 版本
-version: '3.8'
 
-# 定義所有服務
 services:
   # PHP-FPM 服務
   app:
@@ -30,6 +27,7 @@ services:
     # 網絡配置
     networks:
       - cfdive-network  # 連接到自定義網絡
+      - proxy_net
     
     # 依賴關係：確保 db 和 redis 服務先啟動
     depends_on:
@@ -50,13 +48,12 @@ services:
     image: nginx:alpine
     container_name: cfdive-nginx
     restart: unless-stopped
-    ports:
-      - 8080:80
     volumes:
       - ./:/var/www
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
     networks:
       - cfdive-network
+      - proxy_net
     depends_on:
       app:
         condition: service_healthy
@@ -71,14 +68,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: http://localhost:8080
+        VITE_API_URL: ${VITE_API_URL:-https://api.hank-spack.com}
     image: cfdive-frontend
     container_name: cfdive-frontend
     restart: unless-stopped
-    ports:
-      - "5173:80"
     networks:
       - cfdive-network
+      - proxy_net
 
   db:
     image: mysql:8.0
@@ -93,8 +89,6 @@ services:
       SERVICE_NAME: mysql
     volumes:
       - mysql-data:/var/lib/mysql
-    ports:
-      - "3306:3306"
     networks:
       - cfdive-network
     healthcheck:
@@ -108,8 +102,6 @@ services:
     image: phpmyadmin/phpmyadmin
     container_name: cfdive-phpmyadmin
     restart: unless-stopped
-    ports:
-      - "8081:80"
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
@@ -147,9 +139,6 @@ services:
     image: axllent/mailpit
     container_name: cfdive-mailpit
     restart: unless-stopped
-    ports:
-      - "8025:8025"
-      - "1025:1025"
     networks:
       - cfdive-network
 
@@ -157,8 +146,6 @@ services:
     image: redis:alpine
     container_name: cfdive-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     networks:
       - cfdive-network
     healthcheck:
@@ -170,6 +157,8 @@ services:
 networks:
   cfdive-network:
     driver: bridge
+  proxy_net:
+    external: true
 
 volumes:
   mysql-data:

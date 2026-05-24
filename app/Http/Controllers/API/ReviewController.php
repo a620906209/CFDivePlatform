@@ -11,6 +11,7 @@ use App\Models\ReviewEdit;
 use App\Models\ReviewVote;
 use App\Notifications\ReviewReceivedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -20,11 +21,12 @@ class ReviewController extends Controller
 
     public function publicList(Request $request, int $offerId)
     {
-        $offer = DivingOffer::findOrFail($offerId);
-        $user  = $request->user();
+        $offer   = DivingOffer::findOrFail($offerId);
+        $user    = $request->user();
+        $perPage = min((int) $request->query('per_page', 20), 50);
+        $sort    = $request->query('sort', 'helpful');
 
-        $sort = $request->query('sort', 'helpful');
-        $query = Review::where('diving_offer_id', $offer->id);
+        $query = Review::with('votes')->where('diving_offer_id', $offer->id);
 
         match ($sort) {
             'rating'  => $query->orderByDesc('rating')->orderByDesc('created_at'),
@@ -32,27 +34,25 @@ class ReviewController extends Controller
             default   => $query->orderByDesc('helpful_count')->orderByDesc('created_at'),
         };
 
-        $reviews = $query->get();
+        $paginator = $query->paginate($perPage);
+        $reviews   = $paginator->getCollection();
 
-        // 批次查詢 has_voted
-        $votedIds = $user
-            ? ReviewVote::where('member_id', $user->id)
-                ->whereIn('review_id', $reviews->pluck('id'))
-                ->pluck('review_id')
-                ->flip()
-            : collect();
+        $memberId = $user?->id;
 
-        // summary
-        $distRaw = Review::where('diving_offer_id', $offer->id)
-            ->selectRaw('rating, COUNT(*) as cnt')
-            ->groupBy('rating')
-            ->pluck('cnt', 'rating');
-        $distribution = collect([1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0])->merge($distRaw);
+        $distribution = Cache::remember("offer_review_distribution_{$offerId}", 600, function () use ($offerId) {
+            $distRaw = Review::where('diving_offer_id', $offerId)
+                ->selectRaw('rating, COUNT(*) as cnt')
+                ->groupBy('rating')
+                ->pluck('cnt', 'rating');
+            return collect([1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0])->merge($distRaw);
+        });
 
-        $total   = $reviews->count();
-        $average = $total > 0 ? round($reviews->avg('rating'), 1) : 0;
+        $total   = $paginator->total();
+        $average = $total > 0 ? round(
+            Review::where('diving_offer_id', $offerId)->avg('rating'), 1
+        ) : 0;
 
-        $formatted = $reviews->map(function ($r) use ($user, $votedIds) {
+        $formatted = $reviews->map(function ($r) use ($user, $memberId) {
             $item = [
                 'id'            => $r->id,
                 'reviewer_name' => '匿名潛水者',
@@ -61,10 +61,12 @@ class ReviewController extends Controller
                 'helpful_count' => $r->helpful_count,
                 'is_edited'     => $r->is_edited,
                 'created_at'    => $r->created_at?->toISOString(),
-                'has_voted'     => $votedIds->has($r->id),
+                'has_voted'     => $memberId
+                    ? $r->votes->contains('member_id', $memberId)
+                    : false,
             ];
             if ($user) {
-                $item['is_mine'] = $r->member_id === $user->id;
+                $item['is_mine'] = $r->member_id === $memberId;
             }
             return $item;
         });
@@ -78,6 +80,12 @@ class ReviewController extends Controller
                     'distribution' => $distribution,
                 ],
                 'reviews' => $formatted,
+                'meta'    => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page'    => $paginator->lastPage(),
+                    'per_page'     => $paginator->perPage(),
+                    'total'        => $paginator->total(),
+                ],
             ],
         ]);
     }
@@ -121,6 +129,8 @@ class ReviewController extends Controller
             return $review;
         });
 
+        Cache::forget("offer_review_distribution_{$offerId}");
+
         try {
             $offer    = DivingOffer::with('provider')->findOrFail($offerId);
             $provider = $offer->provider;
@@ -146,6 +156,8 @@ class ReviewController extends Controller
             'comment' => 'sometimes|string|min:1',
         ]);
 
+        $offerId = $review->diving_offer_id;
+
         DB::transaction(function () use ($review, $data) {
             ReviewEdit::updateOrCreate(
                 ['review_id' => $review->id],
@@ -154,6 +166,8 @@ class ReviewController extends Controller
             $review->update(array_merge($data, ['is_edited' => true]));
             $this->recalculateOfferRating($review->diving_offer_id);
         });
+
+        Cache::forget("offer_review_distribution_{$offerId}");
 
         return response()->json(['status' => true, 'message' => '評價已更新', 'data' => $this->formatReview($review->fresh())]);
     }
@@ -170,6 +184,8 @@ class ReviewController extends Controller
             $review->delete();
             $this->recalculateOfferRating($offerId);
         });
+
+        Cache::forget("offer_review_distribution_{$offerId}");
 
         return response()->json(['status' => true, 'message' => '評價已刪除']);
     }

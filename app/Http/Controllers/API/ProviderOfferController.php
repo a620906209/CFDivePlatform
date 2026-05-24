@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\DivingOffer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProviderOfferController extends Controller
 {
@@ -60,6 +61,8 @@ class ProviderOfferController extends Controller
 
         $offer = DivingOffer::create($validated);
 
+        Cache::tags(['diving_offers'])->flush();
+
         return response()->json(['status' => true, 'data' => $offer], 201);
     }
 
@@ -89,6 +92,8 @@ class ProviderOfferController extends Controller
 
         $offer->fill($validated)->save();
 
+        Cache::tags(['diving_offers'])->flush();
+
         return response()->json(['status' => true, 'data' => $offer]);
     }
 
@@ -105,6 +110,8 @@ class ProviderOfferController extends Controller
         }
 
         $offer->delete();
+
+        Cache::tags(['diving_offers'])->flush();
 
         return response()->json(['status' => true, 'message' => '課程已刪除']);
     }

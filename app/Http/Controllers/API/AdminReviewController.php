@@ -10,23 +10,34 @@ use Illuminate\Support\Facades\DB;
 
 class AdminReviewController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $reviews = Review::with(['divingOffer', 'member'])
+        $perPage   = min((int) $request->query('per_page', 20), 100);
+        $paginator = Review::with(['divingOffer', 'member'])
             ->orderByDesc('created_at')
-            ->get()
-            ->map(fn($r) => [
-                'id'          => $r->id,
-                'offer_title' => $r->divingOffer?->title,
-                'member_email'=> $r->member?->email,
-                'rating'      => $r->rating,
-                'comment'     => mb_strimwidth($r->comment, 0, 50, '...'),
-                'is_edited'   => $r->is_edited,
-                'helpful_count'=> $r->helpful_count,
-                'created_at'  => $r->created_at?->toISOString(),
-            ]);
+            ->paginate($perPage);
 
-        return response()->json(['status' => true, 'data' => $reviews]);
+        $reviews = $paginator->getCollection()->map(fn($r) => [
+            'id'           => $r->id,
+            'offer_title'  => $r->divingOffer?->title,
+            'member_email' => $r->member?->email,
+            'rating'       => $r->rating,
+            'comment'      => mb_strimwidth($r->comment, 0, 50, '...'),
+            'is_edited'    => $r->is_edited,
+            'helpful_count'=> $r->helpful_count,
+            'created_at'   => $r->created_at?->toISOString(),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'data'   => $reviews,
+            'meta'   => [
+                'current_page' => $paginator->currentPage(),
+                'last_page'    => $paginator->lastPage(),
+                'per_page'     => $paginator->perPage(),
+                'total'        => $paginator->total(),
+            ],
+        ]);
     }
 
     public function destroy(int $id)
