@@ -35,6 +35,10 @@ use OpenApi\Annotations as OA;
  *     name="管理員",
  *     description="管理員相關操作"
  * )
+ * @OA\Tag(
+ *     name="認證",
+ *     description="通用認證操作（登出、取得當前使用者）"
+ * )
  */
 class AuthApiDoc
 {
@@ -42,7 +46,7 @@ class AuthApiDoc
      * 會員註冊
      * 
      * @OA\Post(
-     *     path="/register/member",
+     *     path="/member/register",
      *     summary="會員註冊",
      *     description="建立新的會員帳號",
      *     operationId="registerMember",
@@ -119,7 +123,7 @@ class AuthApiDoc
      * 會員登入
      * 
      * @OA\Post(
-     *     path="/login/member",
+     *     path="/member/login",
      *     summary="會員登入",
      *     description="會員帳號登入系統",
      *     operationId="loginMember",
@@ -207,7 +211,7 @@ class AuthApiDoc
      * 會員登出
      * 
      * @OA\Post(
-     *     path="/logout/member",
+     *     path="/member/logout",
      *     summary="會員登出",
      *     description="會員登出系統並撤銷當前令牌",
      *     operationId="logoutMember",
@@ -241,7 +245,7 @@ class AuthApiDoc
      * 取得會員個人資料
      * 
      * @OA\Get(
-     *     path="/profile/member",
+     *     path="/member/profile",
      *     summary="取得會員個人資料",
      *     description="取得當前登入會員的個人資料",
      *     operationId="memberProfile",
@@ -303,7 +307,7 @@ class AuthApiDoc
      * 更新會員個人資料
      * 
      * @OA\Put(
-     *     path="/profile/member",
+     *     path="/member/profile",
      *     summary="更新會員個人資料",
      *     description="更新當前登入會員的個人資料",
      *     operationId="updateMemberProfile",
@@ -383,8 +387,8 @@ class AuthApiDoc
     /**
      * 修改會員密碼
      * 
-     * @OA\Post(
-     *     path="/password/member",
+     * @OA\Put(
+     *     path="/member/change-password",
      *     summary="修改會員密碼",
      *     description="修改當前登入會員的密碼",
      *     operationId="changeMemberPassword",
@@ -444,7 +448,7 @@ class AuthApiDoc
      * 服務提供者註冊
      * 
      * @OA\Post(
-     *     path="/register/provider",
+     *     path="/provider/register",
      *     summary="服務提供者註冊",
      *     description="建立新的服務提供者帳號",
      *     operationId="registerProvider",
@@ -498,7 +502,7 @@ class AuthApiDoc
      * 服務提供者登入
      * 
      * @OA\Post(
-     *     path="/login/provider",
+     *     path="/provider/login",
      *     summary="服務提供者登入",
      *     description="服務提供者帳號登入系統",
      *     operationId="loginProvider",
@@ -580,7 +584,7 @@ class AuthApiDoc
      * 服務提供者登出
      * 
      * @OA\Post(
-     *     path="/logout/provider",
+     *     path="/provider/logout",
      *     summary="服務提供者登出",
      *     description="服務提供者登出系統並撤銷當前令牌",
      *     operationId="logoutProvider",
@@ -614,7 +618,7 @@ class AuthApiDoc
      * 取得服務提供者資料
      * 
      * @OA\Get(
-     *     path="/profile/provider",
+     *     path="/provider/profile",
      *     summary="取得服務提供者資料",
      *     description="取得當前登入服務提供者的資料",
      *     operationId="providerProfile",
@@ -678,7 +682,7 @@ class AuthApiDoc
      * 更新服務提供者資料
      * 
      * @OA\Put(
-     *     path="/profile/provider",
+     *     path="/provider/profile",
      *     summary="更新服務提供者資料",
      *     description="更新當前登入服務提供者的資料",
      *     operationId="updateProviderProfile",
@@ -764,8 +768,8 @@ class AuthApiDoc
     /**
      * 修改服務提供者密碼
      * 
-     * @OA\Post(
-     *     path="/password/provider",
+     * @OA\Put(
+     *     path="/provider/change-password",
      *     summary="修改服務提供者密碼",
      *     description="修改當前登入服務提供者的密碼",
      *     operationId="changeProviderPassword",
@@ -825,7 +829,7 @@ class AuthApiDoc
      * 管理員註冊
      * 
      * @OA\Post(
-     *     path="/register/admin",
+     *     path="/admin/register",
      *     summary="管理員註冊",
      *     description="建立新的管理員帳號",
      *     operationId="registerAdmin",
@@ -877,7 +881,7 @@ class AuthApiDoc
      * 管理員登入
      * 
      * @OA\Post(
-     *     path="/login/admin",
+     *     path="/admin/login",
      *     summary="管理員登入",
      *     description="管理員帳號登入系統",
      *     operationId="loginAdmin",
@@ -958,7 +962,7 @@ class AuthApiDoc
      * 管理員登出
      * 
      * @OA\Post(
-     *     path="/logout/admin",
+     *     path="/admin/logout",
      *     summary="管理員登出",
      *     description="管理員登出系統並撤銷當前令牌",
      *     operationId="logoutAdmin",
@@ -992,7 +996,7 @@ class AuthApiDoc
      * 取得管理員個人資料
      * 
      * @OA\Get(
-     *     path="/profile/admin",
+     *     path="/admin/profile",
      *     summary="取得管理員個人資料",
      *     description="取得當前登入管理員的個人資料",
      *     operationId="adminProfile",
@@ -1030,7 +1034,7 @@ class AuthApiDoc
      * 更新管理員個人資料
      * 
      * @OA\Put(
-     *     path="/profile/admin",
+     *     path="/admin/profile",
      *     summary="更新管理員個人資料",
      *     description="更新當前登入管理員的個人資料",
      *     operationId="updateAdminProfile",
@@ -1087,8 +1091,8 @@ class AuthApiDoc
     /**
      * 修改管理員密碼
      * 
-     * @OA\Post(
-     *     path="/password/admin",
+     * @OA\Put(
+     *     path="/admin/change-password",
      *     summary="修改管理員密碼",
      *     description="修改當前登入管理員的密碼",
      *     operationId="changeAdminPassword",
@@ -1141,6 +1145,73 @@ class AuthApiDoc
      * )
      */
     public function changeAdminPassword()
+    {
+    }
+
+    /**
+     * 通用登出
+     *
+     * @OA\Post(
+     *     path="/logout",
+     *     summary="通用登出",
+     *     description="撤銷當前 Bearer token，適用所有角色",
+     *     operationId="logout",
+     *     tags={"認證"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="登出成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="登出成功")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="未認證",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function logout()
+    {
+    }
+
+    /**
+     * 取得當前使用者
+     *
+     * @OA\Get(
+     *     path="/user",
+     *     summary="取得當前使用者",
+     *     description="回傳當前 Bearer token 所屬的使用者資訊",
+     *     operationId="currentUser",
+     *     tags={"認證"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="取得成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="name", type="string", example="王小明"),
+     *             @OA\Property(property="email", type="string", example="user@example.com"),
+     *             @OA\Property(property="role", type="string", enum={"member","provider","admin"}, example="member"),
+     *             @OA\Property(property="is_active", type="boolean", example=true),
+     *             @OA\Property(property="created_at", type="string", example="2025-01-01T00:00:00.000000Z"),
+     *             @OA\Property(property="updated_at", type="string", example="2025-01-01T00:00:00.000000Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="未認證",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function currentUser()
     {
     }
 }
