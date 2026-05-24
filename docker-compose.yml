@@ -20,9 +20,9 @@ services:
       - DB_CONNECTION=mysql  # 數據庫類型
       - DB_HOST=db  # 數據庫主機名
       - DB_PORT=3306  # 數據庫端口
-      - DB_DATABASE=CFDivePlatform  # 數據庫名稱
-      - DB_USERNAME=cfdiveuser  # 數據庫用戶名
-      - DB_PASSWORD=**REMOVED**  # 數據庫密碼
+      - DB_DATABASE=${DB_DATABASE:-CFDivePlatform}  # 數據庫名稱
+      - DB_USERNAME=${DB_USERNAME:-cfdiveuser}  # 數據庫用戶名
+      - DB_PASSWORD=${DB_PASSWORD}  # 數據庫密碼
     
     # 網絡配置
     networks:
@@ -81,10 +81,10 @@ services:
     container_name: cfdive-db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: CFDivePlatform
-      MYSQL_ROOT_PASSWORD: **REMOVED**
-      MYSQL_USER: cfdiveuser
-      MYSQL_PASSWORD: **REMOVED**
+      MYSQL_DATABASE: ${DB_DATABASE:-CFDivePlatform}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME:-cfdiveuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     volumes:
@@ -92,7 +92,7 @@ services:
     networks:
       - cfdive-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "cfdiveuser", "-p**REMOVED**"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -105,9 +105,9 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      PMA_USER: cfdiveuser
-      PMA_PASSWORD: **REMOVED**
-      MYSQL_ROOT_PASSWORD: **REMOVED**
+      PMA_USER: ${DB_USERNAME:-cfdiveuser}
+      PMA_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     networks:
       - cfdive-network
     depends_on:
@@ -126,9 +126,9 @@ services:
       - DB_CONNECTION=mysql
       - DB_HOST=db
       - DB_PORT=3306
-      - DB_DATABASE=CFDivePlatform
-      - DB_USERNAME=cfdiveuser
-      - DB_PASSWORD=**REMOVED**
+      - DB_DATABASE=${DB_DATABASE:-CFDivePlatform}
+      - DB_USERNAME=${DB_USERNAME:-cfdiveuser}
+      - DB_PASSWORD=${DB_PASSWORD}
     networks:
       - cfdive-network
     depends_on:
