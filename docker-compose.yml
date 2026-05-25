@@ -97,6 +97,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+    ports:
+      - "127.0.0.1:3306:3306" # 只綁 localhost，不對外
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
