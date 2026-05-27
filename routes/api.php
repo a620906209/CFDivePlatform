@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\DivingOfferController;
@@ -14,26 +15,16 @@ use App\Http\Controllers\API\CourseImageController;
 use App\Http\Controllers\API\AdminStatsController;
 use App\Http\Controllers\API\AdminUserController;
 use App\Http\Controllers\API\AdminOfferController;
+use App\Http\Controllers\API\BookingMessageController;
 use App\Http\Controllers\API\NotificationController;
 
-// 這裡可以定義 API 路由，例如：
-Route::get('/ping', function () {
-    return response()->json(['message' => 'pong']);
-});
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 // 潛水課程（公開）
 Route::get('/diving-offers', [DivingOfferController::class, 'index']);
 Route::get('/diving-offers/{id}', [DivingOfferController::class, 'show']);
 Route::get('/diving-offers/{id}/schedules', [ScheduleController::class, 'publicList']);
 Route::get('/diving-offers/{id}/reviews',  [ReviewController::class, 'publicList']);
-
-// 你可以在這裡繼續新增 API 路由
-Route::post('/testpost', function () {
-    $data = request()->all(); // 取得所有POST資料（array）
-    return response()->json([
-        'data' => $data,
-    ]);
-});
 
 // 會員註冊／登入
 Route::post('/member/register', [AuthController::class, 'registerMember']);
@@ -151,6 +142,15 @@ Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
     Route::patch('/read-all',   [NotificationController::class, 'markAllRead']);
     Route::patch('/{id}/read',  [NotificationController::class, 'markRead']);
     Route::delete('/{id}',      [NotificationController::class, 'destroy']);
+});
+
+// 即時訊息（Member + Provider 共用，依 booking 參與方驗證）
+Route::middleware('auth:sanctum')->group(function () {
+    // unread-counts 必須在 {booking} 之前，否則會被 route model binding 吃掉
+    Route::get('/bookings/messages/unread-counts',   [BookingMessageController::class, 'unreadCounts']);
+    Route::get('/bookings/{booking}/messages',       [BookingMessageController::class, 'index']);
+    Route::post('/bookings/{booking}/messages',      [BookingMessageController::class, 'store']);
+    Route::post('/bookings/{booking}/messages/read', [BookingMessageController::class, 'markRead']);
 });
 
 // 需要認證的通用路由
