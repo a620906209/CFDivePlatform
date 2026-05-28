@@ -5,6 +5,8 @@
 ## What Changes
 
 - 新增 `booking_messages` 資料表，儲存文字與圖片訊息，與 `bookings` 一對多關聯
+- 新增站內通知系統：發送訊息時同步寫入 `notifications` 資料表（`NewBookingMessageNotification`，database channel only），並廣播 `NotificationCreated` event 至 `private-App.Models.User.{receiverId}` 頻道，前端即時更新 Bell Icon 未讀計數（**實作中追加，超出原始 scope**）
+- 新增瀏覽器 Web Notification：分頁在背景時收到對方訊息，透過 Notifications API 推送原生通知（`tag: booking-chat-{id}` 防疊加）（**實作中追加**）
 - 引入 **Laravel Reverb** 作為自架 WebSocket 伺服器（docker-compose 新增 `reverb` service）
 - 每個 confirmed 預約建立一條 **Presence Channel**（`presence-booking.{id}`），同時承載訊息推播與在線狀態
 - 已讀回執：對方在頻道內且讀取訊息時觸發 `MessageRead` event
@@ -28,7 +30,7 @@
 
 - **新增套件**：`laravel/reverb`（PHP）、`intervention/image`（PHP）、`laravel-echo`、`pusher-js`（npm）
 - **新增 Docker service**：`reverb`（連接 `cfdive-network` 與 `proxy_net`，port 8080 僅內網）
-- **新增 API 端點**：訊息列表、發送文字、上傳圖片、標記已讀
+- **新增 API 端點**：訊息列表（`GET /api/bookings/{id}/messages`）、發送文字/圖片（`POST /api/bookings/{id}/messages`）、標記已讀（`POST /api/bookings/{id}/messages/read`）、批次未讀計數（`GET /api/bookings/messages/unread-counts`）
 - **修改**：`docker-compose.yml`、`config/broadcasting.php`（connection 改為 `reverb`）
 - **Infrastructure**：NPM 新增 `ws.hank-space.com` Proxy Host（WebSocket 啟用）、DNS A Record
 - **不影響**：現有預約 API、評價系統、所有已完成模組

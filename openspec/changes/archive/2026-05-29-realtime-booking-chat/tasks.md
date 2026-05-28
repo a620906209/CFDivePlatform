@@ -10,9 +10,9 @@
 ## 2. Docker 與 Infrastructure 設定
 
 - [x] 2.1 [後端] 在 `docker-compose.yml` 新增 `reverb` service：複用 `cfdive-platform` image，`command: php artisan reverb:start --host=0.0.0.0 --port=8080 --debug`，連接 `cfdive-network` 與 `proxy_net`，`restart: unless-stopped`，`depends_on: app`
-- [ ] 2.2 [Infrastructure] 在 DNS 新增 A Record：`ws.hank-space.com` → VPS IP
-- [ ] 2.3 [Infrastructure] 在 Nginx Proxy Manager 新增 Proxy Host：Domain `ws.hank-space.com`，Forward 至 `reverb:8080`，啟用 WebSocket support，申請 SSL 憑證
-- [ ] 2.4 [後端] 執行 `docker-compose up --build reverb` 驗證 Reverb 容器啟動正常
+- [x] 2.2 [Infrastructure] 在 DNS 新增 A Record：`ws.hank-space.com` → VPS IP
+- [x] 2.3 [Infrastructure] 在 Nginx Proxy Manager 新增 Proxy Host：Domain `ws.hank-space.com`，Forward 至 `reverb:8080`，啟用 WebSocket support，申請 SSL 憑證
+- [x] 2.4 [後端] 執行 `docker-compose up --build reverb` 驗證 Reverb 容器啟動正常
 
 ## 3. 資料庫
 
@@ -69,10 +69,10 @@
 
 ## 9. 整合測試與手動驗證
 
-- [ ] 9.1 [整合測試] 驗證 `/broadcasting/auth` 端點可存取（不是 404）：分別用 member token 與 coach token 送出請求，確認路由已正確註冊且 Sanctum middleware 生效；合法參與方回傳 200，非參與方回傳 403，非 confirmed 狀態回傳 403
-- [ ] 9.2 [整合測試] 驗證 `POST /api/bookings/{id}/messages`：text 訊息成功建立且廣播；image 上傳成功且 URL 可存取；invalid 檔案回傳 422
-- [ ] 9.3 [整合測試] 驗證 `markRead`：己方訊息不更新；對方訊息 `read_at` 被設定；`MessageRead` 廣播觸發
-- [ ] 9.4 [整合測試] 驗證封存：`completed` 預約 POST 訊息回傳 403，GET 歷史正常回傳
-- [ ] 9.5 [手動驗證] 開兩個瀏覽器分別登入 Member 與 Coach，確認訊息即時雙向傳達、在線狀態顯示正確、已讀回執正常觸發
-- [ ] 9.6 [手動驗證] 測試圖片訊息：上傳圖片後對方即時看到圖片
-- [ ] 9.7 [手動驗證] 關閉一個視窗，確認另一端顯示「對方已離線」
+- [x] 9.1 [整合測試] 驗證 `/broadcasting/auth` 端點可存取（不是 404）：分別用 member token 與 coach token 送出請求，確認路由已正確註冊且 Sanctum middleware 生效；合法參與方回傳 200，非參與方回傳 403，非 confirmed 狀態回傳 403
+- [x] 9.2 [整合測試] 驗證 `POST /api/bookings/{id}/messages`：text 訊息成功建立且廣播；image 上傳成功且 URL 可存取；invalid 檔案回傳 422
+- [x] 9.3 [整合測試] 驗證 `markRead`：己方訊息不更新；對方訊息 `read_at` 被設定；`MessageRead` 廣播觸發
+- [x] 9.4 [整合測試] 驗證封存：`completed` 預約 POST 訊息回傳 403，GET 歷史正常回傳
+- [x] 9.5 [手動驗證] 開兩個瀏覽器分別登入 Member 與 Coach，確認訊息即時雙向傳達、在線狀態顯示正確、已讀回執正常觸發
+- [x] 9.6 [手動驗證] 測試圖片訊息：上傳圖片後對方即時看到圖片
+- [x] 9.7 [手動驗證] 關閉一個視窗，確認另一端顯示「對方已離線」

@@ -1,11 +1,9 @@
-﻿## ADDED Requirements
-
 ### Requirement: 訂閱預約 Presence Channel
 已認證的 Member 與 Provider SHALL 能透過 Laravel Echo 訂閱 `presence-booking.{booking_id}` 頻道，訂閱時系統 SHALL 驗證使用者確為該預約的參與方。
 
 #### Scenario: 合法參與方成功訂閱
 - **WHEN** 已認證使用者帶有效 Bearer token 連線至 `wss://ws.hank-space.com`，並訂閱 `presence-booking.{id}`
-- **THEN** `broadcasting/auth` 端點回傳授權成功，使用者加入頻道，頻道廣播 `joining` event（含 `user_id`、`user_type`）
+- **THEN** `broadcasting/auth` 端點回傳授權成功，使用者加入頻道，頻道廣播 `joining` event（含 `user_id`、`user_type`、`name`）
 
 #### Scenario: 非參與方訂閱被拒絕
 - **WHEN** 非該預約參與方嘗試訂閱頻道
