@@ -70,7 +70,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-https://api.hank-spack.com}
+        VITE_API_URL: ${VITE_API_URL:-https://api.hank-space.com}
         VITE_REVERB_APP_KEY: ${VITE_REVERB_APP_KEY}
         VITE_REVERB_HOST: ${VITE_REVERB_HOST:-localhost}
         VITE_REVERB_PORT: ${VITE_REVERB_PORT:-8085}
