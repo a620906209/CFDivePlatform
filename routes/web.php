@@ -25,13 +25,9 @@ Route::get('/health', function () {
     $healthy = $checks['db'] && $checks['redis'] && $checks['cache'];
 
     return response()->json([
-        'status'      => $healthy ? 'ok' : 'degraded',
-        'timestamp'   => now()->toIso8601String(),
-        'environment' => app()->environment(),
-        'php_version' => PHP_VERSION,
-        'laravel'     => app()->version(),
-        'memory_mb'   => round(memory_get_usage(true) / 1024 / 1024, 2),
-        'checks'      => $checks,
+        'status'    => $healthy ? 'ok' : 'degraded',
+        'timestamp' => now()->toIso8601String(),
+        'checks'    => $checks,
     ], $healthy ? 200 : 503);
 });
 
