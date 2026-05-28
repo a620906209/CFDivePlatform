@@ -86,10 +86,7 @@ cat > /tmp/update_env.php << 'PHPEOF'
 <?php
 $env = file_get_contents('/var/www/.env');
 $map = [
-    'DB_HOST'     => 'db',
-    'DB_USERNAME' => (getenv('DB_USERNAME') ?: 'cfdiveuser'),
-    'DB_DATABASE' => (getenv('DB_DATABASE') ?: 'CFDivePlatform'),
-    'DB_PASSWORD' => (getenv('DB_PASSWORD') ?: ''),
+    'DB_HOST' => 'db',
 ];
 foreach ($map as $key => $val) {
     $env = preg_replace_callback(
