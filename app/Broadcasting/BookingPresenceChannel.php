@@ -16,7 +16,9 @@ class BookingPresenceChannel
         $booking->loadMissing('schedule');
 
         $isMember = $user->role === 'member' && $booking->member_id === $user->id;
-        $isProvider = $user->role === 'provider' && $booking->schedule->provider_id === $user->id;
+        $isProvider = $user->role === 'provider'
+            && $booking->schedule !== null
+            && $booking->schedule->provider_id === $user->id;
 
         if (!$isMember && !$isProvider) {
             return false;

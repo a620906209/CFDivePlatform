@@ -4,6 +4,8 @@ import api from '../api/axios'
 import coachApi from '../api/coachAxios'
 import echo from '../plugins/echo'
 import { useNotificationStore } from '../stores/notifications'
+import { useAuthStore } from '../stores/auth'
+import { useCoachAuthStore } from '../stores/coachAuth'
 
 const props = defineProps({
   bookingId: { type: Number, required: true },
@@ -21,6 +23,12 @@ const otherUserOnline = ref(false)
 const channel = ref(null)
 
 const notificationStore = useNotificationStore()
+const authStore      = useAuthStore()
+const coachAuthStore = useCoachAuthStore()
+
+const currentUserId = computed(() =>
+  props.currentUserType === 'provider' ? coachAuthStore.user?.id : authStore.user?.id
+)
 
 const isConfirmed = computed(() => props.bookingStatus === 'confirmed')
 const isCompleted = computed(() => props.bookingStatus === 'completed')
@@ -91,6 +99,19 @@ async function sendText() {
   const content = textInput.value.trim()
   textInput.value = ''
   isSending.value = true
+
+  const tempId = `_temp_${Date.now()}`
+  messages.value.push({
+    id: tempId,
+    sender_id: currentUserId.value,
+    sender_type: props.currentUserType,
+    type: 'text',
+    content,
+    read_at: null,
+    created_at: new Date().toISOString(),
+  })
+  scrollToBottom()
+
   try {
     await axiosInstance.value.post(`/bookings/${props.bookingId}/messages`, {
       type: 'text',
@@ -98,6 +119,7 @@ async function sendText() {
     })
   } catch (e) {
     textInput.value = content
+    messages.value = messages.value.filter(m => m.id !== tempId)
   } finally {
     isSending.value = false
   }
@@ -142,6 +164,16 @@ function subscribeChannel() {
       if (e.user_type === otherType.value) otherUserOnline.value = e.online
     })
     .listen('.MessageSent', async (e) => {
+      if (e.sender_type === props.currentUserType) {
+        // 自己送的訊息：替換樂觀更新的暫存訊息（避免重複）
+        const tempIdx = messages.value.findIndex(
+          m => typeof m.id === 'string' && m.id.startsWith('_temp_') && m.content === e.content
+        )
+        if (tempIdx !== -1) {
+          messages.value[tempIdx] = { id: e.id, sender_id: e.sender_id, sender_type: e.sender_type, type: e.type, content: e.content, read_at: null, created_at: e.created_at }
+          return
+        }
+      }
       messages.value.push({
         id: e.id,
         sender_id: e.sender_id,
@@ -153,7 +185,6 @@ function subscribeChannel() {
       })
       scrollToBottom()
       if (e.sender_type !== props.currentUserType) {
-        // 對方傳來的訊息：推瀏覽器通知、刷新 bell badge
         showBrowserNotification(e)
         notificationStore.fetchUnreadCount()
         await markLastRead()
@@ -170,15 +201,39 @@ function subscribeChannel() {
     })
 }
 
+function handleReconnected() {
+  if (!isConfirmed.value) return
+  echo.leave(`booking.${props.bookingId}`)
+  channel.value = null
+  subscribeChannel()
+}
+
+// Fallback：presence channel 失效時，收到 bell 通知也補拉訊息
+async function handleNotificationFallback() {
+  const lastId = messages.value[messages.value.length - 1]?.id
+  if (lastId && typeof lastId === 'string') return  // 還在樂觀更新中，不拉
+  await loadHistory()
+}
+
 onMounted(async () => {
   await requestBrowserNotificationPermission()
   await loadHistory()
   if (isConfirmed.value) {
     subscribeChannel()
+    echo.connector.pusher.connection.bind('reconnected', handleReconnected)
+    if (currentUserId.value) {
+      echo.private(`App.Models.User.${currentUserId.value}`)
+        .listen('.notification.created', handleNotificationFallback)
+    }
   }
 })
 
 onUnmounted(() => {
+  echo.connector.pusher.connection.unbind('reconnected', handleReconnected)
+  if (currentUserId.value) {
+    echo.private(`App.Models.User.${currentUserId.value}`)
+      .stopListening('.notification.created', handleNotificationFallback)
+  }
   if (channel.value) {
     channel.value.whisper('presence', { user_type: props.currentUserType, online: false })
     echo.leave(`booking.${props.bookingId}`)

@@ -3,136 +3,61 @@ set -e
 
 echo "=== CFDivePlatform 容器初始化開始 ==="
 
-# 檢查目錄結構
-if [ ! -d "/var/www/storage" ]; then
-  echo "創建 storage 目錄..."
-  mkdir -p /var/www/storage
-fi
-
-if [ ! -d "/var/www/bootstrap/cache" ]; then
-  echo "創建 bootstrap/cache 目錄..."
-  mkdir -p /var/www/bootstrap/cache
-fi
-
-# 設置權限
-echo "設置目錄權限..."
+# 確保目錄與權限（php-fpm 啟動前必須完成）
+[ ! -d "/var/www/storage" ] && mkdir -p /var/www/storage
+[ ! -d "/var/www/bootstrap/cache" ] && mkdir -p /var/www/bootstrap/cache
 chown -R www-data:www-data /var/www
 chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# 等待 MySQL 服務啟動
-echo "等待 MySQL 服務啟動..."
+# 確保 .env 存在
+if [ ! -f .env ]; then
+    cp .env.example .env
+    php artisan key:generate
+fi
 
-# 使用更穩定的方法檢查 MySQL 連接
-MAX_TRIES=60
-COUNT=0
+# 強制 DB_HOST=db（Docker service name，不能用 localhost）
+php -r "
+\$env = file_get_contents('/var/www/.env');
+\$env = preg_replace('/^DB_HOST=.*$/m', 'DB_HOST=db', \$env);
+file_put_contents('/var/www/.env', \$env);
+"
 
-wait_for_mysql() {
-    while [ $COUNT -lt $MAX_TRIES ]; do
-        if mysqladmin ping -h"db" -u"${DB_USERNAME:-cfdiveuser}" -p"${DB_PASSWORD}" --silent 2>/dev/null; then
-            echo "✅ MySQL 服務已準備就緒"
-            return 0
-        fi
-        
-        # 備用檢查方法
-        if php -r "
-            try {
-                \$pdo = new PDO('mysql:host=db;port=3306', getenv('DB_USERNAME') ?: 'cfdiveuser', getenv('DB_PASSWORD') ?: '');
-                echo 'PHP-PDO-OK';
-                exit(0);
-            } catch(Exception \$e) {
-                exit(1);
-            }
-        " 2>/dev/null; then
-            echo "✅ MySQL 連接成功 (通過 PHP PDO)"
-            break
-        fi
-        
-        echo "⏳ 等待 MySQL... ($((COUNT+1))/$MAX_TRIES)"
+# Composer 依賴（vendor 不存在時才裝，通常已存在於 volume）
+if [ -f "composer.json" ] && { [ ! -d "vendor" ] || [ "composer.json" -nt "vendor/autoload.php" ]; }; then
+    composer install --no-scripts --optimize-autoloader
+fi
+
+# 背景執行：等 MySQL → migration → cache clear → storage link → swagger
+# php-fpm 不等這些完成就先啟動，避免重啟時 CORS 502
+(
+    echo "⏳ [背景] 等待 MySQL..."
+    COUNT=0
+    until mysqladmin ping -h"db" -u"${DB_USERNAME:-cfdiveuser}" -p"${DB_PASSWORD}" --silent 2>/dev/null || [ $COUNT -ge 30 ]; do
         sleep 2
         COUNT=$((COUNT+1))
     done
 
-    if [ $COUNT -eq $MAX_TRIES ]; then
-        echo "⚠️  無法連接到 MySQL，但將繼續啟動服務"
+    echo "🗄️  [背景] 執行 migration..."
+    php artisan migrate --force || echo "⚠️  migration 失敗"
+
+    echo "🧹 [背景] 清除 Laravel 緩存..."
+    php artisan config:clear || true
+    php artisan cache:clear  || true
+    php artisan route:clear  || true
+    php artisan view:clear   || true
+
+    echo "🔗 [背景] storage:link..."
+    php artisan storage:link --force || true
+
+    if php -r "echo class_exists('L5Swagger\\L5SwaggerServiceProvider') ? 'yes' : 'no';" 2>/dev/null | grep -q 'yes'; then
+        php artisan l5-swagger:generate || true
     fi
-}
 
-wait_for_mysql
+    echo "✅ [背景] 初始化完成"
+) &
 
-# 檢查並安裝 Composer 依賴
-echo "📦 檢查 Composer 依賴..."
-if [ -f "composer.json" ]; then
-    if [ ! -d "vendor" ] || [ "composer.json" -nt "vendor/autoload.php" ]; then
-        echo "安裝 Composer 依賴..."
-        composer install --no-scripts --no-autoloader --optimize-autoloader
-        composer dump-autoload --optimize
-    else
-        echo "✅ Composer 依賴已是最新"
-    fi
-fi
-
-# 設置 Laravel 環境
-if [ ! -f .env ]; then
-    echo "🔧 創建 .env 檔案..."
-    cp .env.example .env
-    php artisan key:generate
-else
-    echo "✅ .env 檔案已存在"
-fi
-
-# 更新環境變數以確保正確配置（用 PHP 安全處理含特殊字元的密碼）
-echo "🔧 更新資料庫配置..."
-cat > /tmp/update_env.php << 'PHPEOF'
-<?php
-$env = file_get_contents('/var/www/.env');
-$map = [
-    'DB_HOST'     => 'db',
-    'DB_USERNAME' => (getenv('DB_USERNAME') ?: 'cfdiveuser'),
-    'DB_DATABASE' => (getenv('DB_DATABASE') ?: 'CFDivePlatform'),
-    'DB_PASSWORD' => (getenv('DB_PASSWORD') ?: ''),
-];
-foreach ($map as $key => $val) {
-    $env = preg_replace_callback(
-        '/^' . preg_quote($key, '/') . '=.*$/m',
-        function() use ($key, $val) { return $key . '=' . $val; },
-        $env
-    );
-}
-file_put_contents('/var/www/.env', $env);
-echo "✅ DB config updated\n";
-PHPEOF
-php /tmp/update_env.php
-
-# 執行遷移（如果數據庫已準備好）
-echo "🗄️  執行數據庫遷移..."
-if php artisan migrate:status 2>/dev/null; then
-    php artisan migrate --force || echo "⚠️  遷移執行遇到問題，但繼續執行"
-else
-    echo "⚠️  無法檢查遷移狀態，跳過遷移"
-fi
-
-# 清除與優化 Laravel 緩存
-echo "🧹 清除 Laravel 緩存..."
-php artisan config:clear || true
-php artisan cache:clear || true
-php artisan route:clear || true
-php artisan view:clear || true
-
-# 生成 Swagger 文檔（如果可能）
-if php -r "echo class_exists('L5Swagger\\L5SwaggerServiceProvider') ? 'yes' : 'no';" 2>/dev/null | grep -q 'yes'; then
-    echo "📖 生成 API 文檔..."
-    php artisan l5-swagger:generate || echo "⚠️  API 文檔生成失敗"
-fi
-
-echo "✅ CFDivePlatform 初始化完成！"
-
-# 建立 storage symlink
-echo "🔗 建立 storage symlink..."
-php artisan storage:link --force || true
-
-# 啟動 cron daemon（Laravel Scheduler）
-echo "⏰ 啟動 Laravel Scheduler cron..."
+# 啟動 cron（Laravel Scheduler）
 service cron start || cron || true
 
-# 執行傳入的命令
+echo "🚀 啟動 php-fpm..."
 exec "$@"
