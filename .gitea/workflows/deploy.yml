@@ -12,7 +12,8 @@ jobs:
       - name: Pull latest code
         run: |
           cd /root/myproject/CFDivePlatform
-          git pull
+          flock -w 30 /tmp/cfdive-deploy.lock git fetch origin
+          git reset --hard origin/master
 
       - name: Install Composer dependencies
         run: |
