@@ -24,16 +24,16 @@ const echo = new Echo({
     },
 })
 
-// 登入後更新 auth header，讓 presence channel 授權帶正確 token
+// 登入後更新 auth header 並強制重連，確保 Reverb 用新 token 授權 channel
 export function updateEchoToken() {
     const token = getAuthToken()
     const bearer = `Bearer ${token}`
     echo.options.auth.headers.Authorization = bearer
-    // 同步更新 Pusher 內部 config（避免 Pusher.js 持有舊的 header copy）
     if (echo.connector?.pusher?.config?.auth?.headers) {
         echo.connector.pusher.config.auth.headers.Authorization = bearer
     }
-    // 不 disconnect/connect：避免中斷 BookingChat 已訂閱的 presence channel
+    echo.disconnect()
+    echo.connect()
 }
 
 export default echo

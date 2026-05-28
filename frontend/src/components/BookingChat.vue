@@ -4,8 +4,6 @@ import api from '../api/axios'
 import coachApi from '../api/coachAxios'
 import echo from '../plugins/echo'
 import { useNotificationStore } from '../stores/notifications'
-import { useAuthStore } from '../stores/auth'
-import { useCoachAuthStore } from '../stores/coachAuth'
 
 const props = defineProps({
   bookingId: { type: Number, required: true },
@@ -23,12 +21,6 @@ const otherUserOnline = ref(false)
 const channel = ref(null)
 
 const notificationStore = useNotificationStore()
-const authStore      = useAuthStore()
-const coachAuthStore = useCoachAuthStore()
-
-const currentUserId = computed(() =>
-  props.currentUserType === 'provider' ? coachAuthStore.user?.id : authStore.user?.id
-)
 
 const isConfirmed = computed(() => props.bookingStatus === 'confirmed')
 const isCompleted = computed(() => props.bookingStatus === 'completed')
@@ -103,7 +95,7 @@ async function sendText() {
   const tempId = `_temp_${Date.now()}`
   messages.value.push({
     id: tempId,
-    sender_id: currentUserId.value,
+    sender_id: null,
     sender_type: props.currentUserType,
     type: 'text',
     content,
@@ -201,18 +193,17 @@ function subscribeChannel() {
     })
 }
 
-function handleReconnected() {
+// updateEchoToken() 會 disconnect/connect，connection 重建後需重訂 presence channel
+// Pusher.js 的重連事件走 state_change，用 previous 判斷是否為重連而非初次連線
+let everConnected = false
+function onConnectionStateChange({ current }) {
+  if (current !== 'connected') return
+  if (!everConnected) { everConnected = true; return }
+  // 重連：重訂 presence channel
   if (!isConfirmed.value) return
   echo.leave(`booking.${props.bookingId}`)
   channel.value = null
   subscribeChannel()
-}
-
-// Fallback：presence channel 失效時，收到 bell 通知也補拉訊息
-async function handleNotificationFallback() {
-  const lastId = messages.value[messages.value.length - 1]?.id
-  if (lastId && typeof lastId === 'string') return  // 還在樂觀更新中，不拉
-  await loadHistory()
 }
 
 onMounted(async () => {
@@ -220,20 +211,12 @@ onMounted(async () => {
   await loadHistory()
   if (isConfirmed.value) {
     subscribeChannel()
-    echo.connector.pusher.connection.bind('reconnected', handleReconnected)
-    if (currentUserId.value) {
-      echo.private(`App.Models.User.${currentUserId.value}`)
-        .listen('.notification.created', handleNotificationFallback)
-    }
+    echo.connector.pusher.connection.bind('state_change', onConnectionStateChange)
   }
 })
 
 onUnmounted(() => {
-  echo.connector.pusher.connection.unbind('reconnected', handleReconnected)
-  if (currentUserId.value) {
-    echo.private(`App.Models.User.${currentUserId.value}`)
-      .stopListening('.notification.created', handleNotificationFallback)
-  }
+  echo.connector.pusher.connection.unbind('state_change', onConnectionStateChange)
   if (channel.value) {
     channel.value.whisper('presence', { user_type: props.currentUserType, online: false })
     echo.leave(`booking.${props.bookingId}`)
