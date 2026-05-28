@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libwebp-dev \
     libonig-dev \
     libxml2-dev \
     zip \
@@ -21,7 +24,8 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 安裝 PHP 擴展
-# 這些擴展是 Laravel 和一般 PHP 開發所需的
+# GD 需要在 install 前先 configure，才能帶入 jpeg/webp/freetype 支援
+RUN docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # 從官方 Composer 鏡像複製 Composer 執行文件

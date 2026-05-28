@@ -28,7 +28,7 @@ COUNT=0
 
 wait_for_mysql() {
     while [ $COUNT -lt $MAX_TRIES ]; do
-        if mysqladmin ping -h"db" -u"cfdiveuser" -p"**REMOVED**" --silent 2>/dev/null; then
+        if mysqladmin ping -h"db" -u"${DB_USERNAME:-cfdiveuser}" -p"${DB_PASSWORD}" --silent 2>/dev/null; then
             echo "✅ MySQL 服務已準備就緒"
             return 0
         fi
@@ -36,7 +36,7 @@ wait_for_mysql() {
         # 備用檢查方法
         if php -r "
             try {
-                \$pdo = new PDO('mysql:host=db;port=3306', 'cfdiveuser', '**REMOVED**');
+                \$pdo = new PDO('mysql:host=db;port=3306', getenv('DB_USERNAME') ?: 'cfdiveuser', getenv('DB_PASSWORD') ?: '');
                 echo 'PHP-PDO-OK';
                 exit(0);
             } catch(Exception \$e) {
@@ -80,12 +80,28 @@ else
     echo "✅ .env 檔案已存在"
 fi
 
-# 更新環境變數以確保正確配置
+# 更新環境變數以確保正確配置（用 PHP 安全處理含特殊字元的密碼）
 echo "🔧 更新資料庫配置..."
-sed -i "s/DB_HOST=.*/DB_HOST=db/g" .env
-sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=**REMOVED**/g" .env
-sed -i "s/DB_USERNAME=.*/DB_USERNAME=cfdiveuser/g" .env
-sed -i "s/DB_DATABASE=.*/DB_DATABASE=CFDivePlatform/g" .env
+cat > /tmp/update_env.php << 'PHPEOF'
+<?php
+$env = file_get_contents('/var/www/.env');
+$map = [
+    'DB_HOST'     => 'db',
+    'DB_USERNAME' => (getenv('DB_USERNAME') ?: 'cfdiveuser'),
+    'DB_DATABASE' => (getenv('DB_DATABASE') ?: 'CFDivePlatform'),
+    'DB_PASSWORD' => (getenv('DB_PASSWORD') ?: ''),
+];
+foreach ($map as $key => $val) {
+    $env = preg_replace_callback(
+        '/^' . preg_quote($key, '/') . '=.*$/m',
+        function() use ($key, $val) { return $key . '=' . $val; },
+        $env
+    );
+}
+file_put_contents('/var/www/.env', $env);
+echo "✅ DB config updated\n";
+PHPEOF
+php /tmp/update_env.php
 
 # 執行遷移（如果數據庫已準備好）
 echo "🗄️  執行數據庫遷移..."

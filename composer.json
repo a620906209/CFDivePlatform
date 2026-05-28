@@ -7,7 +7,9 @@
     "require": {
         "php": "^8.2",
         "darkaonline/l5-swagger": "^9.0",
+        "intervention/image": "^3.11",
         "laravel/framework": "^11.0",
+        "laravel/reverb": "^1.10",
         "laravel/sanctum": "^4.1",
         "laravel/socialite": "^5.20",
         "laravel/tinker": "^2.9",

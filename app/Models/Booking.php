@@ -48,4 +48,9 @@ class Booking extends Model
     {
         return $this->belongsTo(User::class, 'member_id');
     }
+
+    public function messages()
+    {
+        return $this->hasMany(BookingMessage::class);
+    }
 }

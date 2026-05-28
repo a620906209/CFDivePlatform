@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '../api/notificationAxios'
+import echo from '../plugins/echo'
 
 export const useNotificationStore = defineStore('notifications', () => {
   const unreadCount   = ref(0)
@@ -10,6 +11,7 @@ export const useNotificationStore = defineStore('notifications', () => {
   let intervalId         = null
   let currentInterval    = null
   let visibilityHandler  = null
+  let privateChannel     = null   // 訂閱 private user channel 用
 
   async function fetchUnreadCount() {
     try {
@@ -76,6 +78,31 @@ export const useNotificationStore = defineStore('notifications', () => {
     isOpen.value        = false
   }
 
+  /**
+   * 訂閱使用者的 private channel，收到 notification.created 立刻更新 bell。
+   * 在 startPolling() 後呼叫，需要傳入 userId。
+   */
+  let realtimeUserId = null
+
+  function startRealtime(userId) {
+    if (!userId) return
+    stopRealtime()   // 防止重複訂閱
+    realtimeUserId = userId
+    privateChannel = echo
+      .private(`App.Models.User.${userId}`)
+      .listen('.notification.created', () => {
+        fetchUnreadCount()
+      })
+  }
+
+  function stopRealtime() {
+    if (realtimeUserId) {
+      echo.leave(`App.Models.User.${realtimeUserId}`)
+      realtimeUserId = null
+      privateChannel = null
+    }
+  }
+
   async function markRead(id) {
     const n = notifications.value.find(n => n.id === id)
     if (n && !n.read_at) {
@@ -110,6 +137,7 @@ export const useNotificationStore = defineStore('notifications', () => {
     unreadCount, notifications, isOpen,
     fetchNotifications, fetchUnreadCount,
     startPolling, stopPolling,
+    startRealtime, stopRealtime,
     markRead, markAllRead, remove,
   }
 })
