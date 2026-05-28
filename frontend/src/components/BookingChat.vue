@@ -170,15 +170,24 @@ function subscribeChannel() {
     })
 }
 
+function handleReconnected() {
+  if (!isConfirmed.value) return
+  echo.leave(`booking.${props.bookingId}`)
+  channel.value = null
+  subscribeChannel()
+}
+
 onMounted(async () => {
   await requestBrowserNotificationPermission()
   await loadHistory()
   if (isConfirmed.value) {
     subscribeChannel()
+    echo.connector.pusher.connection.bind('reconnected', handleReconnected)
   }
 })
 
 onUnmounted(() => {
+  echo.connector.pusher.connection.unbind('reconnected', handleReconnected)
   if (channel.value) {
     channel.value.whisper('presence', { user_type: props.currentUserType, online: false })
     echo.leave(`booking.${props.bookingId}`)

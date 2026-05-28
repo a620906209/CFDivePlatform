@@ -29,8 +29,8 @@ export const useCoachAuthStore = defineStore('coachAuth', () => {
     localStorage.setItem('coach_user', JSON.stringify(userData))
     const ns = useNotificationStore()
     ns.startPolling()
-    ns.startRealtime(userData.id)
     updateEchoToken()
+    ns.startRealtime(userData.id)
   }
 
   async function logout() {
