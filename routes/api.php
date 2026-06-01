@@ -38,6 +38,8 @@ Route::get('/auth/google/callback', [\App\Http\Controllers\API\SocialAuthControl
 Route::middleware(['auth:sanctum'])->prefix('member')->group(function () {
     // 會員登出
     Route::post('/logout', [AuthController::class, 'logoutMember']);
+    // Token Refresh
+    Route::post('/refresh', [AuthController::class, 'refreshMember']);
     // 取得會員個人資料
     Route::get('/profile', [AuthController::class, 'memberProfile']);
     // 更新會員個人資料
@@ -66,6 +68,8 @@ Route::middleware('throttle:5,1')->post('/provider/login', [AuthController::clas
 Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
     // 服務提供者登出
     Route::post('/logout', [AuthController::class, 'logoutProvider']);
+    // Token Refresh
+    Route::post('/refresh', [AuthController::class, 'refreshProvider']);
     // 取得服務提供者資料
     Route::get('/profile', [AuthController::class, 'providerProfile']);
     // 更新服務提供者資料
@@ -104,6 +108,8 @@ Route::middleware('throttle:3,1')->post('/admin/login', [AuthController::class, 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // 管理員登出
     Route::post('/logout', [AuthController::class, 'logoutAdmin']);
+    // Token Refresh
+    Route::post('/refresh', [AuthController::class, 'refreshAdmin']);
     // 取得管理員個人資料
     Route::get('/profile', [AuthController::class, 'adminProfile']);
     // 更新管理員個人資料

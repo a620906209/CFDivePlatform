@@ -4,7 +4,7 @@ import Pusher from 'pusher-js'
 window.Pusher = Pusher
 
 function getAuthToken() {
-    return localStorage.getItem('coach_token') || localStorage.getItem('token') || null
+    return sessionStorage.getItem('coach_token') || sessionStorage.getItem('token') || null
 }
 
 const echo = new Echo({
