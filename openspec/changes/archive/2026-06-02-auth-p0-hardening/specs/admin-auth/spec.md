@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: 管理員登入
 後端 SHALL 提供 `POST /api/admin/login`（現有 AuthController 方法），驗證 email/password 並確認 role=admin，回傳有效期 7 天的 Bearer token。
@@ -15,25 +15,7 @@
 - **WHEN** 同一 IP 在 1 分鐘內送出超過 3 次登入請求
 - **THEN** 回傳 HTTP 429，帶有 `Retry-After` header
 
----
-
-### Requirement: 管理員登出
-後端 SHALL 提供 `POST /api/admin/logout`（需 Bearer token），撤銷當前 token。
-
-#### Scenario: 登出成功
-- **WHEN** 已登入管理員送出登出請求
-- **THEN** 回傳 HTTP 200，`{ status: true, message: "..." }`，token 失效
-
----
-
-### Requirement: 管理員個人資料
-後端 SHALL 提供 `GET /api/admin/profile`（需 Bearer token），回傳管理員基本資訊與 AdminProfile。
-
-#### Scenario: 取得個人資料
-- **WHEN** 已登入管理員送出 GET 請求
-- **THEN** 回傳 HTTP 200，包含 name / email / role / adminProfile（position / department）
-
----
+## ADDED Requirements
 
 ### Requirement: 管理員 Bearer Token 有效期
 後端 SHALL 發行有效期為 7 天的管理員 Bearer Token，過期後需重新登入。
