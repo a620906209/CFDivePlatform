@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable(); // 驗證郵件時間
             $table->string('password'); // 密碼
             $table->string('phone')->nullable(); // 電話號碼，可為空
-            $table->enum('role', ['admin', 'coach', 'member'])->default('member'); // 角色：管理員、教練、會員
+            $table->enum('role', ['admin', 'coach', 'member', 'provider'])->default('member'); // 角色：管理員、教練、會員、服務提供者
             $table->boolean('is_active')->default(true); // 是否啟用
             $table->rememberToken(); // 記住我 token
             $table->timestamps(); // 建立與更新時間

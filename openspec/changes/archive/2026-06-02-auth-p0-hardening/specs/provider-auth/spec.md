@@ -1,0 +1,33 @@
+## MODIFIED Requirements
+
+### Requirement: 教練帳號登入
+後端 SHALL 提供 `POST /api/provider/login`，驗證 email/password 並回傳 Sanctum Bearer token，僅限 role=provider 帳號。回傳的 token 有效期為 7 天。
+
+#### Scenario: 正確帳密登入成功
+- **WHEN** 教練送出正確的 email 與 password
+- **THEN** 回傳 HTTP 200，包含 `{ status: true, data: { user, token, token_type: "Bearer" } }`
+
+#### Scenario: 錯誤帳密登入失敗
+- **WHEN** 教練送出錯誤的 email 或 password
+- **THEN** 回傳 HTTP 401，`{ status: false, message: "帳號或密碼錯誤" }`
+
+#### Scenario: 會員帳號無法用教練登入
+- **WHEN** role=member 的帳號嘗試呼叫 `/api/provider/login`
+- **THEN** 回傳 HTTP 403，`{ status: false, message: "此帳號非教練角色" }`
+
+#### Scenario: 超過登入頻率限制
+- **WHEN** 同一 IP 在 1 分鐘內送出超過 5 次登入請求
+- **THEN** 回傳 HTTP 429，帶有 `Retry-After` header
+
+## ADDED Requirements
+
+### Requirement: Bearer Token 有效期
+後端 SHALL 發行有效期為 7 天的 Sanctum Bearer Token，過期後使用者必須重新登入。
+
+#### Scenario: Token 過期後請求被拒絕
+- **WHEN** 教練使用已過期（超過 7 天）的 token 送出 API 請求
+- **THEN** 回傳 HTTP 401，token 視為無效
+
+#### Scenario: 有效期內 token 正常運作
+- **WHEN** 教練使用未過期的 token 送出 API 請求
+- **THEN** 請求正常通過認證

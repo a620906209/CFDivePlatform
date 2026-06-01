@@ -106,9 +106,9 @@ class SocialAuthController extends Controller
             // 生成 Sanctum token
             $token = $user->createToken('google-auth')->plainTextToken;
 
-            return redirect(env('FRONTEND_URL') . '/auth/callback?token=' . $token);
+            return redirect(config('app.frontend_url') . '/auth/callback#token=' . $token);
         } catch (\Exception $e) {
-            return redirect(env('FRONTEND_URL') . '/login?error=oauth_failed');
+            return redirect(config('app.frontend_url') . '/login?error=oauth_failed');
         }
     }
 }

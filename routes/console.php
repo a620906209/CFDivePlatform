@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('app:expire-pending-bookings')->hourly();
 Schedule::command('app:complete-finished-bookings')->dailyAt('00:05');
+Schedule::command('sanctum:prune-expired --hours=168')->daily();
