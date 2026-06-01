@@ -6,26 +6,75 @@ const coachApi = axios.create({
 })
 
 coachApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('coach_token')
+  const token = sessionStorage.getItem('coach_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
 
+let isRefreshing   = false
+let isRedirecting  = false
+let pendingRequests = []
+
+function resolvePending(token) {
+  pendingRequests.forEach((cb) => cb(token))
+  pendingRequests = []
+}
+
+function rejectPending(error) {
+  pendingRequests.forEach((cb) => cb(null, error))
+  pendingRequests = []
+}
+
 coachApi.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (
-      error.response?.status === 401 &&
-      !error.config.url.includes('/login') &&
-      !error.config.url.includes('/register')
-    ) {
-      localStorage.removeItem('coach_token')
-      localStorage.removeItem('coach_user')
-      window.location.href = '/coach/login'
+  async (error) => {
+    const config = error.config
+    const status = error.response?.status
+
+    const isAuthEndpoint =
+      config.url.includes('/login') ||
+      config.url.includes('/register') ||
+      config.url.includes('/refresh')
+
+    if (status !== 401 || isAuthEndpoint || config._retry) {
+      return Promise.reject(error)
     }
-    return Promise.reject(error)
+
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        pendingRequests.push((token, err) => {
+          if (err) return reject(err)
+          config.headers.Authorization = `Bearer ${token}`
+          resolve(coachApi(config))
+        })
+      })
+    }
+
+    config._retry = true
+    isRefreshing = true
+
+    try {
+      const { data } = await coachApi.post('/provider/refresh')
+      const newToken = data.data.token
+      sessionStorage.setItem('coach_token', newToken)
+      coachApi.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+      resolvePending(newToken)
+      config.headers.Authorization = `Bearer ${newToken}`
+      return coachApi(config)
+    } catch {
+      rejectPending(error)
+      if (!isRedirecting) {
+        isRedirecting = true
+        sessionStorage.removeItem('coach_token')
+        sessionStorage.removeItem('coach_user')
+        window.location.href = '/coach/login'
+      }
+      return Promise.reject(error)
+    } finally {
+      isRefreshing = false
+    }
   }
 )
 

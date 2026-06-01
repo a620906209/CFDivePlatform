@@ -1052,6 +1052,63 @@ class AuthController extends Controller
     }
 
     /**
+     * 會員 Token Refresh
+     */
+    public function refreshMember(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+        if ($user->role !== self::ROLE_MEMBER) {
+            return $this->getUnauthorizedResponse();
+        }
+
+        $request->user()->currentAccessToken()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'data'   => ['token' => $token, 'token_type' => 'Bearer'],
+        ]);
+    }
+
+    /**
+     * 服務提供者 Token Refresh
+     */
+    public function refreshProvider(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+        if ($user->role !== self::ROLE_PROVIDER) {
+            return $this->getUnauthorizedResponse();
+        }
+
+        $request->user()->currentAccessToken()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'data'   => ['token' => $token, 'token_type' => 'Bearer'],
+        ]);
+    }
+
+    /**
+     * 管理員 Token Refresh
+     */
+    public function refreshAdmin(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+        if ($user->role !== self::ROLE_ADMIN) {
+            return $this->getUnauthorizedResponse();
+        }
+
+        $request->user()->currentAccessToken()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'data'   => ['token' => $token, 'token_type' => 'Bearer'],
+        ]);
+    }
+
+    /**
      * 查詢會員資料
      * 只有管理員可以使用這個方法
      */

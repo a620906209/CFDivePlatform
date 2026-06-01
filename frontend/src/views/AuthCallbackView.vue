@@ -18,7 +18,7 @@ onMounted(async () => {
   }
 
   // 存 token 先，再拉 profile
-  localStorage.setItem('token', token)
+  sessionStorage.setItem('token', token)
   try {
     const res = await api.get('/member/profile')
     auth.setAuth(res.data.data, token)

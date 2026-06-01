@@ -25,6 +25,7 @@ export const useNotificationStore = defineStore('notifications', () => {
         }
       }
     } catch (e) {
+      if (e?.response?.status === 401) { stopPolling(); return }
       console.error('[NotificationStore] fetchUnreadCount failed:', e?.response?.status, e?.message)
     }
   }
@@ -35,6 +36,7 @@ export const useNotificationStore = defineStore('notifications', () => {
       notifications.value = res.data.data
       unreadCount.value   = res.data.unread_count
     } catch (e) {
+      if (e?.response?.status === 401) { stopPolling(); return }
       console.error('[NotificationStore] fetchNotifications failed:', e?.response?.status, e?.message)
     }
   }

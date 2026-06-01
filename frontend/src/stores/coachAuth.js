@@ -11,8 +11,8 @@ export const useCoachAuthStore = defineStore('coachAuth', () => {
   const isLoggedIn = computed(() => !!token.value)
 
   function init() {
-    const savedToken = localStorage.getItem('coach_token')
-    const savedUser  = localStorage.getItem('coach_user')
+    const savedToken = sessionStorage.getItem('coach_token')
+    const savedUser  = sessionStorage.getItem('coach_user')
     if (savedToken) {
       token.value = savedToken
       user.value  = savedUser ? JSON.parse(savedUser) : null
@@ -25,8 +25,8 @@ export const useCoachAuthStore = defineStore('coachAuth', () => {
   function setAuth(userData, tokenValue) {
     user.value  = userData
     token.value = tokenValue
-    localStorage.setItem('coach_token', tokenValue)
-    localStorage.setItem('coach_user', JSON.stringify(userData))
+    sessionStorage.setItem('coach_token', tokenValue)
+    sessionStorage.setItem('coach_user', JSON.stringify(userData))
     const ns = useNotificationStore()
     ns.startPolling()
     updateEchoToken()
@@ -42,8 +42,8 @@ export const useCoachAuthStore = defineStore('coachAuth', () => {
     ns.stopPolling()
     user.value  = null
     token.value = null
-    localStorage.removeItem('coach_token')
-    localStorage.removeItem('coach_user')
+    sessionStorage.removeItem('coach_token')
+    sessionStorage.removeItem('coach_user')
   }
 
   return { user, token, isLoggedIn, init, setAuth, logout }
