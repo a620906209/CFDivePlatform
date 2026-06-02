@@ -30,9 +30,11 @@ Route::get('/diving-offers/{id}/reviews',  [ReviewController::class, 'publicList
 Route::post('/member/register', [AuthController::class, 'registerMember']);
 Route::middleware('throttle:10,1')->post('/member/login', [AuthController::class, 'loginMember']);
 
-// Google 第三方登入（僅會員）
-Route::get('/auth/google/redirect', [\App\Http\Controllers\API\SocialAuthController::class, 'redirectToGoogle']);
-Route::get('/auth/google/callback', [\App\Http\Controllers\API\SocialAuthController::class, 'handleGoogleCallback']);
+// Google 第三方登入（僅會員）— 需要 StartSession 支援 OAuth state
+Route::middleware([\Illuminate\Session\Middleware\StartSession::class])->group(function () {
+    Route::get('/auth/google/redirect', [\App\Http\Controllers\API\SocialAuthController::class, 'redirectToGoogle']);
+    Route::get('/auth/google/callback', [\App\Http\Controllers\API\SocialAuthController::class, 'handleGoogleCallback']);
+});
 
 // 會員專屬 API（需登入）
 Route::middleware(['auth:sanctum'])->prefix('member')->group(function () {
