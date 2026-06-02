@@ -7,15 +7,19 @@ use App\Models\User;
 use App\Models\AdminProfile;
 use App\Models\ProviderProfile;
 use App\Models\MemberProfile;
+use App\Traits\NormalizesEmail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
 
 class AuthController extends Controller
 {
-    // 科定規範角色
+    use NormalizesEmail;
+
     private const ROLE_MEMBER = 'member';
     private const ROLE_PROVIDER = 'provider';
     private const ROLE_ADMIN = 'admin';
@@ -131,6 +135,50 @@ class AuthController extends Controller
         ]);
     }
     
+    private function isAccountLocked(string $role, string $email): bool
+    {
+        $count = Cache::get("login_failures:{$role}:{$email}", 0);
+        return $count >= config('auth_lockout.max_attempts');
+    }
+
+    private function recordLoginFailure(string $role, string $email): int
+    {
+        $ttl      = config('auth_lockout.decay_minutes') * 60;
+        $countKey = "login_failures:{$role}:{$email}";
+        $expiresKey = "login_expires_at:{$role}:{$email}";
+
+        if (!Cache::has($countKey)) {
+            Cache::put($countKey, 1, $ttl);
+            Cache::put($expiresKey, now()->addSeconds($ttl)->toIso8601String(), $ttl);
+            return 1;
+        }
+
+        return Cache::increment($countKey);
+    }
+
+    private function clearLoginFailures(string $role, string $email): void
+    {
+        Cache::forget("login_failures:{$role}:{$email}");
+        Cache::forget("login_expires_at:{$role}:{$email}");
+    }
+
+    private function buildLockedResponse(string $role, string $email): \Illuminate\Http\JsonResponse
+    {
+        $decayMinutes = config('auth_lockout.decay_minutes');
+        $lockedUntil  = Cache::get("login_expires_at:{$role}:{$email}");
+
+        if (!$lockedUntil) {
+            Log::warning("auth_lockout: expires_at key missing for {$role}:{$email}");
+            $lockedUntil = now()->addMinutes($decayMinutes)->toIso8601String();
+        }
+
+        return response()->json([
+            'status'       => false,
+            'message'      => "帳號已暫時鎖定，請於 {$decayMinutes} 分鐘後再試",
+            'locked_until' => $lockedUntil,
+        ], 423);
+    }
+
     /**
      * 標準化的登出方法
      */
@@ -268,53 +316,60 @@ class AuthController extends Controller
  */
     public function loginMember(Request $request)
     {
-        // 驗證請求數據
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
+            'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => '驗證失敗',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 422);
         }
 
-        // 檢查用戶是否存在
-        $user = User::where('email', $request->email)
-                   ->where('role', 'member') // 只驗證會員
-                   ->first();
+        $email = $this->normalizeEmail($request->email);
 
-        // 檢查密碼
+        // 1st: 帳號鎖定檢查
+        if ($this->isAccountLocked(self::ROLE_MEMBER, $email)) {
+            return $this->buildLockedResponse(self::ROLE_MEMBER, $email);
+        }
+
+        // 2nd: 帳號存在確認
+        $user = User::where('email', $email)->where('role', self::ROLE_MEMBER)->first();
+
+        // 3rd: 密碼驗證（帳號不存在與密碼錯誤回傳相同訊息）
         if (!$user || !Hash::check($request->password, $user->password)) {
+            if ($user) {
+                $count = $this->recordLoginFailure(self::ROLE_MEMBER, $email);
+                if ($count >= config('auth_lockout.max_attempts')) {
+                    return $this->buildLockedResponse(self::ROLE_MEMBER, $email);
+                }
+            }
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => '電子郵件或密碼錯誤'
             ], 401);
         }
 
-        // 檢查用戶是否啟用
         if (!$user->is_active) {
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => '帳號已被停用'
             ], 403);
         }
 
-        // 創建 API token
+        $this->clearLoginFailures(self::ROLE_MEMBER, $email);
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        // 加載會員資料
         $user->load('memberProfile');
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => '登入成功',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
+            'data'    => [
+                'user'       => $user,
+                'token'      => $token,
                 'token_type' => 'Bearer',
             ]
         ]);
@@ -531,53 +586,60 @@ class AuthController extends Controller
  */
     public function loginProvider(Request $request)
     {
-        // 驗證請求數據
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
+            'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => '驗證失敗',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 422);
         }
 
-        // 檢查用戶是否存在
-        $user = User::where('email', $request->email)
-                   ->where('role', 'provider') // 只驗證服務提供者
-                   ->first();
+        $email = $this->normalizeEmail($request->email);
 
-        // 檢查密碼
+        // 1st: 帳號鎖定檢查
+        if ($this->isAccountLocked(self::ROLE_PROVIDER, $email)) {
+            return $this->buildLockedResponse(self::ROLE_PROVIDER, $email);
+        }
+
+        // 2nd: 帳號存在確認
+        $user = User::where('email', $email)->where('role', self::ROLE_PROVIDER)->first();
+
+        // 3rd: 密碼驗證（帳號不存在與密碼錯誤回傳相同訊息）
         if (!$user || !Hash::check($request->password, $user->password)) {
+            if ($user) {
+                $count = $this->recordLoginFailure(self::ROLE_PROVIDER, $email);
+                if ($count >= config('auth_lockout.max_attempts')) {
+                    return $this->buildLockedResponse(self::ROLE_PROVIDER, $email);
+                }
+            }
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => '電子郵件或密碼錯誤'
             ], 401);
         }
 
-        // 檢查用戶是否啟用
         if (!$user->is_active) {
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => '帳號已被停用'
             ], 403);
         }
 
-        // 創建 API token
+        $this->clearLoginFailures(self::ROLE_PROVIDER, $email);
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        // 加載服務提供者資料
         $user->load('providerProfile');
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => '登入成功',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
+            'data'    => [
+                'user'       => $user,
+                'token'      => $token,
                 'token_type' => 'Bearer',
             ]
         ]);

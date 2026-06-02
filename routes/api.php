@@ -28,7 +28,7 @@ Route::get('/diving-offers/{id}/reviews',  [ReviewController::class, 'publicList
 
 // 會員註冊／登入
 Route::post('/member/register', [AuthController::class, 'registerMember']);
-Route::middleware('throttle:5,1')->post('/member/login', [AuthController::class, 'loginMember']);
+Route::middleware('throttle:10,1')->post('/member/login', [AuthController::class, 'loginMember']);
 
 // Google 第三方登入（僅會員）
 Route::get('/auth/google/redirect', [\App\Http\Controllers\API\SocialAuthController::class, 'redirectToGoogle']);
@@ -62,7 +62,7 @@ Route::middleware('auth:sanctum')->post('/reviews/{id}/helpful', [ReviewControll
 
 // 服務提供者註冊／登入
 Route::post('/provider/register', [AuthController::class, 'registerProvider']);
-Route::middleware('throttle:5,1')->post('/provider/login', [AuthController::class, 'loginProvider']);
+Route::middleware('throttle:10,1')->post('/provider/login', [AuthController::class, 'loginProvider']);
 
 // 服務提供者專屬 API（需登入）
 Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
