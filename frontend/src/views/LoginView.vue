@@ -14,7 +14,7 @@ const error    = ref('')
 const loading  = ref(false)
 
 const oauthError = route.query.error === 'oauth_failed'
-  ? 'Google 登入失敗，請重試。'
+  ? 'OAuth 授權失敗，請重新嘗試'
   : ''
 
 const successMsg = route.query.registered ? '註冊成功，請登入。' : ''
