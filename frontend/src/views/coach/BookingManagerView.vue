@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getProviderBookings, confirmBooking, rejectBooking, cancelBooking, completeBooking } from '../../api/coachBookingApi'
+import BookingChat from '../../components/BookingChat.vue'
+import { useBookingUnreadCounts } from '../../composables/useBookingUnreadCounts'
+import coachApi from '../../api/coachAxios'
 
 const bookings = ref([])
 const loading  = ref(true)
@@ -31,8 +34,23 @@ const groupedByOffer = computed(() => {
 })
 
 const pendingCount = computed(() => bookings.value.filter(b => b.status === 'pending').length)
+const chatExpanded = ref(new Set())
 
-onMounted(fetchBookings)
+const { counts: unreadCounts, clearCount, startPolling } = useBookingUnreadCounts(coachApi)
+
+function toggleChat(id) {
+  if (chatExpanded.value.has(id)) chatExpanded.value.delete(id)
+  else chatExpanded.value.add(id)
+}
+
+function canChat(status) {
+  return status === 'confirmed' || status === 'completed'
+}
+
+onMounted(() => {
+  fetchBookings()
+  startPolling()
+})
 
 async function fetchBookings() {
   loading.value = true
@@ -88,43 +106,68 @@ async function doAction(booking, action) {
           <div
             v-for="b in group"
             :key="b.id"
-            class="bg-white rounded-xl border px-5 py-4 flex items-start justify-between flex-wrap gap-3"
+            class="bg-white rounded-xl border overflow-hidden"
             :class="b.status === 'pending' ? 'border-yellow-200 shadow-sm' : 'border-gray-100'"
           >
-            <div class="min-w-0">
-              <p class="text-sm font-medium text-gray-700">
-                {{ b.scheduled_date }} {{ b.start_time }}
-              </p>
-              <p class="text-sm text-gray-500 mt-0.5">
-                {{ b.member_name }}
-                <span class="text-gray-400">（{{ b.member_email }}）</span>
-                ・{{ b.participants }} 人・NT$ {{ b.total_price?.toLocaleString() }}
-              </p>
-              <p v-if="b.notes" class="text-xs text-gray-400 mt-1">備注：{{ b.notes }}</p>
+            <div class="px-5 py-4 flex items-start justify-between flex-wrap gap-3">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gray-700">
+                  {{ b.scheduled_date }} {{ b.start_time }}
+                </p>
+                <p class="text-sm text-gray-500 mt-0.5">
+                  {{ b.member_name }}
+                  <span class="text-gray-400">（{{ b.member_email }}）</span>
+                  ・{{ b.participants }} 人・NT$ {{ b.total_price?.toLocaleString() }}
+                </p>
+                <p v-if="b.notes" class="text-xs text-gray-400 mt-1">備注：{{ b.notes }}</p>
+              </div>
+
+              <div class="flex flex-col items-end gap-2 shrink-0">
+                <span class="text-xs px-3 py-1 rounded-full font-medium" :class="STATUS_LABEL[b.status]?.color">
+                  {{ STATUS_LABEL[b.status]?.text || b.status }}
+                </span>
+                <div class="flex gap-2 flex-wrap justify-end">
+                  <button v-if="b.status === 'pending'" @click="doAction(b, 'confirm')"
+                    class="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-full transition">
+                    確認
+                  </button>
+                  <button v-if="b.status === 'pending'" @click="doAction(b, 'reject')"
+                    class="text-xs bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded-full transition">
+                    拒絕
+                  </button>
+                  <button v-if="b.status === 'confirmed'" @click="doAction(b, 'complete')"
+                    class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-full transition">
+                    完成
+                  </button>
+                  <button v-if="b.status === 'confirmed'" @click="doAction(b, 'cancel')"
+                    class="text-xs text-orange-500 hover:text-orange-700 underline">
+                    取消
+                  </button>
+                  <button v-if="canChat(b.status)" @click="toggleChat(b.id)"
+                    class="relative text-xs border px-3 py-1 rounded-full transition"
+                    :class="chatExpanded.has(b.id)
+                      ? 'border-blue-400 text-blue-600'
+                      : 'border-gray-300 hover:border-blue-400 hover:text-blue-600 text-gray-600'"
+                  >
+                    {{ chatExpanded.has(b.id) ? '收起訊息' : '訊息' }}
+                    <!-- 未讀紅點 -->
+                    <span
+                      v-if="(unreadCounts[b.id] ?? 0) > 0 && !chatExpanded.has(b.id)"
+                      class="absolute -top-1 -right-1 min-w-[1rem] h-4 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5"
+                    >{{ unreadCounts[b.id] }}</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div class="flex flex-col items-end gap-2 shrink-0">
-              <span class="text-xs px-3 py-1 rounded-full font-medium" :class="STATUS_LABEL[b.status]?.color">
-                {{ STATUS_LABEL[b.status]?.text || b.status }}
-              </span>
-              <div class="flex gap-2">
-                <button v-if="b.status === 'pending'" @click="doAction(b, 'confirm')"
-                  class="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-full transition">
-                  確認
-                </button>
-                <button v-if="b.status === 'pending'" @click="doAction(b, 'reject')"
-                  class="text-xs bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded-full transition">
-                  拒絕
-                </button>
-                <button v-if="b.status === 'confirmed'" @click="doAction(b, 'complete')"
-                  class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-full transition">
-                  完成
-                </button>
-                <button v-if="b.status === 'confirmed'" @click="doAction(b, 'cancel')"
-                  class="text-xs text-orange-500 hover:text-orange-700 underline">
-                  取消
-                </button>
-              </div>
+            <!-- 即時訊息（confirmed / completed，點擊展開） -->
+            <div v-if="canChat(b.status) && chatExpanded.has(b.id)" class="border-t border-gray-100 p-4">
+              <BookingChat
+                :bookingId="b.id"
+                :bookingStatus="b.status"
+                currentUserType="provider"
+                @read="clearCount(b.id)"
+              />
             </div>
           </div>
         </div>

@@ -48,6 +48,8 @@ services:
     image: nginx:alpine
     container_name: cfdive-nginx
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
     volumes:
       - ./:/var/www
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
@@ -68,10 +70,16 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-https://api.hank-spack.com}
+        VITE_API_URL: ${VITE_API_URL:-https://api.hank-space.com}
+        VITE_REVERB_APP_KEY: ${VITE_REVERB_APP_KEY}
+        VITE_REVERB_HOST: ${VITE_REVERB_HOST:-localhost}
+        VITE_REVERB_PORT: ${VITE_REVERB_PORT:-8085}
+        VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME:-http}
     image: cfdive-frontend
     container_name: cfdive-frontend
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:5173:80"
     networks:
       - cfdive-network
       - proxy_net
@@ -97,6 +105,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+    ports:
+      - "127.0.0.1:3306:3306" # 只綁 localhost，不對外
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -153,6 +163,37 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  reverb:
+    image: cfdive-platform
+    container_name: cfdive-reverb
+    restart: unless-stopped
+    working_dir: /var/www/
+    entrypoint: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+    ports:
+      - "127.0.0.1:8085:8080"
+    volumes:
+      - ./:/var/www
+    environment:
+      - APP_KEY=${APP_KEY}
+      - REVERB_APP_ID=${REVERB_APP_ID}
+      - REVERB_APP_KEY=${REVERB_APP_KEY}
+      - REVERB_APP_SECRET=${REVERB_APP_SECRET}
+      - REVERB_HOST=reverb
+      - REVERB_PORT=8080
+      - REDIS_HOST=redis
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-CFDivePlatform}
+      - DB_USERNAME=${DB_USERNAME:-cfdiveuser}
+      - DB_PASSWORD=${DB_PASSWORD}
+    networks:
+      - cfdive-network
+      - proxy_net
+    depends_on:
+      app:
+        condition: service_healthy
 
 networks:
   cfdive-network:

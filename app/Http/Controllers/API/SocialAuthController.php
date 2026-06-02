@@ -18,11 +18,19 @@ class SocialAuthController extends Controller
      */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')
+        $state = bin2hex(random_bytes(32));
+        session()->put('oauth_state', $state);
+
+        $redirect = Socialite::driver('google')
             ->scopes(['openid', 'profile', 'email'])
-            ->with(['access_type' => 'offline', 'prompt' => 'consent']) // 這裡要求 prompt=consent 才能每次都獲取 refresh token
-            ->stateless()
+            ->with(['access_type' => 'offline', 'prompt' => 'consent', 'state' => $state])
             ->redirect();
+
+        // Socialite 在 redirect() 內自己寫了一個 random state 進 session('state')。
+        // 用我們的 state 覆蓋，確保 user() 的內建驗證與 URL 中的 state 一致。
+        session()->put('state', $state);
+
+        return $redirect;
     }
 
     /**
@@ -30,9 +38,16 @@ class SocialAuthController extends Controller
      */
     public function handleGoogleCallback(Request $request)
     {
+        $requestState = $request->input('state');
+        $sessionState = session()->pull('oauth_state');
+
+        if (!$requestState || !$sessionState || !hash_equals($sessionState, $requestState)) {
+            return redirect(config('app.frontend_url') . '/login?error=oauth_failed');
+        }
+
         try {
-            // 獲取 Google 用戶資訊
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            // 獲取 Google 用戶資訊（Socialite 內建 state 驗證此時也會通過）
+            $googleUser = Socialite::driver('google')->user();
 
             // 查找相關的社交帳號
             $socialAccount = SocialAccount::where('provider', 'google')
@@ -106,9 +121,9 @@ class SocialAuthController extends Controller
             // 生成 Sanctum token
             $token = $user->createToken('google-auth')->plainTextToken;
 
-            return redirect(env('FRONTEND_URL') . '/auth/callback?token=' . $token);
+            return redirect(config('app.frontend_url') . '/auth/callback#token=' . $token);
         } catch (\Exception $e) {
-            return redirect(env('FRONTEND_URL') . '/login?error=oauth_failed');
+            return redirect(config('app.frontend_url') . '/login?error=oauth_failed');
         }
     }
 }

@@ -10,8 +10,8 @@ notificationApi.interceptors.request.use((config) => {
   // 兩者都存在時（測試情境），以當前頁面路徑決定：/coach 開頭用 coach_token，其餘用 token
   const isCoachPage = window.location.pathname.startsWith('/coach')
   const token = isCoachPage
-    ? (localStorage.getItem('coach_token') || localStorage.getItem('token'))
-    : (localStorage.getItem('token') || localStorage.getItem('coach_token'))
+    ? (sessionStorage.getItem('coach_token') || sessionStorage.getItem('token'))
+    : (sessionStorage.getItem('token') || sessionStorage.getItem('coach_token'))
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

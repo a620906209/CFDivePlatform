@@ -9,7 +9,7 @@ const route  = useRoute()
 const auth   = useAuthStore()
 
 onMounted(async () => {
-  const token = route.query.token
+  const token = new URLSearchParams(window.location.hash.substring(1)).get('token')
   const error = route.query.error
 
   if (error || !token) {
@@ -18,7 +18,7 @@ onMounted(async () => {
   }
 
   // 存 token 先，再拉 profile
-  localStorage.setItem('token', token)
+  sessionStorage.setItem('token', token)
   try {
     const res = await api.get('/member/profile')
     auth.setAuth(res.data.data, token)

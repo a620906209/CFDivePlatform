@@ -6,6 +6,7 @@ import router from './router'
 import { useAuthStore } from './stores/auth'
 import { useCoachAuthStore } from './stores/coachAuth'
 import { useAdminAuthStore } from './stores/adminAuth'
+import echo from './plugins/echo'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -19,4 +20,5 @@ useCoachAuthStore().init()
 useAdminAuthStore().init()
 
 app.use(router)
+app.config.globalProperties.$echo = echo
 app.mount('#app')

@@ -1,0 +1,47 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Pull latest code
+        run: |
+          cd /root/myproject/CFDivePlatform
+          flock /tmp/cfdive-deploy.lock git fetch origin
+          git reset --hard origin/master
+
+      - name: Install Composer dependencies
+        run: |
+          cd /root/myproject/CFDivePlatform
+          docker compose exec -T app composer install --no-dev --optimize-autoloader
+
+      - name: Run migrations
+        run: |
+          cd /root/myproject/CFDivePlatform
+          docker compose exec -T app php artisan migrate --force
+
+      - name: Cache configs
+        run: |
+          cd /root/myproject/CFDivePlatform
+          docker compose exec -T app php artisan config:cache
+          docker compose exec -T app php artisan route:cache
+          docker compose exec -T app php artisan view:cache
+          docker compose exec -T app php artisan event:cache
+
+      - name: Restart queue worker
+        run: |
+          cd /root/myproject/CFDivePlatform
+          docker compose restart queue-worker
+
+      - name: Rebuild frontend (if changed)
+        run: |
+          cd /root/myproject/CFDivePlatform
+          if git diff --name-only HEAD~1 HEAD | grep -q '^frontend/'; then
+            docker compose build frontend
+            docker compose up -d frontend
+          fi

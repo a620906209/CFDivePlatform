@@ -1,11 +1,16 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getMyBookings, cancelBooking } from '../api/bookingApi'
+import BookingChat from '../components/BookingChat.vue'
+import { useBookingUnreadCounts } from '../composables/useBookingUnreadCounts'
+import api from '../api/axios'
 
 const bookings = ref([])
 const loading  = ref(true)
 const error    = ref('')
 const expanded = ref(new Set())
+
+const { counts: unreadCounts, clearCount, startPolling } = useBookingUnreadCounts(api)
 
 const STATUS_LABEL = {
   pending:            { text: '待教練確認', color: 'bg-yellow-100 text-yellow-700', hint: '等待教練確認中，確認後才完成預約' },
@@ -26,6 +31,7 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+  startPolling()
 })
 
 function toggle(id) {
@@ -84,6 +90,16 @@ function formatDate(dateStr) {
             </p>
           </div>
           <div class="flex items-center gap-3 shrink-0">
+            <!-- 未讀訊息角標 -->
+            <span
+              v-if="(unreadCounts[b.id] ?? 0) > 0"
+              class="flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full leading-none"
+            >
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+              {{ unreadCounts[b.id] }}
+            </span>
             <span class="text-xs px-3 py-1 rounded-full font-medium" :class="STATUS_LABEL[b.status]?.color">
               {{ STATUS_LABEL[b.status]?.text || b.status }}
             </span>
@@ -140,6 +156,15 @@ function formatDate(dateStr) {
               <p class="text-gray-500 text-xs">{{ b.created_at ? new Date(b.created_at).toLocaleString('zh-TW') : '—' }}</p>
             </div>
           </div>
+
+          <!-- 即時訊息（confirmed / completed） -->
+          <BookingChat
+            v-if="b.status === 'confirmed' || b.status === 'completed'"
+            :bookingId="b.id"
+            :bookingStatus="b.status"
+            currentUserType="member"
+            @read="clearCount(b.id)"
+          />
 
           <!-- 操作按鈕列 -->
           <div class="flex items-center justify-between pt-1">

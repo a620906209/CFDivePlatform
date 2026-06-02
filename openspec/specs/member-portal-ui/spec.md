@@ -75,6 +75,27 @@
 - **WHEN** 使用者點擊「以 Google 登入」按鈕
 - **THEN** 瀏覽器導航至後端 `GET /api/auth/google/redirect`，開始 OAuth 流程
 
+#### Scenario: 超過登入頻率限制
+- **WHEN** 同一 IP 在 1 分鐘內送出超過 5 次登入請求
+- **THEN** 前端顯示適當的錯誤訊息（對應後端回傳的 HTTP 429）
+
+---
+
+### Requirement: Google OAuth Callback 處理
+前端 SHALL 在 `/auth/callback` 路由讀取 URL fragment（`#token=<value>`）取得 Sanctum token，完成 OAuth 登入後將 token 存入 localStorage 並導航至 `/courses`。token 不得透過 URL query string 傳遞。
+
+#### Scenario: OAuth callback 成功取得 token
+- **WHEN** 後端 OAuth callback redirect 到 `/auth/callback#token=<token>`
+- **THEN** 前端從 `window.location.hash` 解析 token，呼叫 `/api/member/profile` 取得使用者資料，呼叫 `auth.setAuth()` 儲存認證狀態，並導航至 `/courses`
+
+#### Scenario: OAuth callback 缺少 token
+- **WHEN** redirect 到 `/auth/callback` 但 hash 中無 `token` 參數
+- **THEN** 前端導航至 `/login?error=oauth_failed`，顯示錯誤訊息
+
+#### Scenario: URL 中不留存 token
+- **WHEN** callback 頁面成功處理 token 後
+- **THEN** 瀏覽器網址列不顯示 token（使用 `history.replaceState` 清除 hash）
+
 ---
 
 ### Requirement: 註冊頁
@@ -108,12 +129,20 @@
 ---
 
 ### Requirement: 認證狀態管理
-前端 SHALL 使用 Pinia store 管理認證狀態，token 持久化至 localStorage，並在所有需認證的 API 請求自動附加 Bearer token。
+前端 SHALL 使用 Pinia store 管理認證狀態，token 存於 sessionStorage（非 localStorage），並在所有需認證的 API 請求自動附加 Bearer token。收到 401 時先嘗試 refresh，成功後 retry；refresh 失敗才清除 session 並導向登入頁。
 
 #### Scenario: 頁面刷新後保持登入狀態
-- **WHEN** 已登入使用者重新整理頁面
-- **THEN** 從 localStorage 還原 token，使用者仍為登入狀態
+- **WHEN** 已登入使用者在同一分頁重新整理頁面
+- **THEN** 從 sessionStorage 還原 token，使用者仍為登入狀態
+
+#### Scenario: 分頁關閉後 token 自動清除
+- **WHEN** 使用者關閉瀏覽器分頁或瀏覽器
+- **THEN** sessionStorage 自動清除，重新開啟需重新登入
+
+#### Scenario: Token 過期後自動 refresh
+- **WHEN** API 請求因 token 過期回傳 401
+- **THEN** 自動呼叫 `POST /api/member/refresh`，成功後 retry 原始請求，使用者無感知
 
 #### Scenario: 登出
 - **WHEN** 使用者點擊登出
-- **THEN** 呼叫 `POST /api/member/logout`，清除 localStorage token，導向 `/login`
+- **THEN** 呼叫 `POST /api/member/logout`，清除 sessionStorage token，導向 `/login`

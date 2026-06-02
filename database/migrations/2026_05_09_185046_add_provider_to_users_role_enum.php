@@ -12,11 +12,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'coach', 'member', 'provider') NOT NULL DEFAULT 'member'");
     }
 
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'coach', 'member') NOT NULL DEFAULT 'member'");
     }
 };
