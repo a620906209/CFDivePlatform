@@ -17,11 +17,11 @@ class AuthRateLimitTest extends TestCase
         Cache::flush();
     }
 
-    // ── member (throttle:5,1) ────────────────────────────────
+    // ── member (throttle:10,1) ───────────────────────────────
 
     public function test_member_login_within_limit_is_not_throttled(): void
     {
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $response = $this->postJson('/api/member/login', [
                 'email'    => 'notexist@example.com',
                 'password' => 'wrong',
@@ -32,7 +32,7 @@ class AuthRateLimitTest extends TestCase
 
     public function test_member_login_exceeds_limit_returns_429(): void
     {
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $this->postJson('/api/member/login', [
                 'email'    => 'notexist@example.com',
                 'password' => 'wrong',
@@ -48,11 +48,11 @@ class AuthRateLimitTest extends TestCase
         $this->assertTrue($response->headers->has('Retry-After'));
     }
 
-    // ── provider (throttle:5,1) ──────────────────────────────
+    // ── provider (throttle:10,1) ─────────────────────────────
 
     public function test_provider_login_exceeds_limit_returns_429(): void
     {
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $this->postJson('/api/provider/login', [
                 'email'    => 'notexist@example.com',
                 'password' => 'wrong',
