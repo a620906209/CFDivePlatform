@@ -52,6 +52,19 @@
 
 ---
 
+### Requirement: 管理員查詢指定用戶資料
+後端 SHALL 提供 `GET /api/admin/check-member/{id}` 與 `GET /api/admin/check-provider/{id}`（需 Bearer token，role=admin），依角色查詢指定用戶的基本資料與對應 profile。
+
+#### Scenario: 查詢存在的用戶
+- **WHEN** 管理員以有效 id 查詢對應角色的用戶
+- **THEN** 回傳 HTTP 200 與該用戶資料
+
+#### Scenario: id 不存在或角色不符
+- **WHEN** 查詢的 id 不存在，或該用戶角色與端點不符（如以 check-member 查 provider）
+- **THEN** 回傳 HTTP 404
+
+---
+
 ### Requirement: 管理員 Bearer Token 有效期
 後端 SHALL 發行有效期為 7 天的管理員 Bearer Token。主動使用 API 的 session 可透過 refresh 端點取得新 token（sliding window）；閒置超過 7 天後需重新登入。
 

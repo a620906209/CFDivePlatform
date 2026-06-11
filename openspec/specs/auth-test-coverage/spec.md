@@ -1,7 +1,7 @@
 # auth-test-coverage Specification
 
 ## Purpose
-TBD - created by archiving change auth-tests. Update Purpose after archive.
+驗證三角色（member / provider / admin）認證流程的測試覆蓋契約：登入／註冊／登出、帳號鎖定（P2）、OAuth state 驗證、token refresh 與登入頻率限制。此規格定義測試套件必須覆蓋的場景，任何認證行為變更時，對應測試必須同步失敗以攔截回歸。
 ## Requirements
 ### Requirement: Auth 登入／註冊／登出測試覆蓋（三角色）
 測試套件 SHALL 對 member、provider、admin 三個角色各自驗證以下場景，確保回歸時能即時偵測。
