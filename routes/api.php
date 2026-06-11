@@ -102,8 +102,7 @@ Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
     Route::put('/bookings/{id}/complete',        [ProviderBookingController::class, 'complete']);
 });
 
-// 管理員註冊／登入
-Route::post('/admin/register', [AuthController::class, 'registerAdmin']);
+// 管理員登入（帳號建立僅限主機端 php artisan app:create-admin，不提供公開註冊）
 Route::middleware('throttle:3,1')->post('/admin/login', [AuthController::class, 'loginAdmin']);
 
 // 管理員專屬 API（需登入）

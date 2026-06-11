@@ -1,5 +1,22 @@
 ## ADDED Requirements
 
+### Requirement: 管理員帳號建立途徑
+管理員帳號 SHALL 僅能透過主機端 `php artisan app:create-admin` command 或資料庫 seeder 建立。系統 MUST NOT 提供任何公開的管理員註冊 HTTP 端點（原 `POST /api/admin/register` 已於 2026-06-11 因 P0 安全漏洞移除）。command 建立的密碼門檻為至少 8 碼，高於一般使用者。
+
+#### Scenario: 公開註冊端點保持關閉
+- **WHEN** 任何人（含未認證請求）送出 `POST /api/admin/register`
+- **THEN** 回傳 HTTP 404，且不建立任何帳號
+
+#### Scenario: 主機端建立管理員成功
+- **WHEN** 操作者於主機執行 `php artisan app:create-admin {name} {email} --password={password}` 且資料合法
+- **THEN** 建立 role=admin 的 User 與對應 AdminProfile
+
+#### Scenario: 密碼過弱或 email 重複
+- **WHEN** command 收到少於 8 碼的密碼或已存在的 email
+- **THEN** command 以失敗結束，不建立任何帳號
+
+---
+
 ### Requirement: 管理員登入
 後端 SHALL 提供 `POST /api/admin/login`（現有 AuthController 方法），驗證 email/password 並確認 role=admin，回傳有效期 7 天的 Bearer token。
 
