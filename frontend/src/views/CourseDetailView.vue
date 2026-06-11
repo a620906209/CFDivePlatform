@@ -147,7 +147,7 @@ async function submitBooking() {
           target="_blank"
           class="w-24 h-20 rounded-xl overflow-hidden shrink-0 border-2 border-transparent hover:border-ocean-400 transition"
         >
-          <img :src="img.url" class="w-full h-full object-cover" />
+          <img :src="img.url" loading="lazy" class="w-full h-full object-cover" />
         </a>
       </div>
 

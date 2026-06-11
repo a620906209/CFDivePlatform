@@ -14,6 +14,7 @@ defineProps({
         v-if="offer.cover_image_url"
         :src="offer.cover_image_url"
         :alt="offer.title"
+        loading="lazy"
         class="w-full h-full object-cover"
       />
       <div v-else class="bg-gradient-to-br from-ocean-700 to-ocean-500 h-full flex items-center justify-center text-white text-5xl">

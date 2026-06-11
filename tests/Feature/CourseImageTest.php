@@ -73,8 +73,73 @@ class CourseImageTest extends TestCase
 
         $this->actingAs($provider)
             ->postJson("/api/provider/offers/{$offer->id}/cover", [
-                'image' => UploadedFile::fake()->image('big.png')->size(3000),
+                'image' => UploadedFile::fake()->image('big.png')->size(11000),
             ])->assertStatus(422);
+    }
+
+    public function test_upload_cover_accepts_phone_sized_original(): void
+    {
+        // 原上限 2MB 會擋掉手機原圖；放寬至 10MB 後 5MB 應通過（伺服器端會壓縮）
+        Storage::fake('public');
+        $provider = $this->makeProvider();
+        $offer    = $this->makeOffer($provider);
+
+        $this->actingAs($provider)
+            ->postJson("/api/provider/offers/{$offer->id}/cover", [
+                'image' => UploadedFile::fake()->image('phone.jpg', 800, 600)->size(5000),
+            ])->assertOk();
+    }
+
+    public function test_uploaded_cover_is_stored_as_jpeg(): void
+    {
+        Storage::fake('public');
+        $provider = $this->makeProvider();
+        $offer    = $this->makeOffer($provider);
+
+        $this->actingAs($provider)
+            ->postJson("/api/provider/offers/{$offer->id}/cover", [
+                'image' => UploadedFile::fake()->image('photo.png', 400, 300),
+            ])->assertOk();
+
+        $path = $offer->fresh()->cover_image;
+        $this->assertStringEndsWith('.jpg', $path);
+        Storage::disk('public')->assertExists($path);
+    }
+
+    public function test_oversized_cover_is_scaled_down_to_2048(): void
+    {
+        // 2048px 上限保護的是課程列表頁的載入重量：原圖直存會讓手機照片
+        // （數 MB）直接進列表，壓縮管線是 O3.1 體感優化的核心
+        Storage::fake('public');
+        $provider = $this->makeProvider();
+        $offer    = $this->makeOffer($provider);
+
+        $this->actingAs($provider)
+            ->postJson("/api/provider/offers/{$offer->id}/cover", [
+                'image' => UploadedFile::fake()->image('huge.jpg', 3000, 2500),
+            ])->assertOk();
+
+        $stored = Storage::disk('public')->get($offer->fresh()->cover_image);
+        [$width, $height] = getimagesizefromstring($stored);
+        $this->assertLessThanOrEqual(2048, $width);
+        $this->assertLessThanOrEqual(2048, $height);
+    }
+
+    public function test_small_image_is_not_upscaled(): void
+    {
+        Storage::fake('public');
+        $provider = $this->makeProvider();
+        $offer    = $this->makeOffer($provider);
+
+        $this->actingAs($provider)
+            ->postJson("/api/provider/offers/{$offer->id}/cover", [
+                'image' => UploadedFile::fake()->image('small.jpg', 640, 480),
+            ])->assertOk();
+
+        $stored = Storage::disk('public')->get($offer->fresh()->cover_image);
+        [$width, $height] = getimagesizefromstring($stored);
+        $this->assertSame(640, $width);
+        $this->assertSame(480, $height);
     }
 
     public function test_upload_cover_forbidden_for_other_provider(): void
