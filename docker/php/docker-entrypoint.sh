@@ -22,9 +22,12 @@ php -r "
 file_put_contents('/var/www/.env', \$env);
 "
 
-# Composer 依賴（vendor 不存在時才裝，通常已存在於 volume）
-if [ -f "composer.json" ] && { [ ! -d "vendor" ] || [ "composer.json" -nt "vendor/autoload.php" ]; }; then
+# Composer 依賴（vendor 不存在或 lock 內容變更時才裝）
+# 用內容比對而非 mtime：git checkout/pull 會更新 composer.json 的 mtime，
+# mtime 比對會讓每次分支操作後的開機都重跑 autoload 生成（bind mount 上耗時數分鐘、期間全站 502）
+if [ -f "composer.lock" ] && { [ ! -d "vendor" ] || ! cmp -s composer.lock vendor/.composer.lock.installed; }; then
     composer install --no-scripts --optimize-autoloader
+    cp composer.lock vendor/.composer.lock.installed
 fi
 
 # 背景執行：等 MySQL → migration → cache clear → storage link → swagger
