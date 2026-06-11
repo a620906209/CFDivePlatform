@@ -7,6 +7,7 @@ use App\Enums\ScheduleStatus;
 use App\Models\Booking;
 use App\Models\CourseSchedule;
 use App\Models\DivingOffer;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -32,6 +33,11 @@ class BookingOversellTest extends TestCase
     private function makeProviderWithSchedule(int $maxParticipants): array
     {
         $provider = User::factory()->create(['role' => 'provider']);
+
+        ProviderProfile::create([
+            'user_id'     => $provider->id,
+            'is_verified' => true,
+        ]);
 
         $offer = DivingOffer::create([
             'provider_id' => $provider->id,

@@ -98,6 +98,33 @@ class DivingOfferVisibilityTest extends TestCase
             ->assertJsonPath('data.title', 'Visible Course');
     }
 
+    // ── 公開子端點套用相同可見性 ─────────────────────────────
+
+    public function test_schedules_endpoint_returns_404_for_unverified_provider_offer(): void
+    {
+        $unverified = $this->makeProvider(false);
+        $offer = $this->makeOffer($unverified->id, 'Hidden Schedules Course');
+
+        $this->getJson("/api/diving-offers/{$offer->id}/schedules")->assertStatus(404);
+    }
+
+    public function test_reviews_endpoint_returns_404_for_unverified_provider_offer(): void
+    {
+        $unverified = $this->makeProvider(false);
+        $offer = $this->makeOffer($unverified->id, 'Hidden Reviews Course');
+
+        $this->getJson("/api/diving-offers/{$offer->id}/reviews")->assertStatus(404);
+    }
+
+    public function test_sub_endpoints_work_for_verified_provider_offer(): void
+    {
+        $verified = $this->makeProvider(true);
+        $offer = $this->makeOffer($verified->id, 'Visible Sub Course');
+
+        $this->getJson("/api/diving-offers/{$offer->id}/schedules")->assertOk();
+        $this->getJson("/api/diving-offers/{$offer->id}/reviews")->assertOk();
+    }
+
     // ── 驗證狀態切換立即生效（快取失效） ─────────────────────
 
     public function test_toggle_verified_takes_effect_immediately_despite_cache(): void

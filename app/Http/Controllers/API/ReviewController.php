@@ -21,7 +21,7 @@ class ReviewController extends Controller
 
     public function publicList(Request $request, int $offerId)
     {
-        $offer   = DivingOffer::findOrFail($offerId);
+        $offer   = DivingOffer::visibleToPublic()->findOrFail($offerId);
         $user    = $request->user();
         $perPage = min((int) $request->query('per_page', 20), 50);
         $sort    = $request->query('sort', 'helpful');
