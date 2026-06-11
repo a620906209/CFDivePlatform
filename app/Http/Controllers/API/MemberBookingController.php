@@ -45,9 +45,14 @@ class MemberBookingController extends Controller
             'notes'        => 'nullable|string|max:500',
         ]);
 
-        $schedule = CourseSchedule::with('divingOffer')->findOrFail($data['schedule_id']);
+        $schedule = CourseSchedule::with('divingOffer.provider.providerProfile')->findOrFail($data['schedule_id']);
 
         // Layer 1：快速失敗
+        // 可見性繞過防護：課程屬未驗證教練時不可建立新預約（既有預約不受影響，見 provider-verification 規格）
+        $offer = $schedule->divingOffer;
+        if ($offer->provider_id !== null && !($offer->provider?->providerProfile?->is_verified)) {
+            return response()->json(['status' => false, 'message' => '此課程目前不開放預約'], 422);
+        }
         if ($schedule->status !== ScheduleStatus::Open) {
             return response()->json(['status' => false, 'message' => '此時段不開放預約'], 422);
         }

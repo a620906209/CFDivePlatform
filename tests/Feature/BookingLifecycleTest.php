@@ -7,6 +7,7 @@ use App\Enums\ScheduleStatus;
 use App\Models\Booking;
 use App\Models\CourseSchedule;
 use App\Models\DivingOffer;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -37,9 +38,16 @@ class BookingLifecycleTest extends TestCase
         return User::factory()->create(['role' => 'member']);
     }
 
-    private function makeProvider(): User
+    private function makeProvider(bool $isVerified = true): User
     {
-        return User::factory()->create(['role' => 'provider']);
+        $provider = User::factory()->create(['role' => 'provider']);
+
+        ProviderProfile::create([
+            'user_id'     => $provider->id,
+            'is_verified' => $isVerified,
+        ]);
+
+        return $provider;
     }
 
     private function makeOffer(User $provider): DivingOffer
@@ -138,6 +146,43 @@ class BookingLifecycleTest extends TestCase
             'schedule_id'  => $schedule->id,
             'participants' => 1,
         ])->assertStatus(422);
+    }
+
+    // ── 可見性繞過防護（provider-verification 規格） ─────────
+
+    public function test_cannot_book_unverified_provider_course_via_schedule_id(): void
+    {
+        $unverified = $this->makeProvider(isVerified: false);
+        $schedule   = $this->makeSchedule($this->makeOffer($unverified));
+
+        $this->actingAs($this->makeMember())->postJson('/api/member/bookings', [
+            'schedule_id'  => $schedule->id,
+            'participants' => 1,
+        ])->assertStatus(422)
+          ->assertJsonPath('message', '此課程目前不開放預約');
+
+        $this->assertSame(0, Booking::count());
+    }
+
+    public function test_existing_confirmed_booking_survives_provider_unverification(): void
+    {
+        $provider = $this->makeProvider();
+        $schedule = $this->makeSchedule($this->makeOffer($provider), ['current_participants' => 1]);
+        $member   = $this->makeMember();
+        $booking  = $this->makeBooking($member, $schedule, BookingStatus::Confirmed);
+
+        // 教練在預約成立後被取消驗證：只擋新預約，不毀既有合約
+        $provider->providerProfile->update(['is_verified' => false]);
+
+        $this->actingAs($member)
+            ->getJson("/api/bookings/{$booking->id}/messages")
+            ->assertOk();
+
+        $this->actingAs($provider)
+            ->putJson("/api/provider/bookings/{$booking->id}/complete")
+            ->assertOk();
+
+        $this->assertSame(BookingStatus::Completed, $booking->fresh()->status);
     }
 
     // ── Provider 確認 / 拒絕 ─────────────────────────────────

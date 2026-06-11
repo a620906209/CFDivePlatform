@@ -95,7 +95,7 @@ class ScheduleController extends Controller
 
     public function publicList(int $offerId)
     {
-        $offer = DivingOffer::findOrFail($offerId);
+        $offer = DivingOffer::visibleToPublic()->findOrFail($offerId);
         $schedules = CourseSchedule::where('diving_offer_id', $offer->id)
             ->where('status', ScheduleStatus::Open->value)
             ->whereDate('scheduled_date', '>=', now()->toDateString())

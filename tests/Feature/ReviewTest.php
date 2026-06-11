@@ -6,6 +6,7 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\CourseSchedule;
 use App\Models\DivingOffer;
+use App\Models\ProviderProfile;
 use App\Models\Review;
 use App\Models\ReviewEdit;
 use App\Models\ReviewVote;
@@ -32,6 +33,8 @@ class ReviewTest extends TestCase
     private function createOffer(): DivingOffer
     {
         $provider = User::factory()->create(['role' => 'provider']);
+        // 公開評價端點僅對已驗證教練的課程開放（provider-verification 規格）
+        ProviderProfile::create(['user_id' => $provider->id, 'is_verified' => true]);
         return DivingOffer::create([
             'provider_id' => $provider->id,
             'title'       => '測試潛水課程',
