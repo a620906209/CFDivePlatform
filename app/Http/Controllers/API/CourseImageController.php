@@ -5,15 +5,19 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\CourseImage;
 use App\Models\DivingOffer;
+use App\Traits\CompressesImages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CourseImageController extends Controller
 {
+    use CompressesImages;
+
     private function validateImage(Request $request): void
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+            // 10MB：伺服器端會壓縮（compressToJpeg），放寬以容納手機原圖
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
     }
 
@@ -34,7 +38,7 @@ class CourseImageController extends Controller
             Storage::disk('public')->delete($offer->cover_image);
         }
 
-        $path = $request->file('image')->store("offers/{$offerId}/cover", 'public');
+        $path = $this->compressToJpeg($request->file('image'), "offers/{$offerId}/cover");
         $offer->update(['cover_image' => $path]);
 
         return response()->json([
@@ -67,7 +71,7 @@ class CourseImageController extends Controller
             return response()->json(['status' => false, 'message' => '相簿最多 3 張圖片'], 422);
         }
 
-        $path       = $request->file('image')->store("offers/{$offerId}/gallery", 'public');
+        $path       = $this->compressToJpeg($request->file('image'), "offers/{$offerId}/gallery");
         $sortOrder  = ($offer->courseImages()->max('sort_order') ?? 0) + 1;
 
         $image = CourseImage::create([
