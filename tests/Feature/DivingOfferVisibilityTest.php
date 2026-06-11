@@ -24,7 +24,7 @@ class DivingOfferVisibilityTest extends TestCase
 
         ProviderProfile::create([
             'user_id'     => $provider->id,
-            'is_verified' => $isVerified,
+            'verification_status' => $isVerified ? 'approved' : 'unsubmitted',
         ]);
 
         return $provider;
@@ -127,7 +127,7 @@ class DivingOfferVisibilityTest extends TestCase
 
     // ── 驗證狀態切換立即生效（快取失效） ─────────────────────
 
-    public function test_toggle_verified_takes_effect_immediately_despite_cache(): void
+    public function test_revoking_verification_takes_effect_immediately_despite_cache(): void
     {
         $provider = $this->makeProvider(true);
         $this->makeOffer($provider->id, 'Toggle Course');
@@ -139,10 +139,10 @@ class DivingOfferVisibilityTest extends TestCase
             array_column($this->getJson('/api/diving-offers')->json('data'), 'title')
         );
 
+        // 撤銷驗證（approved→rejected）後快取必須立即失效
         $this->actingAs($admin)
-            ->putJson("/api/admin/providers/{$provider->id}/toggle-verified")
-            ->assertOk()
-            ->assertJsonPath('data.is_verified', false);
+            ->putJson("/api/admin/verifications/{$provider->id}/reject", ['reason' => '資料不實'])
+            ->assertOk();
 
         $this->assertNotContains(
             'Toggle Course',

@@ -141,6 +141,14 @@ class User extends Authenticatable
     }
 
     /**
+     * 教練驗證證照圖片（送審用）
+     */
+    public function providerCertifications()
+    {
+        return $this->hasMany(ProviderCertification::class);
+    }
+
+    /**
      * 獲取用戶的會員資料
      */
     /**

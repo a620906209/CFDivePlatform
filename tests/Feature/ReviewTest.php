@@ -34,7 +34,7 @@ class ReviewTest extends TestCase
     {
         $provider = User::factory()->create(['role' => 'provider']);
         // 公開評價端點僅對已驗證教練的課程開放（provider-verification 規格）
-        ProviderProfile::create(['user_id' => $provider->id, 'is_verified' => true]);
+        ProviderProfile::create(['user_id' => $provider->id, 'verification_status' => 'approved']);
         return DivingOffer::create([
             'provider_id' => $provider->id,
             'title'       => '測試潛水課程',

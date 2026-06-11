@@ -35,7 +35,7 @@ class DevelopmentSeeder extends Seeder
             'description'   => '專業 PADI 認證教練，10 年教學經驗',
             'contact_phone' => '0912345678',
             'contact_email' => 'coach@cfdive.com',
-            'is_verified'   => true,
+            'verification_status' => 'approved',
         ]);
 
         // Member
