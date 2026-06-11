@@ -66,13 +66,9 @@
 - **WHEN** role=member 的帳號嘗試 `POST /api/provider/login`
 - **THEN** 回傳 HTTP 401，`{ status: false, message: "電子郵件或密碼錯誤" }`（查詢以 role 過濾，跨角色帳號視同不存在）
 
-#### Scenario: Admin 註冊成功
-- **WHEN** 送出有效的 name / email / password / password_confirmation 至 `POST /api/admin/register`
-- **THEN** 回傳 HTTP 201，body 包含 `{ status: true, data: { user } }`，DB 存在對應 admin 用戶
-
-#### Scenario: Admin 重複 Email 註冊失敗
-- **WHEN** 送出已存在的 email 至 `POST /api/admin/register`
-- **THEN** 回傳 HTTP 422
+#### Scenario: Admin 公開註冊端點保持關閉
+- **WHEN** 任何人送出 `POST /api/admin/register`（該端點已於 2026-06-11 因 P0 漏洞移除，見 admin-auth 規格「管理員帳號建立途徑」）
+- **THEN** 回傳 HTTP 404，且不建立任何帳號；帳號建立改由 `app:create-admin` command 覆蓋測試
 
 #### Scenario: Admin 登入成功
 - **WHEN** 送出正確的 email / password 至 `POST /api/admin/login`
