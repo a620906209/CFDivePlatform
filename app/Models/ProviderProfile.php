@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\VerificationStatus;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -23,7 +24,9 @@ use Illuminate\Database\Eloquent\Model;
  *     @OA\Property(property="certifications", type="string", example="PADI五星級潛水中心,SSI認證中心", description="業者相關認證"),
  *     @OA\Property(property="facilities", type="string", example="空氣填充站,沖洗區,更衣室,休息區", description="設施"),
  *     @OA\Property(property="business_hours", type="string", example="週一至週五 09:00-18:00，週六日 08:00-19:00", description="營業時間"),
- *     @OA\Property(property="is_verified", type="boolean", example=true, description="是否通過平台驗證"),
+ *     @OA\Property(property="verification_status", type="string", example="approved", description="審核狀態：unsubmitted / pending / approved / rejected"),
+ *     @OA\Property(property="rejection_reason", type="string", nullable=true, example=null, description="駁回原因（rejected 時有值）"),
+ *     @OA\Property(property="is_verified", type="boolean", example=true, description="是否通過平台驗證（相容欄位，= verification_status 為 approved）"),
  *     @OA\Property(property="rating", type="number", format="float", example=4.8, description="評分"),
  *     @OA\Property(property="website", type="string", example="https://www.bluedive.com", description="官方網站"),
  *     @OA\Property(property="social_media", type="string", example="https://www.facebook.com/bluedive", description="社群媒體連結"),
@@ -55,7 +58,8 @@ class ProviderProfile extends Model
         'certifications',
         'facilities',
         'business_hours',
-        'is_verified',
+        'verification_status',
+        'rejection_reason',
         'rating',
         'website',
         'social_media',
@@ -63,6 +67,21 @@ class ProviderProfile extends Model
         'banner_url',
         'is_active'
     ];
+
+    protected $casts = [
+        'verification_status' => VerificationStatus::class,
+    ];
+
+    /**
+     * API 相容層：既有前端與 Swagger 讀取 is_verified boolean，
+     * 欄位移除後以 accessor 維持輸出（= 審核通過）
+     */
+    protected $appends = ['is_verified'];
+
+    public function getIsVerifiedAttribute(): bool
+    {
+        return $this->verification_status === VerificationStatus::Approved;
+    }
 
     /**
      * 與用戶的關聯

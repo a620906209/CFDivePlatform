@@ -57,13 +57,13 @@
 
 ---
 
-### Requirement: 管理員驗證教練
-後端 SHALL 提供 `PUT /api/admin/providers/{id}/toggle-verified`，反轉 ProviderProfile.is_verified 狀態。
+### Requirement: 管理員驗證教練（已由審核狀態機取代）
+`PUT /api/admin/providers/{id}/toggle-verified` 已於 2026-06-12 移除——單鍵切換允許繞過審核狀態機（無原因駁回、未送審直接通過）。教練驗證狀態的變更一律透過 `PUT /api/admin/verifications/{userId}/approve|reject`（見 provider-verification 規格「Admin 審核佇列與裁決」）。
 
-#### Scenario: 驗證教練
-- **WHEN** 管理員對 is_verified=false 的教練發送請求
-- **THEN** 將 is_verified 設為 true，回傳 HTTP 200，`{ status: true, message: "教練已驗證", data: { is_verified: true } }`
+#### Scenario: toggle 端點回 404
+- **WHEN** 管理員請求 `PUT /api/admin/providers/{id}/toggle-verified`
+- **THEN** 回傳 HTTP 404
 
-#### Scenario: 取消驗證教練
-- **WHEN** 管理員對 is_verified=true 的教練發送請求
-- **THEN** 將 is_verified 設為 false，回傳 HTTP 200，`{ status: true, message: "已取消驗證", data: { is_verified: false } }`
+#### Scenario: 教練列表仍顯示驗證狀態
+- **WHEN** 管理員請求 `GET /api/admin/providers`
+- **THEN** 每筆教練的 provider_profile 包含 `verification_status` 與相容用 `is_verified`（accessor，= approved）

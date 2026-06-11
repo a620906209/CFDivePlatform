@@ -48,9 +48,10 @@ class MemberBookingController extends Controller
         $schedule = CourseSchedule::with('divingOffer.provider.providerProfile')->findOrFail($data['schedule_id']);
 
         // Layer 1：快速失敗
-        // 可見性繞過防護：課程屬未驗證教練時不可建立新預約（既有預約不受影響，見 provider-verification 規格）
+        // 可見性繞過防護：課程教練未通過審核時不可建立新預約（既有預約不受影響，見 provider-verification 規格）
         $offer = $schedule->divingOffer;
         if ($offer->provider_id !== null && !($offer->provider?->providerProfile?->is_verified)) {
+            // is_verified 為 accessor（= verification_status === approved）
             return response()->json(['status' => false, 'message' => '此課程目前不開放預約'], 422);
         }
         if ($schedule->status !== ScheduleStatus::Open) {

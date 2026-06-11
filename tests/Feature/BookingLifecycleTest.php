@@ -44,7 +44,7 @@ class BookingLifecycleTest extends TestCase
 
         ProviderProfile::create([
             'user_id'     => $provider->id,
-            'is_verified' => $isVerified,
+            'verification_status' => $isVerified ? 'approved' : 'unsubmitted',
         ]);
 
         return $provider;
@@ -171,8 +171,8 @@ class BookingLifecycleTest extends TestCase
         $member   = $this->makeMember();
         $booking  = $this->makeBooking($member, $schedule, BookingStatus::Confirmed);
 
-        // 教練在預約成立後被取消驗證：只擋新預約，不毀既有合約
-        $provider->providerProfile->update(['is_verified' => false]);
+        // 教練在預約成立後被撤銷驗證（approved→rejected）：只擋新預約，不毀既有合約
+        $provider->providerProfile->update(['verification_status' => 'rejected', 'rejection_reason' => '測試撤銷']);
 
         $this->actingAs($member)
             ->getJson("/api/bookings/{$booking->id}/messages")

@@ -84,6 +84,11 @@ Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
     Route::get('/offers/{id}',     [ProviderOfferController::class, 'show']);
     Route::put('/offers/{id}',     [ProviderOfferController::class, 'update']);
     Route::delete('/offers/{id}',  [ProviderOfferController::class, 'destroy']);
+    // 驗證申請（證照送審）
+    Route::get('/verification',                          [\App\Http\Controllers\API\ProviderVerificationController::class, 'show']);
+    Route::post('/verification/certifications',          [\App\Http\Controllers\API\ProviderVerificationController::class, 'uploadCertification']);
+    Route::delete('/verification/certifications/{id}',   [\App\Http\Controllers\API\ProviderVerificationController::class, 'deleteCertification']);
+    Route::post('/verification/submit',                  [\App\Http\Controllers\API\ProviderVerificationController::class, 'submit']);
     // 課程圖片
     Route::post('/offers/{id}/cover',    [CourseImageController::class, 'uploadCover']);
     Route::delete('/offers/{id}/cover',  [CourseImageController::class, 'deleteCover']);
@@ -130,7 +135,10 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/providers',                        [AdminUserController::class, 'providers']);
     Route::get('/providers/{id}',                   [AdminUserController::class, 'provider']);
     Route::put('/providers/{id}/toggle-active',     [AdminUserController::class, 'toggleProviderActive']);
-    Route::put('/providers/{id}/toggle-verified',   [AdminUserController::class, 'toggleProviderVerified']);
+    // 教練審核（toggle-verified 已由審核狀態機取代）
+    Route::get('/verifications',                    [\App\Http\Controllers\API\AdminVerificationController::class, 'index']);
+    Route::put('/verifications/{userId}/approve',   [\App\Http\Controllers\API\AdminVerificationController::class, 'approve']);
+    Route::put('/verifications/{userId}/reject',    [\App\Http\Controllers\API\AdminVerificationController::class, 'reject']);
     // 課程管理
     Route::get('/offers',           [AdminOfferController::class, 'index']);
     Route::delete('/offers/{id}',   [AdminOfferController::class, 'destroy']);

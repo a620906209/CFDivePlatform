@@ -65,7 +65,7 @@ class DemoSeeder extends Seeder
                 'services'      => '體驗潛水,OW認證課程,AOW認證課程,夜潛,水下攝影',
                 'certifications' => 'PADI 五星級潛水中心,PADI Course Director',
                 'facilities'    => '空氣填充站,氧氣填充站,裝備租借,沖洗區,更衣室,停車場',
-                'business_hours' => '每日 07:30–18:00', 'is_verified' => true,
+                'business_hours' => '每日 07:30–18:00', 'verification_status' => 'approved',
             ],
             [
                 'email' => 'greendive@cfdive.com', 'name' => '陳美玲',
@@ -77,7 +77,7 @@ class DemoSeeder extends Seeder
                 'services'      => '體驗潛水,OW認證課程,AOW認證課程,水下生態導覽,浮潛',
                 'certifications' => 'PADI 潛水中心,SSI 認證教練',
                 'facilities'    => '空氣填充站,裝備租借,防寒衣洗滌區,水下攝影記錄',
-                'business_hours' => '每日 07:00–17:30', 'is_verified' => true,
+                'business_hours' => '每日 07:00–17:30', 'verification_status' => 'approved',
             ],
             [
                 'email' => 'islet@cfdive.com', 'name' => '張大偉',
@@ -89,7 +89,7 @@ class DemoSeeder extends Seeder
                 'services'      => '浮潛,體驗潛水,OW認證課程,海龜觀察導覽',
                 'certifications' => 'PADI 授權潛水中心',
                 'facilities'    => '裝備租借,沖洗區,更衣室,代訂民宿服務',
-                'business_hours' => '每日 08:00–17:00', 'is_verified' => true,
+                'business_hours' => '每日 08:00–17:00', 'verification_status' => 'approved',
             ],
             [
                 'email' => 'northdive@cfdive.com', 'name' => '王建國',
@@ -101,7 +101,7 @@ class DemoSeeder extends Seeder
                 'services'      => '體驗潛水,OW認證課程,進階課程,Tec潛水,洞穴入門',
                 'certifications' => 'PADI 課程總監,PADI TecRec 教練',
                 'facilities'    => '空氣填充站,混氣填充站,裝備租借,技術潛水裝備維修',
-                'business_hours' => '週一公休，週二至週日 08:00–18:00', 'is_verified' => false,
+                'business_hours' => '週一公休，週二至週日 08:00–18:00', 'verification_status' => 'pending',
             ],
         ];
 
@@ -123,7 +123,7 @@ class DemoSeeder extends Seeder
                 'certifications' => $data['certifications'],
                 'facilities'     => $data['facilities'],
                 'business_hours' => $data['business_hours'],
-                'is_verified'    => $data['is_verified'],
+                'verification_status' => $data['verification_status'],
                 'rating'         => 0,
             ]);
             $providers[] = $user;

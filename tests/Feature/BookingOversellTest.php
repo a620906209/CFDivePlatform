@@ -36,7 +36,7 @@ class BookingOversellTest extends TestCase
 
         ProviderProfile::create([
             'user_id'     => $provider->id,
-            'is_verified' => true,
+            'verification_status' => 'approved',
         ]);
 
         $offer = DivingOffer::create([

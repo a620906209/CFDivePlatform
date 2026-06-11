@@ -283,30 +283,85 @@ class AdminApiDoc
     }
 
     /**
-     * 切換教練審核狀態
+     * 教練審核佇列
      *
-     * @OA\Put(
-     *     path="/admin/providers/{id}/toggle-verified",
-     *     summary="切換教練審核狀態",
-     *     description="通過或撤銷教練審核，回傳新的 is_verified 狀態",
-     *     operationId="toggleProviderVerified",
+     * @OA\Get(
+     *     path="/admin/verifications",
+     *     summary="教練審核佇列",
+     *     description="查詢教練驗證申請（預設僅 pending；status=all 可查全部），含證照圖片 URL",
+     *     operationId="adminVerificationIndex",
      *     tags={"Admin 教練管理"},
      *     security={{"bearerAuth": {}}},
-     *     @OA\Parameter(name="id", in="path", required=true, description="使用者 ID", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="unsubmitted / pending / approved / rejected / all", @OA\Schema(type="string", default="pending")),
      *     @OA\Response(
      *         response=200,
-     *         description="切換成功",
+     *         description="查詢成功",
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="教練已通過審核"),
-     *             @OA\Property(property="is_verified", type="boolean", example=true)
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 @OA\Property(property="user_id", type="integer", example=5),
+     *                 @OA\Property(property="name", type="string", example="王教練"),
+     *                 @OA\Property(property="email", type="string", example="coach@example.com"),
+     *                 @OA\Property(property="business_name", type="string", example="藍海潛水"),
+     *                 @OA\Property(property="verification_status", type="string", example="pending"),
+     *                 @OA\Property(property="rejection_reason", type="string", nullable=true, example=null),
+     *                 @OA\Property(property="certifications", type="array", @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="url", type="string", example="http://localhost:8080/storage/providers/5/certifications/uuid.jpg")
+     *                 ))
+     *             ))
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非 admin 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
-     *     @OA\Response(response=404, description="教練不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 admin 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
-    public function toggleProviderVerified()
+    public function adminVerificationIndex()
+    {
+    }
+
+    /**
+     * 通過教練審核
+     *
+     * @OA\Put(
+     *     path="/admin/verifications/{userId}/approve",
+     *     summary="通過教練審核",
+     *     description="將 pending 教練轉為 approved，課程恢復公開曝光並通知教練",
+     *     operationId="adminVerificationApprove",
+     *     tags={"Admin 教練管理"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="userId", in="path", required=true, description="教練使用者 ID", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="已通過審核"),
+     *     @OA\Response(response=403, description="非 admin 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=404, description="教練不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=422, description="當前狀態無法通過審核", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     * )
+     */
+    public function adminVerificationApprove()
+    {
+    }
+
+    /**
+     * 駁回教練審核
+     *
+     * @OA\Put(
+     *     path="/admin/verifications/{userId}/reject",
+     *     summary="駁回教練審核",
+     *     description="駁回 pending 教練或撤銷 approved 教練，原因必填並通知教練",
+     *     operationId="adminVerificationReject",
+     *     tags={"Admin 教練管理"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="userId", in="path", required=true, description="教練使用者 ID", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"reason"},
+     *         @OA\Property(property="reason", type="string", maxLength=500, example="證照影像不清晰，請重新拍攝上傳")
+     *     )),
+     *     @OA\Response(response=200, description="已駁回"),
+     *     @OA\Response(response=403, description="非 admin 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=404, description="教練不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=422, description="原因未填或狀態不可駁回", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     * )
+     */
+    public function adminVerificationReject()
     {
     }
 

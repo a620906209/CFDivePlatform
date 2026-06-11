@@ -30,6 +30,7 @@ const routes = [
       { path: 'schedules',       component: () => import('../views/coach/ScheduleManagerView.vue') },
       { path: 'bookings',        component: () => import('../views/coach/BookingManagerView.vue') },
       { path: 'reviews',         component: () => import('../views/coach/ReviewsView.vue') },
+      { path: 'verification',    component: () => import('../views/coach/VerificationView.vue') },
     ],
   },
 
