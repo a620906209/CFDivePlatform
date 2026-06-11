@@ -826,58 +826,6 @@ class AuthApiDoc
     }
 
     /**
-     * 管理員註冊
-     * 
-     * @OA\Post(
-     *     path="/admin/register",
-     *     summary="管理員註冊",
-     *     description="建立新的管理員帳號",
-     *     operationId="registerAdmin",
-     *     tags={"管理員"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name", "email", "password", "password_confirmation"},
-     *             @OA\Property(property="name", type="string", example="張管理", description="使用者姓名"),
-     *             @OA\Property(property="email", type="string", format="email", example="admin@example.com", description="電子郵件"),
-     *             @OA\Property(property="password", type="string", format="password", example="password123", description="密碼"),
-     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123", description="確認密碼"),
-     *             @OA\Property(property="phone", type="string", example="0912345678", description="電話號碼"),
-     *             @OA\Property(property="position", type="string", example="系統管理員", description="職位"),
-     *             @OA\Property(property="department", type="string", example="IT部門", description="部門")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="管理員註冊成功",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="管理員註冊成功"),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="user", type="object", ref="#/components/schemas/User"),
-     *                 @OA\Property(property="token", type="string", example="1|abcdef1234567890"),
-     *                 @OA\Property(property="token_type", type="string", example="Bearer")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="驗證失敗",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="驗證失敗"),
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     )
-     * )
-     */
-    public function registerAdmin()
-    {
-    }
-
-    /**
      * 管理員登入
      * 
      * @OA\Post(

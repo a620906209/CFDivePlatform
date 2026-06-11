@@ -248,40 +248,7 @@ class AuthLoginTest extends TestCase
              ->assertStatus(401);
     }
 
-    // ── admin 註冊 ───────────────────────────────────────────
-
-    public function test_admin_register_success(): void
-    {
-        $response = $this->postJson('/api/admin/register', [
-            'name'                  => 'Test Admin',
-            'email'                 => 'newadmin@example.com',
-            'password'              => 'password123',
-            'password_confirmation' => 'password123',
-        ]);
-
-        $response->assertStatus(201)
-                 ->assertJsonPath('status', true)
-                 ->assertJsonStructure(['data' => ['user']]);
-
-        $this->assertDatabaseHas('users', [
-            'email' => 'newadmin@example.com',
-            'role'  => 'admin',
-        ]);
-    }
-
-    public function test_admin_register_duplicate_email_returns_422(): void
-    {
-        $this->createAdmin(['email' => 'dup-admin@example.com']);
-
-        $response = $this->postJson('/api/admin/register', [
-            'name'                  => 'Another Admin',
-            'email'                 => 'dup-admin@example.com',
-            'password'              => 'password123',
-            'password_confirmation' => 'password123',
-        ]);
-
-        $response->assertStatus(422);
-    }
+    // admin 註冊端點已移除（P0 漏洞），帳號建立途徑見 AdminAccountCreationTest
 
     // ── admin 登入／登出 ─────────────────────────────────────
 

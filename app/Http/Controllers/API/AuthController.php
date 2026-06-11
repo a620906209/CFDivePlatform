@@ -847,59 +847,6 @@ class AuthController extends Controller
     }
 
     /**
-     * 管理員註冊
-     */
-    public function registerAdmin(Request $request)
-    {
-        // 驗證請求數據
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'phone' => 'nullable|string|max:20',
-            'position' => 'nullable|string|max:100',
-            'department' => 'nullable|string|max:100',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => '驗證失敗',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // 創建用戶
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'phone' => $request->phone,
-            'role' => 'admin', // 強制為管理員角色
-        ]);
-
-        // 創建管理員資料
-        AdminProfile::create([
-            'user_id' => $user->id,
-            'position' => $request->position,
-            'department' => $request->department,
-        ]);
-
-        // 創建 API token
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'status' => true,
-            'message' => '管理員註冊成功',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'Bearer',
-            ]
-        ], 201);
-    }
-
-    /**
      * 管理員登入
      */
     public function loginAdmin(Request $request)

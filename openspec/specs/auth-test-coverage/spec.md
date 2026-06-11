@@ -1,7 +1,7 @@
 # auth-test-coverage Specification
 
 ## Purpose
-TBD - created by archiving change auth-tests. Update Purpose after archive.
+驗證三角色（member / provider / admin）認證流程的測試覆蓋契約：登入／註冊／登出、帳號鎖定（P2）、OAuth state 驗證、token refresh 與登入頻率限制。此規格定義測試套件必須覆蓋的場景，任何認證行為變更時，對應測試必須同步失敗以攔截回歸。
 ## Requirements
 ### Requirement: Auth 登入／註冊／登出測試覆蓋（三角色）
 測試套件 SHALL 對 member、provider、admin 三個角色各自驗證以下場景，確保回歸時能即時偵測。
@@ -66,13 +66,9 @@ TBD - created by archiving change auth-tests. Update Purpose after archive.
 - **WHEN** role=member 的帳號嘗試 `POST /api/provider/login`
 - **THEN** 回傳 HTTP 401，`{ status: false, message: "電子郵件或密碼錯誤" }`（查詢以 role 過濾，跨角色帳號視同不存在）
 
-#### Scenario: Admin 註冊成功
-- **WHEN** 送出有效的 name / email / password / password_confirmation 至 `POST /api/admin/register`
-- **THEN** 回傳 HTTP 201，body 包含 `{ status: true, data: { user } }`，DB 存在對應 admin 用戶
-
-#### Scenario: Admin 重複 Email 註冊失敗
-- **WHEN** 送出已存在的 email 至 `POST /api/admin/register`
-- **THEN** 回傳 HTTP 422
+#### Scenario: Admin 公開註冊端點保持關閉
+- **WHEN** 任何人送出 `POST /api/admin/register`（該端點已於 2026-06-11 因 P0 漏洞移除，見 admin-auth 規格「管理員帳號建立途徑」）
+- **THEN** 回傳 HTTP 404，且不建立任何帳號；帳號建立改由 `app:create-admin` command 覆蓋測試
 
 #### Scenario: Admin 登入成功
 - **WHEN** 送出正確的 email / password 至 `POST /api/admin/login`
