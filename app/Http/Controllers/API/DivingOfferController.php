@@ -15,7 +15,7 @@ class DivingOfferController extends Controller
         $cacheKey = 'diving_offers_' . md5(serialize($request->all()));
 
         $result = Cache::tags(['diving_offers'])->remember($cacheKey, 180, function () use ($request, $perPage) {
-            $query = DivingOffer::query();
+            $query = DivingOffer::query()->visibleToPublic();
 
             if ($q = $request->query('q')) {
                 $query->where(function ($sub) use ($q) {
@@ -55,7 +55,7 @@ class DivingOfferController extends Controller
 
     public function show(int $id)
     {
-        $offer = DivingOffer::with('courseImages')->find($id);
+        $offer = DivingOffer::with('courseImages')->visibleToPublic()->find($id);
 
         if (!$offer) {
             return response()->json(['status' => false, 'message' => '課程不存在'], 404);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
@@ -51,6 +52,18 @@ class DivingOffer extends Model
     public function provider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'provider_id');
+    }
+
+    /**
+     * 公開端點可見性：未驗證教練的課程不對外曝光。
+     * provider_id 為 null 的課程（平台自有資料）不受此限制。
+     */
+    public function scopeVisibleToPublic(Builder $query): Builder
+    {
+        return $query->where(function (Builder $visible) {
+            $visible->whereNull('provider_id')
+                ->orWhereHas('provider.providerProfile', fn (Builder $profile) => $profile->where('is_verified', true));
+        });
     }
 
     public function schedules()

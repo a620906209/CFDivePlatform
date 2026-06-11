@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AdminUserController extends Controller
 {
@@ -143,6 +144,9 @@ class AdminUserController extends Controller
         $profile = $user->providerProfile;
         $profile->is_verified = !$profile->is_verified;
         $profile->save();
+
+        // 驗證狀態影響公開課程列表的可見性，需立即讓快取失效
+        Cache::tags(['diving_offers'])->flush();
 
         $msg = $profile->is_verified ? '教練已驗證' : '已取消驗證';
         return response()->json(['status' => true, 'message' => $msg, 'data' => ['is_verified' => $profile->is_verified]]);
