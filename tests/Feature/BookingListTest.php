@@ -30,7 +30,7 @@ class BookingListTest extends TestCase
     private function makeProviderWithSchedule(): array
     {
         $provider = User::factory()->create(['role' => 'provider']);
-        ProviderProfile::create(['user_id' => $provider->id, 'is_verified' => true]);
+        ProviderProfile::create(['user_id' => $provider->id, 'verification_status' => 'approved']);
 
         $offer = DivingOffer::create([
             'provider_id' => $provider->id,

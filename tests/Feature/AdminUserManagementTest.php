@@ -31,10 +31,10 @@ class AdminUserManagementTest extends TestCase
         return $member;
     }
 
-    private function makeProvider(bool $isVerified = false): User
+    private function makeProvider(string $verificationStatus = 'unsubmitted'): User
     {
         $provider = User::factory()->create(['role' => 'provider']);
-        ProviderProfile::create(['user_id' => $provider->id, 'is_verified' => $isVerified]);
+        ProviderProfile::create(['user_id' => $provider->id, 'verification_status' => $verificationStatus]);
         return $provider;
     }
 
@@ -89,21 +89,21 @@ class AdminUserManagementTest extends TestCase
         ]);
     }
 
-    // ── toggle-verified ──────────────────────────────────────
+    // ── approve ─────────────────────────────────────────────
 
-    public function test_admin_toggles_provider_verified_status(): void
+    public function test_admin_approves_provider_verification(): void
     {
         $admin    = $this->makeAdmin();
-        $provider = $this->makeProvider(isVerified: false);
+        $provider = $this->makeProvider(verificationStatus: 'pending');
 
         $this->actingAs($admin)
-            ->putJson("/api/admin/providers/{$provider->id}/toggle-verified")
+            ->putJson("/api/admin/verifications/{$provider->id}/approve")
             ->assertOk()
-            ->assertJsonPath('data.is_verified', true);
+            ->assertJsonPath('status', true);
 
         $this->assertDatabaseHas('provider_profiles', [
-            'user_id'     => $provider->id,
-            'is_verified' => true,
+            'user_id'             => $provider->id,
+            'verification_status' => 'approved',
         ]);
     }
 
