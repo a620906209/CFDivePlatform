@@ -8,6 +8,7 @@
 
 **會員（Member）**
 - 註冊 / 登入（Email + Google OAuth）
+- Token 自動續期（401 refresh-then-retry，sessionStorage 儲存）
 - 瀏覽、搜尋、篩選潛水課程
 - 查看課程時段並送出預約
 - 與教練即時訊息（文字 + 圖片，含已讀回執）
@@ -15,14 +16,16 @@
 - 站內通知（Bell Icon 即時更新 + 瀏覽器推播）
 
 **教練（Provider）**
-- 課程 CRUD（含封面 + 相簿圖片上傳）
+- 課程 CRUD（含封面 + 相簿圖片上傳，伺服器端壓縮）
 - 課程時段管理
 - 預約管理（確認 / 拒絕 / 完成 / 取消）
 - 與學員即時訊息
+- 證照上傳與教練資格送審
 
 **管理員（Admin）**
 - 平台統計數據（會員數、教練數、課程數）
-- 會員與教練帳號管理（啟用 / 停用 / 審核）
+- 會員與教練帳號管理（啟用 / 停用）
+- 教練資格審核（送審 / 通過 / 駁回 / 撤銷）
 - 課程、預約、評價管理
 
 ---
@@ -36,17 +39,18 @@
 | 資料庫 | MySQL 8.0 |
 | 快取 | Redis |
 | 即時通訊 | Laravel Reverb（WebSocket，`wss://ws.hank-space.com`）|
-| 認證 | Laravel Sanctum + Google OAuth |
+| 認證 | Laravel Sanctum + Google OAuth + Token Refresh |
 | 容器 | Docker / Docker Compose |
 | API 文件 | Swagger UI（l5-swagger）|
 | 錯誤監控 | Sentry |
 | CI/CD | Gitea Actions（自動部署至 VPS）|
+| 測試 | PHPUnit / Laravel Feature & Unit Tests |
 
 ---
 
 ## API 文件
 
-共 73 個端點，涵蓋：
+Swagger 文件涵蓋公開、會員、教練、管理員與認證端點，包含：
 - 認證（Email + Google OAuth）
 - 公開課程查詢
 - 會員預約 / 訊息 / 評價 / 通知
@@ -67,11 +71,16 @@ GET /health
 
 ## 本地開發
 
-**啟動**
+**測試用帳號**
 
-```bash
-docker compose up -d
-```
+| 角色 | 帳號 | 密碼 | 用途 |
+|------|------|------|------|
+| 會員 | Guest@cfdive.com | guestpassword | 體驗課程瀏覽、預約、會員預約紀錄 |
+| 教練 | Guest_Coach@cfdive.com | coachpassword | 體驗課程管理、時段管理、預約管理 |
+
+**教練頁入口**
+
+目前首頁尚未提供明顯導引到教練後台的入口。若要體驗教練功能，請直接開啟 `/coach/login`，使用上方教練試用帳號登入後會進入 `/coach/dashboard`。
 
 | 服務 | URL |
 |------|-----|
@@ -79,13 +88,3 @@ docker compose up -d
 | phpMyAdmin | http://localhost:8081 |
 | Mailpit | http://localhost:8025 |
 | Reverb WebSocket | ws://localhost:8085 |
-
-**環境設定**
-
-複製 `.env.example` 為 `.env`，填入以下必要值：
-
-```env
-REVERB_APP_KEY=        # 32 字元隨機字串
-REVERB_APP_SECRET=     # 32 字元隨機字串
-SENTRY_LARAVEL_DSN=    # Sentry DSN（留空則停用）
-```
