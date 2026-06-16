@@ -5,6 +5,8 @@
 
 ---
 
+## Requirements
+
 ### Requirement: Provider 課程 CRUD 測試覆蓋
 測試套件 SHALL 驗證 `POST /api/provider/offers`、`PUT /api/provider/offers/{id}`、`DELETE /api/provider/offers/{id}` 的正常流程與所有權邊界。
 
@@ -86,9 +88,10 @@
 - **WHEN** Admin 送出 `PUT /api/admin/members/{id}/toggle-active`（目標會員 is_active=true）
 - **THEN** 回傳 HTTP 200，DB 記錄 is_active 由 true 變為 false
 
-#### Scenario: Admin 切換教練驗證狀態
-- **WHEN** Admin 送出 `PUT /api/admin/providers/{id}/toggle-verified`（目標教練 is_verified=false）
-- **THEN** 回傳 HTTP 200，provider_profiles.is_verified 由 false 變為 true
+#### Scenario: Admin 核准教練審核
+- **WHEN** Admin 對 `verification_status=pending` 的教練送出 `PUT /api/admin/verifications/{userId}/approve`
+- **THEN** 回傳 HTTP 200，provider_profiles.verification_status 變為 `approved`
+- **NOTE** `toggle-verified` 路由已由 provider-verification-workflow 移除，驗證狀態變更一律透過審核狀態機
 
 #### Scenario: 非 Admin 角色被拒絕
 - **WHEN** role=member 的使用者送出 `GET /api/admin/members`
