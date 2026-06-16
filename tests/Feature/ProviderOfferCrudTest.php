@@ -21,7 +21,7 @@ class ProviderOfferCrudTest extends TestCase
     private function makeProvider(): User
     {
         $provider = User::factory()->create(['role' => 'provider']);
-        ProviderProfile::create(['user_id' => $provider->id, 'is_verified' => true]);
+        ProviderProfile::create(['user_id' => $provider->id, 'verification_status' => 'approved']);
         return $provider;
     }
 
