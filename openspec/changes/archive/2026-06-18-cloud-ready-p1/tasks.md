@@ -40,6 +40,6 @@
 
 ## 7. 手動驗證（VPS，需更新 .env 後）
 
-- [ ] 7.1 [整合測試] 確認 log 走 stderr：呼叫任意 API 後 `docker compose logs app | tail -20` 有日誌輸出
-- [ ] 7.2 [整合測試] 確認 `storage/logs/` 無新增日誌檔（舊檔保留）
-- [ ] 7.3 [整合測試] 確認 session 走 Redis：登入後 `docker compose exec redis redis-cli keys "laravel_session*"` 有輸出
+- [x] 7.1 [整合測試] 確認 log 走 stderr：呼叫任意 API 後 `docker compose logs app | tail -20` 有日誌輸出
+- [x] 7.2 [整合測試] 確認 `storage/logs/` 無新增日誌檔（舊檔保留）
+- [x] 7.3 [整合測試] 確認 session 走 Redis：登入後 `docker compose exec redis redis-cli keys "cfdiveplatform_database_*"` 有輸出（prefix 為 APP_NAME_database_，非 laravel_session*）
