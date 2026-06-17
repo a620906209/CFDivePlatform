@@ -59,8 +59,5 @@ fi
     echo "✅ [背景] 初始化完成"
 ) &
 
-# 啟動 cron（Laravel Scheduler）
-service cron start || cron || true
-
 echo "🚀 啟動 php-fpm..."
 exec "$@"
