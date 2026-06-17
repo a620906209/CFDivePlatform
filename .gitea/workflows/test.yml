@@ -15,11 +15,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, dom, fileinfo, gd, pdo_sqlite, sqlite3
-          coverage: none
+        run: |
+          apk add --no-cache \
+            php82 php82-phar php82-mbstring php82-dom php82-fileinfo php82-gd \
+            php82-pdo php82-pdo_sqlite php82-sqlite3 php82-tokenizer \
+            php82-xml php82-xmlwriter php82-ctype php82-curl php82-openssl \
+            php82-json php82-session php82-iconv \
+            curl unzip
+          ln -sf /usr/bin/php82 /usr/local/bin/php
+          curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --quiet
 
       - name: Copy .env
         run: cp .env.example .env
