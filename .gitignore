@@ -27,6 +27,4 @@ yarn-error.log
 /frontend/dist
 /frontend/.env
 
-# windsurf
-.windsurf/rules
 
