@@ -1,5 +1,30 @@
 # CFDivePlatform 啟動指令
 
+## 部署模式
+
+專案根目錄有兩個 compose 檔：
+
+| 檔案 | 用途 |
+|------|------|
+| `docker-compose.yml` | 正式服務（app、nginx、frontend、db、redis、reverb、queue-worker） |
+| `compose.override.yml` | 開發工具（phpmyadmin、mailpit），已進版控 |
+
+**本機 / VPS（預設）**：Docker Compose 自動合併兩檔，開發工具一同啟動：
+
+```bash
+docker compose up -d
+```
+
+**雲端正式環境**：明確指定單一檔案，排除開發工具：
+
+```bash
+docker compose -f docker-compose.yml up -d
+```
+
+> VPS 首次部署或更新後執行 `git pull` 即可取得最新的 `compose.override.yml`，不需手動建立。
+
+---
+
 ## 專案位置
 
 ```powershell

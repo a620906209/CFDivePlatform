@@ -38,11 +38,11 @@ services:
     
     # 健康檢查配置
     healthcheck:
-      test: ["CMD", "php", "-v"]  # 檢查 PHP 版本確認服務正常
-      interval: 30s  # 每30秒檢查一次
-      timeout: 10s  # 超時時間10秒
-      retries: 3  # 重試3次
-      start_period: 40s  # 容器啟動後40秒開始檢查
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 9000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   nginx:
     image: nginx:alpine
@@ -109,21 +109,6 @@ services:
     ports:
       - "127.0.0.1:3306:3306" # 只綁 localhost，不對外
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: cfdive-phpmyadmin
-    restart: unless-stopped
-    environment:
-      PMA_HOST: db
-      PMA_PORT: 3306
-      PMA_USER: ${DB_USERNAME:-cfdiveuser}
-      PMA_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    networks:
-      - cfdive-network
-    depends_on:
-      db:
-        condition: service_healthy
 
   queue-worker:
     image: cfdive-platform
@@ -146,12 +131,6 @@ services:
       app:
         condition: service_healthy
 
-  mailpit:
-    image: axllent/mailpit
-    container_name: cfdive-mailpit
-    restart: unless-stopped
-    networks:
-      - cfdive-network
 
   redis:
     image: redis:alpine
