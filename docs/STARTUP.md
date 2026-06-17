@@ -6,7 +6,7 @@
 
 | 檔案 | 用途 |
 |------|------|
-| `docker-compose.yml` | 正式服務（app、nginx、frontend、db、redis、reverb、queue-worker） |
+| `docker-compose.yml` | 正式服務（app、nginx、frontend、db、redis、reverb、queue-worker、scheduler） |
 | `compose.override.yml` | 開發工具（phpmyadmin、mailpit），已進版控 |
 
 **本機 / VPS（預設）**：Docker Compose 自動合併兩檔，開發工具一同啟動：
@@ -187,7 +187,60 @@ npm run dev
 | Reverb WebSocket | <ws://localhost:8085> |
 | Health Check | <http://localhost:8080/health> |
 
-## 10. 停止服務
+## 10. Log 查看
+
+Laravel 日誌走 stderr，透過 Docker 查看（不再有 `storage/logs/` 檔案）：
+
+```bash
+# 即時串流
+docker compose logs -f app
+
+# 查看最後 50 行
+docker compose logs app --tail=50
+```
+
+## 11. VPS 維護窗口操作（P1 部署）
+
+PR merge 後 CI/CD 自動跑 composer/migrate/cache，完成後 SSH 進 VPS 執行：
+
+```bash
+cd /root/myproject/CFDivePlatform
+
+# 1. 更新 .env（一次性）
+sed -i 's/SESSION_DRIVER=database/SESSION_DRIVER=redis/' .env
+sed -i 's/LOG_CHANNEL=stack/LOG_CHANNEL=stderr/' .env
+sed -i '/^LOG_STACK=/d' .env
+sed -i '/^LOG_DAILY_DAYS=/d' .env
+
+# 2. Rebuild + 重啟（entrypoint 自動 config:clear）
+docker compose up -d --build
+
+# 3. 驗證
+docker compose ps                                          # scheduler 應顯示 Up
+docker compose logs app --tail=20                         # 應有 stderr 日誌
+docker compose exec redis redis-cli keys "laravel_session*"  # 登入後應有 session key
+docker compose exec app sh -c "which cron 2>/dev/null || echo 'cron binary not found'"  # 應輸出 not found
+```
+
+**Rollback（若需還原）：**
+
+Session/Log 還原（不需 rebuild）：
+```bash
+sed -i 's/SESSION_DRIVER=redis/SESSION_DRIVER=database/' .env
+sed -i 's/LOG_CHANNEL=stderr/LOG_CHANNEL=stack/' .env
+echo "LOG_STACK=daily" >> .env
+echo "LOG_DAILY_DAYS=14" >> .env
+docker compose exec app php artisan config:clear
+docker compose restart app
+```
+
+Scheduler 還原（需 rebuild）：
+```bash
+git revert <commit-hash>
+docker compose up -d --build
+```
+
+## 12. 停止服務
 
 停止容器，但保留資料庫 volume：
 
