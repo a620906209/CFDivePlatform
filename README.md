@@ -57,10 +57,10 @@ Swagger UI（由 l5-swagger 生成）涵蓋所有端點，包含：
 - 教練課程 / 時段 / 預約管理 / 資格驗證申請（證照送審）
 - 管理員後台
 
-| 環境 | Swagger UI URL |
-|------|----------------|
+| 環境 | Swagger UI |
+|------|-----------|
 | 本地 | http://localhost:8080/api/documentation |
-| JSON | http://localhost:8080/docs/api-docs.json |
+| 生產 | https://api.hank-space.com/api/documentation |
 
 ---
 
@@ -87,10 +87,11 @@ GET /health
 
 目前首頁尚未提供明顯導引到教練後台的入口。若要體驗教練功能，請直接開啟 `/coach/login`，使用上方教練試用帳號登入後會進入 `/coach/dashboard`。
 
-| 服務 | URL |
-|------|-----|
-| API / 前端 | http://localhost:8080 |
-| Swagger UI | http://localhost:8080/api/documentation |
-| phpMyAdmin | http://localhost:8081 |
-| Mailpit | http://localhost:8025 |
-| Reverb WebSocket | ws://localhost:8085 |
+| 服務 | 本地 | 生產 |
+|------|------|------|
+| 前端 | http://localhost:8080 | https://app.hank-space.com |
+| API | http://localhost:8080/api | https://api.hank-space.com/api |
+| Swagger UI | http://localhost:8080/api/documentation | https://api.hank-space.com/api/documentation |
+| phpMyAdmin | http://localhost:8081 | http://\<vps-ip\>:8081 |
+| Mailpit | http://localhost:8025 | http://\<vps-ip\>:8025 |
+| Reverb WebSocket | ws://localhost:8085 | wss://ws.hank-space.com |
