@@ -50,12 +50,17 @@
 
 ## API 文件
 
-Swagger 文件涵蓋公開、會員、教練、管理員與認證端點，包含：
-- 認證（Email + Google OAuth）
+Swagger UI（由 l5-swagger 生成）涵蓋所有端點，包含：
+- 認證（Email + Google OAuth）、Token 刷新
 - 公開課程查詢
-- 會員預約 / 訊息 / 評價 / 通知
-- 教練課程 / 時段 / 預約管理
+- 會員預約 / 即時訊息 / 評價 / 通知
+- 教練課程 / 時段 / 預約管理 / 資格驗證申請（證照送審）
 - 管理員後台
+
+| 環境 | Swagger UI URL |
+|------|----------------|
+| 本地 | http://localhost:8080/api/documentation |
+| JSON | http://localhost:8080/docs/api-docs.json |
 
 ---
 
@@ -85,6 +90,7 @@ GET /health
 | 服務 | URL |
 |------|-----|
 | API / 前端 | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/api/documentation |
 | phpMyAdmin | http://localhost:8081 |
 | Mailpit | http://localhost:8025 |
 | Reverb WebSocket | ws://localhost:8085 |
