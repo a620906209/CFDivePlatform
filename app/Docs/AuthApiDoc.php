@@ -208,8 +208,40 @@ class AuthApiDoc
     }
 
     /**
+     * 會員 Token 刷新
+     *
+     * @OA\Post(
+     *     path="/member/refresh",
+     *     summary="會員 Token 刷新",
+     *     description="撤銷當前 Token 並發放新的 Bearer token（不需要重新登入）",
+     *     operationId="refreshMember",
+     *     tags={"會員"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="刷新成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="token", type="string", example="24|newtoken..."),
+     *             @OA\Property(property="token_type", type="string", example="Bearer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="未認證",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function refreshMember()
+    {
+    }
+
+    /**
      * 會員登出
-     * 
+     *
      * @OA\Post(
      *     path="/member/logout",
      *     summary="會員登出",
@@ -581,8 +613,40 @@ class AuthApiDoc
     }
 
     /**
+     * 服務提供者 Token 刷新
+     *
+     * @OA\Post(
+     *     path="/provider/refresh",
+     *     summary="服務提供者 Token 刷新",
+     *     description="撤銷當前 Token 並發放新的 Bearer token",
+     *     operationId="refreshProvider",
+     *     tags={"服務提供者"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="刷新成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="token", type="string", example="25|newtoken..."),
+     *             @OA\Property(property="token_type", type="string", example="Bearer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="未認證",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function refreshProvider()
+    {
+    }
+
+    /**
      * 服務提供者登出
-     * 
+     *
      * @OA\Post(
      *     path="/provider/logout",
      *     summary="服務提供者登出",
@@ -907,8 +971,40 @@ class AuthApiDoc
     }
 
     /**
+     * 管理員 Token 刷新
+     *
+     * @OA\Post(
+     *     path="/admin/refresh",
+     *     summary="管理員 Token 刷新",
+     *     description="撤銷當前 Token 並發放新的 Bearer token",
+     *     operationId="refreshAdmin",
+     *     tags={"管理員"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="刷新成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="token", type="string", example="26|newtoken..."),
+     *             @OA\Property(property="token_type", type="string", example="Bearer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="未認證",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function refreshAdmin()
+    {
+    }
+
+    /**
      * 管理員登出
-     * 
+     *
      * @OA\Post(
      *     path="/admin/logout",
      *     summary="管理員登出",

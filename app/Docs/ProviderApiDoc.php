@@ -21,9 +21,150 @@ use OpenApi\Annotations as OA;
  *     name="教練預約",
  *     description="服務提供者的預約管理"
  * )
+ * @OA\Tag(
+ *     name="教練驗證",
+ *     description="服務提供者的資格驗證申請（證照送審）"
+ * )
  */
 class ProviderApiDoc
 {
+    // -----------------------------------------------------------------------
+    // Provider Verification (證照送審)
+    // -----------------------------------------------------------------------
+
+    /**
+     * 取得驗證申請狀態
+     *
+     * @OA\Get(
+     *     path="/provider/verification",
+     *     summary="取得驗證申請狀態",
+     *     description="回傳當前服務提供者的驗證狀態與已上傳的證照清單",
+     *     operationId="getProviderVerification",
+     *     tags={"教練驗證"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="取得成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="verification_status", type="string", enum={"unsubmitted","pending","approved","rejected"}, example="pending"),
+     *                 @OA\Property(property="rejection_reason", type="string", nullable=true, example=null),
+     *                 @OA\Property(
+     *                     property="certifications",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="url", type="string", example="http://localhost:8080/storage/providers/5/certifications/uuid.jpg")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="無權限", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     * )
+     */
+    public function getProviderVerification()
+    {
+    }
+
+    /**
+     * 上傳證照圖片
+     *
+     * @OA\Post(
+     *     path="/provider/verification/certifications",
+     *     summary="上傳證照圖片",
+     *     description="上傳一張證照圖片（multipart/form-data），未送審前可多次上傳",
+     *     operationId="uploadCertification",
+     *     tags={"教練驗證"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"certification"},
+     *                 @OA\Property(property="certification", type="string", format="binary", description="證照圖片（jpg/png，最大 5MB）")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="上傳成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="url", type="string", example="http://localhost:8080/storage/providers/5/certifications/uuid.jpg")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="圖片驗證失敗", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="無權限", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     * )
+     */
+    public function uploadCertification()
+    {
+    }
+
+    /**
+     * 刪除證照圖片
+     *
+     * @OA\Delete(
+     *     path="/provider/verification/certifications/{id}",
+     *     summary="刪除證照圖片",
+     *     description="刪除指定的已上傳證照，已送審（pending/approved）狀態不可刪除",
+     *     operationId="deleteCertification",
+     *     tags={"教練驗證"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="證照 ID", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="刪除成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="證照已刪除")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="無權限或當前狀態不可刪除", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=404, description="證照不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     * )
+     */
+    public function deleteCertification()
+    {
+    }
+
+    /**
+     * 送出驗證申請
+     *
+     * @OA\Post(
+     *     path="/provider/verification/submit",
+     *     summary="送出驗證申請",
+     *     description="將驗證狀態由 unsubmitted/rejected 轉為 pending，至少需有一張已上傳的證照",
+     *     operationId="submitVerification",
+     *     tags={"教練驗證"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="送審成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="驗證申請已送出")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="尚未上傳證照或當前狀態不可送審", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="無權限", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     * )
+     */
+    public function submitVerification()
+    {
+    }
+
     // -----------------------------------------------------------------------
     // Provider Offers CRUD
     // -----------------------------------------------------------------------

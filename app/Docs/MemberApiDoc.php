@@ -17,6 +17,10 @@ use OpenApi\Annotations as OA;
  *     name="通知",
  *     description="站內通知管理（Member / Provider 共用）"
  * )
+ * @OA\Tag(
+ *     name="即時訊息",
+ *     description="預約聊天室訊息（Member / Provider 共用，僅限 confirmed / completed 預約的參與方）"
+ * )
  */
 class MemberApiDoc
 {
@@ -274,6 +278,152 @@ class MemberApiDoc
      * )
      */
     public function markReviewHelpful()
+    {
+    }
+
+    // -----------------------------------------------------------------------
+    // Booking Messages（即時訊息，Member + Provider 共用）
+    // -----------------------------------------------------------------------
+
+    /**
+     * 取得各預約未讀訊息數
+     *
+     * @OA\Get(
+     *     path="/bookings/messages/unread-counts",
+     *     summary="取得各預約未讀訊息數",
+     *     description="回傳當前使用者每個預約中對方發送的未讀訊息數量（Key 為 booking_id）",
+     *     operationId="getMessageUnreadCounts",
+     *     tags={"即時訊息"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="取得成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="Key 為 booking_id（string），value 為未讀數（integer）",
+     *                 example={"12": 3, "17": 1}
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function getMessageUnreadCounts()
+    {
+    }
+
+    /**
+     * 取得預約訊息列表
+     *
+     * @OA\Get(
+     *     path="/bookings/{booking}/messages",
+     *     summary="取得預約訊息列表",
+     *     description="回傳指定預約的所有訊息（依時間升冪排列），僅限預約參與方存取，且預約狀態需為 confirmed 或 completed",
+     *     operationId="listBookingMessages",
+     *     tags={"即時訊息"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="booking", in="path", required=true, description="預約 ID", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="取得成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="booking_id", type="integer", example=12),
+     *                     @OA\Property(property="sender_type", type="string", enum={"member","provider"}, example="member"),
+     *                     @OA\Property(property="message", type="string", nullable=true, example="請問需要自備潛水裝備嗎？"),
+     *                     @OA\Property(property="image_url", type="string", nullable=true, example=null),
+     *                     @OA\Property(property="read_at", type="string", nullable=true, example=null),
+     *                     @OA\Property(property="created_at", type="string", example="2025-07-01T10:00:00.000000Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="非參與方或預約狀態不符", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=404, description="預約不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     * )
+     */
+    public function listBookingMessages()
+    {
+    }
+
+    /**
+     * 發送預約訊息
+     *
+     * @OA\Post(
+     *     path="/bookings/{booking}/messages",
+     *     summary="發送預約訊息",
+     *     description="向指定預約的對方發送文字訊息或圖片（multipart/form-data）",
+     *     operationId="sendBookingMessage",
+     *     tags={"即時訊息"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="booking", in="path", required=true, description="預約 ID", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="message", type="string", nullable=true, example="請問需要自備潛水裝備嗎？"),
+     *                 @OA\Property(property="image", type="string", format="binary", nullable=true, description="圖片（jpg/png，message 與 image 至少擇一）")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="訊息已送出",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=42),
+     *                 @OA\Property(property="booking_id", type="integer", example=12),
+     *                 @OA\Property(property="sender_type", type="string", example="member"),
+     *                 @OA\Property(property="message", type="string", nullable=true, example="請問需要自備潛水裝備嗎？"),
+     *                 @OA\Property(property="image_url", type="string", nullable=true, example=null),
+     *                 @OA\Property(property="read_at", type="string", nullable=true, example=null),
+     *                 @OA\Property(property="created_at", type="string", example="2025-07-01T10:05:00.000000Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="非參與方或預約狀態不符", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=422, description="message 與 image 皆為空", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     * )
+     */
+    public function sendBookingMessage()
+    {
+    }
+
+    /**
+     * 標記訊息為已讀
+     *
+     * @OA\Post(
+     *     path="/bookings/{booking}/messages/read",
+     *     summary="標記訊息為已讀",
+     *     description="將指定預約中對方發送的所有未讀訊息批次標記為已讀",
+     *     operationId="markMessagesRead",
+     *     tags={"即時訊息"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="booking", in="path", required=true, description="預約 ID", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="標記成功",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="已標記為已讀")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="非參與方", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     * )
+     */
+    public function markMessagesRead()
     {
     }
 
