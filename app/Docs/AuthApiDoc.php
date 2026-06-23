@@ -12,7 +12,7 @@ use OpenApi\Annotations as OA;
  * )
  * 
  * @OA\Server(
- *     url="/api",
+ *     url=L5_SWAGGER_CONST_HOST,
  *     description="API 伺服器"
  * )
  * 
