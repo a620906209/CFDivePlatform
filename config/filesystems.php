@@ -36,12 +36,22 @@ return [
             'throw' => false,
         ],
 
+        // 注意：本專案所有上傳程式碼都寫死 Storage::disk('public')，不吃 'default' disk。
+        // 因此這裡讓 'public' disk 的 driver 直接讀 FILESYSTEM_DISK，而非新增一顆獨立的
+        // 's3' disk 再改呼叫點——FILESYSTEM_DISK=local 時以下 S3 專屬欄位會被忽略。
+        // 詳見 openspec/changes/cloud-ready-s3-storage/design.md 的 D1。
         'public' => [
-            'driver' => 'local',
+            'driver' => env('FILESYSTEM_DISK', 'local'),
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('AWS_URL') ?: env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
         ],
 
         's3' => [

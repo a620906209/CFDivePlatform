@@ -1,21 +1,21 @@
 ## 1. 依賴與設定 [後端]
 
-- [ ] 1.1 [後端] `composer require league/flysystem-aws-s3-v3`
-- [ ] 1.2 [後端] `config/filesystems.php`：`public` disk 改為 D1 設計（`driver` 吃 `env('FILESYSTEM_DISK', 'local')`，補上 `key`/`secret`/`region`/`bucket`/`endpoint`/`use_path_style_endpoint`），並加註解說明此專案對 `FILESYSTEM_DISK` 的特殊用法
-- [ ] 1.3 [後端] `.env.example`：`FILESYSTEM_DISK` 保留 `local` 預設，更新行內註解；補齊 `AWS_ENDPOINT`、`AWS_URL`、`AWS_USE_PATH_STYLE_ENDPOINT` 三個變數與說明
+- [x] 1.1 [後端] `composer require league/flysystem-aws-s3-v3`
+- [x] 1.2 [後端] `config/filesystems.php`：`public` disk 改為 D1 設計（`driver` 吃 `env('FILESYSTEM_DISK', 'local')`，補上 `key`/`secret`/`region`/`bucket`/`endpoint`/`use_path_style_endpoint`），並加註解說明此專案對 `FILESYSTEM_DISK` 的特殊用法
+- [x] 1.3 [後端] `.env.example`：`FILESYSTEM_DISK` 保留 `local` 預設，更新行內註解；補齊 `AWS_ENDPOINT`、`AWS_URL`、`AWS_USE_PATH_STYLE_ENDPOINT` 三個變數與說明
 
 ## 2. 遷移 Command [後端]
 
-- [ ] 2.1 [後端] 新增 `app/Console/Commands/MigrateStorageToS3.php`（`storage:migrate-to-s3` 指令），掃描 `storage/app/public/` 並上傳至 `Storage::disk('s3')`，保留相對路徑，排除 `storage:link` 符號連結
-- [ ] 2.2 [後端] 實作 `--dry-run` 參數：只列出檔案清單與總數，不執行上傳
-- [ ] 2.3 [後端] 上傳後用 `Storage::disk('s3')->exists()` 驗證，失敗檔案收集成清單並於結尾印出，command 以非 0 exit code 結束（若有失敗）
-- [ ] 2.4 [後端] 確認 command 不刪除任何本機檔案（無論成功或失敗）
+- [x] 2.1 [後端] 新增 `app/Console/Commands/MigrateStorageToS3.php`（`storage:migrate-to-s3` 指令），掃描 `storage/app/public/` 並上傳至 `Storage::disk('s3')`，保留相對路徑，排除 `storage:link` 符號連結
+- [x] 2.2 [後端] 實作 `--dry-run` 參數：只列出檔案清單與總數，不執行上傳
+- [x] 2.3 [後端] 上傳後用 `Storage::disk('s3')->exists()` 驗證，失敗檔案收集成清單並於結尾印出，command 以非 0 exit code 結束（若有失敗）
+- [x] 2.4 [後端] 確認 command 不刪除任何本機檔案（無論成功或失敗）
 
 ## 3. 測試 [後端]
 
-- [ ] 3.1 [後端] `MigrateStorageToS3` command 測試：正常上傳、`--dry-run` 不執行上傳、部分失敗時正確回報且不中斷
-- [ ] 3.2 [後端] `config/filesystems.php` 改動後，既有 `CourseImageTest`／`ProviderCertification` 相關測試在 `FILESYSTEM_DISK=local`（預設）下全數通過，確認零回歸
-- [ ] 3.3 [後端] 新增測試驗證 `FILESYSTEM_DISK=local` 與未設定時行為一致（呼叫 `Storage::disk('public')` 不需任何 AWS credentials 即可運作）
+- [x] 3.1 [後端] `MigrateStorageToS3` command 測試：正常上傳、`--dry-run` 不執行上傳、部分失敗時正確回報且不中斷
+- [x] 3.2 [後端] `config/filesystems.php` 改動後，既有 `CourseImageTest`／`ProviderCertification` 相關測試在 `FILESYSTEM_DISK=local`（預設）下全數通過，確認零回歸
+- [x] 3.3 [後端] 新增測試驗證 `FILESYSTEM_DISK=local` 與未設定時行為一致（呼叫 `Storage::disk('public')` 不需任何 AWS credentials 即可運作）
 
 ## 4. R2 環境準備 [整合測試]
 
