@@ -1,4 +1,10 @@
-## ADDED Requirements
+# notification-core Specification
+
+## Purpose
+
+定義站內通知的資料模型、通知列表與未讀數 API、標記已讀/刪除操作，以及前端 Bell Icon 與通知中心的顯示與動態輪詢機制。
+
+## Requirements
 
 ### Requirement: 通知資料模型
 

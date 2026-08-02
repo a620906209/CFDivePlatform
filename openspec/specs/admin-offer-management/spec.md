@@ -1,4 +1,10 @@
-## ADDED Requirements
+# admin-offer-management Specification
+
+## Purpose
+
+定義管理員查看全平台課程列表與刪除任意課程的 API 行為，這些操作不受一般教練端點的 provider_id 擁有權限制。
+
+## Requirements
 
 ### Requirement: 管理員查看全平台課程列表
 後端 SHALL 提供 `GET /api/admin/offers`（需 Bearer token，role=admin），回傳所有課程，支援關鍵字搜尋與分頁。

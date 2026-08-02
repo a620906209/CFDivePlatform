@@ -1,4 +1,10 @@
-## ADDED Requirements
+# admin-stats Specification
+
+## Purpose
+
+定義平台統計數據 API 的行為，回傳總會員數、總教練數、總課程數等核心經營指標，供管理員在 Admin Dashboard 快速掌握平台規模，僅限管理員角色存取。
+
+## Requirements
 
 ### Requirement: 平台統計數據 API
 後端 SHALL 提供 `GET /api/admin/stats`（需 Bearer token，role=admin），回傳平台核心數據。

@@ -1,4 +1,10 @@
-## ADDED Requirements
+# admin-panel-ui Specification
+
+## Purpose
+
+定義 Admin Panel 前端頁面（登入、儀表板、會員/教練/課程管理）的路由、資料載入與操作行為，以及路由守衛與 Layout 規則。
+
+## Requirements
 
 ### Requirement: 管理員登入頁
 前端 SHALL 提供 `/admin/login` 頁面，供管理員以 email/password 登入，成功後導向 `/admin/dashboard`。

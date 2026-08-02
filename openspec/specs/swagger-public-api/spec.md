@@ -1,4 +1,10 @@
-## ADDED Requirements
+# swagger-public-api Specification
+
+## Purpose
+
+定義無需認證的公開端點與全域共用 Schema 的 Swagger API 文件涵蓋範圍，包含課程列表、詳情、評價與時段查詢。
+
+## Requirements
 
 ### Requirement: 公開端點 Swagger 文件及共用 Schema
 

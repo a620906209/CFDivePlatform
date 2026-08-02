@@ -1,4 +1,10 @@
-## ADDED Requirements
+# swagger-member-api Specification
+
+## Purpose
+
+定義 Member 端點的 Swagger API 文件涵蓋範圍，包含預約、評價、投票與站內通知端點。
+
+## Requirements
 
 ### Requirement: Member 端點 Swagger 文件
 

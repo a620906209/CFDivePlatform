@@ -1,4 +1,10 @@
-## ADDED Requirements
+# admin-auth Specification
+
+## Purpose
+
+定義管理員帳號的建立途徑（僅限主機端指令，不提供公開註冊端點）、登入/登出、個人資料查詢與 Bearer Token 有效期規則。
+
+## Requirements
 
 ### Requirement: 管理員帳號建立途徑
 管理員帳號 SHALL 僅能透過主機端 `php artisan app:create-admin` command 或資料庫 seeder 建立。系統 MUST NOT 提供任何公開的管理員註冊 HTTP 端點（原 `POST /api/admin/register` 已於 2026-06-11 因 P0 安全漏洞移除）。command 建立的密碼門檻為至少 8 碼，高於一般使用者。

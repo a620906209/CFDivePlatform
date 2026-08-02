@@ -1,4 +1,10 @@
-## ADDED Requirements
+# notification-triggers Specification
+
+## Purpose
+
+定義預約與評價各事件（建立、確認、拒絕、取消、完成、收到評價）觸發站內與 Email 通知的時機與收件人，且通知失敗不影響主業務。
+
+## Requirements
 
 ### Requirement: 預約建立觸發通知
 

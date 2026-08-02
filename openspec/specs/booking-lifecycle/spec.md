@@ -1,3 +1,11 @@
+# booking-lifecycle Specification
+
+## Purpose
+
+定義預約系統的七狀態機、建立/確認/拒絕/取消流程、防超賣的名額驗證、Scheduler 自動過期與完成，以及狀態轉換觸發的通知。
+
+## Requirements
+
 ### Requirement: Member 送出預約
 Member SHALL 能選擇一個開放時段送出預約，系統記錄價格快照。pending 狀態不佔用時段名額。
 

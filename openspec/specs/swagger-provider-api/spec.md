@@ -1,4 +1,10 @@
-## ADDED Requirements
+# swagger-provider-api Specification
+
+## Purpose
+
+定義 Provider 端點的 Swagger API 文件涵蓋範圍，包含課程 CRUD、圖片管理、開課時段與預約處理端點。
+
+## Requirements
 
 ### Requirement: Provider 端點 Swagger 文件
 

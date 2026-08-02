@@ -1,4 +1,10 @@
-## ADDED Requirements
+# account-lockout Specification
+
+## Purpose
+
+定義登入失敗鎖定機制的 Cache Key 命名規範、Fixed Window 計數邏輯、閾值設定與前端錯誤提示，防止暴力破解並避免帳號枚舉攻擊。
+
+## Requirements
 
 ### Requirement: Cache Key Namespace
 後端 SHALL 使用以下格式的 Cache key，`{role}` 僅允許 `member` 或 `provider` 兩個值，對應各自的登入端點；`{email}` 為 `strtolower(trim($request->email))` 正規化後的結果。

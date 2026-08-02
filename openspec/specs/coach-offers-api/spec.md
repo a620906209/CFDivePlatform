@@ -1,4 +1,10 @@
-## ADDED Requirements
+# coach-offers-api Specification
+
+## Purpose
+
+定義教練課程管理 API 的 provider_id 所有權驗證不變式與 CRUD 端點行為，確保教練只能查看與操作自己的課程。
+
+## Requirements
 
 ### Requirement: provider_id 所有權不變式
 對單一課程操作端點（show / update / destroy），系統 MUST 依序執行：先以 id 查找課程（不存在回 404），再比對 provider_id（不符回 403）。兩步驟不可合併為單一 WHERE 查詢。`store()` MUST 強制將 `provider_id` 設為 `auth()->id()`，忽略 request body 傳入值。

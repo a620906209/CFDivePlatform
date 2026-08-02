@@ -1,4 +1,10 @@
-## ADDED Requirements
+# diving-offers-api Specification
+
+## Purpose
+
+定義公開的課程列表與課程詳情 API，支援關鍵字搜尋、地區與標籤篩選、分頁，以及前端開發 origin 的 CORS 設定。
+
+## Requirements
 
 ### Requirement: 課程列表 API
 後端 SHALL 提供公開的 `GET /api/diving-offers` endpoint，回傳分頁的潛水課程列表，支援關鍵字搜尋與篩選，無需認證即可存取。response 中每筆課程包含 `provider_id` 欄位（可為 null）。

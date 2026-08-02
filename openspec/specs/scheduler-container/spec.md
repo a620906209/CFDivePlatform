@@ -1,5 +1,7 @@
 # scheduler-container
 
+## Purpose
+
 Laravel Scheduler 以獨立 container 執行，取代 app container 內的 cron daemon。
 
 ## Requirements

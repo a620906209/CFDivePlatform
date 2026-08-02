@@ -1,4 +1,10 @@
-## ADDED Requirements
+# provider-auth Specification
+
+## Purpose
+
+定義教練帳號的登入、註冊、登出、個人資料讀取與更新 API，以及 Bearer Token 的 7 天有效期與 refresh 機制。
+
+## Requirements
 
 ### Requirement: 教練帳號登入
 後端 SHALL 提供 `POST /api/provider/login`，驗證 email/password 並回傳 Sanctum Bearer token，僅限 role=provider 帳號。回傳的 token 有效期為 7 天。

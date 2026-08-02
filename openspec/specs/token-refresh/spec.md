@@ -1,4 +1,10 @@
-## ADDED Requirements
+# token-refresh Specification
+
+## Purpose
+
+定義三角色（會員/教練/管理員）的 Bearer Token Refresh 端點，以及前端 axios interceptor 的 401 自動 refresh-then-retry 攔截機制。
+
+## Requirements
 
 ### Requirement: Member Token Refresh
 後端 SHALL 提供 `POST /api/member/refresh`（需有效 Bearer token），revoke 現有 token 並發行新的 7 天 token。

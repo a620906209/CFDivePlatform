@@ -1,3 +1,11 @@
+# course-image-upload Specification
+
+## Purpose
+
+定義課程封面與相簿圖片的伺服器端壓縮規則、上傳/刪除端點行為、課程刪除時的圖片清理，以及圖片透過 host bind mount 持久化的機制。
+
+## Requirements
+
 ### Requirement: 伺服器端圖片壓縮
 系統 SHALL 在儲存課程封面與相簿圖片前進行壓縮：長邊超過 2048px 時等比縮小至 2048px 內（僅縮不放大），一律轉存 JPEG（quality 85，副檔名 `.jpg`，uuid 檔名）。與聊天圖片管線（`scaleDown(2048) + toJpeg(85)`）參數一致，共用 `App\Traits\CompressesImages`。
 

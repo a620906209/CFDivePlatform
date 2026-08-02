@@ -1,3 +1,11 @@
+# api-cache-layer Specification
+
+## Purpose
+
+定義以 Redis 作為 Laravel 快取驅動，涵蓋 Admin 統計、課程列表、評價分布的快取策略、TTL 與資料異動時的失效時機。
+
+## Requirements
+
 ### Requirement: Redis 作為快取驅動
 
 系統 SHALL 使用 Redis 作為 Laravel 快取驅動，取代現有的 `database` driver。
