@@ -1,3 +1,11 @@
+# booking-chat Specification
+
+## Purpose
+
+定義預約聊天室的完整行為：文字與圖片訊息收發、訊息歷史查詢、狀態轉換時的訊息封存、已讀回執、未讀計數與跨裝置站內/瀏覽器通知。
+
+## Requirements
+
 ### Requirement: 發送文字訊息
 Member 與 Provider SHALL 能在 `confirmed` 狀態的預約中透過 `POST /api/bookings/{id}/messages` 發送文字訊息。訊息儲存後系統 SHALL 廣播 `MessageSent` event 至 `presence-booking.{id}` 頻道。
 

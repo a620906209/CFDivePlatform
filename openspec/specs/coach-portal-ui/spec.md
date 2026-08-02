@@ -1,4 +1,10 @@
-## ADDED Requirements
+# coach-portal-ui Specification
+
+## Purpose
+
+定義 Coach Portal 前端頁面（註冊、登入、課程 Dashboard、新增/編輯課程、個人資料）的路由行為與路由守衛規則。
+
+## Requirements
 
 ### Requirement: 教練註冊頁
 前端 SHALL 提供 `/coach/register` 頁面，供教練填寫帳號資訊與業者資料後申請帳號，成功後導向 `/coach/login`。

@@ -1,3 +1,11 @@
+# db-index-optimization Specification
+
+## Purpose
+
+定義為加速常用查詢（未讀通知計數、教練課程列表）而新增的資料庫複合索引與單欄索引，避免這些高頻查詢隨資料量成長退化為 full table scan。
+
+## Requirements
+
 ### Requirement: Notifications 表補複合索引
 
 `notifications` 表 SHALL 新增 `[notifiable_type, notifiable_id, read_at]` 複合索引，以加速 `unreadNotifications()` 查詢。

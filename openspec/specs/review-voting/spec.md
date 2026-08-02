@@ -1,3 +1,11 @@
+# review-voting Specification
+
+## Purpose
+
+定義會員對評價投「有幫助」票的規則：可取消不可重複、角色限制、不可對自己的評價投票，以及投票狀態隨評價列表回傳。
+
+## Requirements
+
 ### Requirement: Member 對評價投「有幫助」票
 已登入 **Member**（role = member）SHALL 能對評價投「有幫助」票，可取消，不可重複投票。Provider 與 Admin 不可投票。
 

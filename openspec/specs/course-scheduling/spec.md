@@ -1,3 +1,11 @@
+# course-scheduling Specification
+
+## Purpose
+
+定義教練建立與管理開課時段、取消時段時對既有預約的 cascade 處理、名額自動管理，以及會員查詢可用時段的行為。
+
+## Requirements
+
 ### Requirement: Provider 建立開課時段
 Provider SHALL 能為自己擁有的 DivingOffer 建立開課時段，指定日期、開始時間、人數上限。
 

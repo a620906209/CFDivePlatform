@@ -1,5 +1,7 @@
 # compose-cloud-baseline
 
+## Purpose
+
 Docker Compose 雲端基準設定——healthcheck 使用真實端點、正式 compose 不含開發工具、dev-only 服務透過 override 隔離。
 
 ## Requirements

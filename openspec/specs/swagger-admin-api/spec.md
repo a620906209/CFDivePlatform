@@ -1,4 +1,10 @@
-## ADDED Requirements
+# swagger-admin-api Specification
+
+## Purpose
+
+定義 Admin 端點的 Swagger API 文件涵蓋範圍，包含統計、會員/教練/課程/預約/評價管理端點。
+
+## Requirements
 
 ### Requirement: Admin 端點 Swagger 文件
 

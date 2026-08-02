@@ -1,4 +1,10 @@
-## ADDED Requirements
+# member-portal-ui Specification
+
+## Purpose
+
+定義 Member Portal 前端的完整頁面行為：首頁、課程列表/詳情、登入註冊（含 Google OAuth）、個人資料，以及以 sessionStorage 管理的認證狀態。
+
+## Requirements
 
 ### Requirement: 專案基礎建設
 前端 SHALL 建立於本 repo 的 `frontend/` 目錄（原規劃獨立 repo，後併入主 repo 以簡化版控與部署），使用 Vue 3 + Vite + Tailwind CSS + Vue Router 4 + Pinia + Axios，並設定 `.env` 指定後端 API base URL。

@@ -1,3 +1,11 @@
+# user-presence Specification
+
+## Purpose
+
+定義預約聊天室的 Presence Channel 訂閱驗證、在線狀態感知、已讀回執顯示與未讀訊息計數的即時行為。
+
+## Requirements
+
 ### Requirement: 訂閱預約 Presence Channel
 已認證的 Member 與 Provider SHALL 能透過 Laravel Echo 訂閱 `presence-booking.{booking_id}` 頻道，訂閱時系統 SHALL 驗證使用者確為該預約的參與方。
 

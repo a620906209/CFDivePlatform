@@ -1,4 +1,10 @@
-## ADDED Requirements
+# notification-email Specification
+
+## Purpose
+
+定義透過 SMTP 非同步寄送 Email 通知的機制，涵蓋本地 Mailpit 攔截、Queue Worker 投遞、Markdown 模板與各事件的觸發條件。
+
+## Requirements
 
 ### Requirement: Laravel Mail 設定
 
@@ -56,6 +62,7 @@ Email 通知 SHALL 透過 Laravel Queue（`QUEUE_CONNECTION=database`）非同�
 ---
 
 ### Requirement: Email 通知觸發條件與收件人
+系統 SHALL 依下表定義的事件、收件人與主旨寄送 Email 通知：
 
 | 事件 | 收件人 | 主旨 |
 |------|--------|------|

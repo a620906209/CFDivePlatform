@@ -1,4 +1,10 @@
-## ADDED Requirements
+# login-rate-limiting Specification
+
+## Purpose
+
+定義登入端點的 IP-based 頻率限制規則：會員/教練每分鐘 10 次、管理員每分鐘 3 次，超過限制回傳 HTTP 429。
+
+## Requirements
 
 ### Requirement: 登入頻率限制
 後端 SHALL 對所有登入端點套用 IP-based 頻率限制，超過限制時回傳 HTTP 429。Member 與 Provider 每 IP 每分鐘最多 10 次（原定 5 次；帳號鎖定機制上線後已涵蓋暴力破解防護，放寬以容納共享 IP 場景，與實作 `throttle:10,1` 一致）；Admin 因影響範圍更廣，限制為每 IP 每分鐘最多 3 次。

@@ -1,4 +1,10 @@
-## ADDED Requirements
+# swagger-auth-supplement Specification
+
+## Purpose
+
+定義補全 Auth 相關端點的 Swagger 文件涵蓋範圍，包含 Google OAuth 與三角色的密碼變更端點。
+
+## Requirements
 
 ### Requirement: Auth 補全端點 Swagger 文件
 

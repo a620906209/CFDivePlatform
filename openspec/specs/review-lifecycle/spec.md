@@ -1,3 +1,11 @@
+# review-lifecycle Specification
+
+## Purpose
+
+定義評價系統的完整生命週期：新增/修改/刪除評價的資格驗證、課程統計即時重算、匿名公開顯示與分頁排序，以及評價觸發的 Provider 通知。
+
+## Requirements
+
 ### Requirement: Member 新增評價
 已完成特定課程的 Member SHALL 能對該課程留下一次評價（星等 + 文字）。
 

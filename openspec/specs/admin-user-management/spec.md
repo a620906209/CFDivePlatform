@@ -1,4 +1,10 @@
-## ADDED Requirements
+# admin-user-management Specification
+
+## Purpose
+
+定義管理員查看與管理會員/教練帳號的 API：列表查詢、詳情查看、啟用停用切換；教練驗證狀態變更改由審核狀態機（見 provider-verification）管理。
+
+## Requirements
 
 ### Requirement: 管理員查看會員列表
 後端 SHALL 提供 `GET /api/admin/members`（需 Bearer token，role=admin），回傳所有 role=member 的用戶，支援關鍵字搜尋與分頁。
@@ -58,7 +64,7 @@
 ---
 
 ### Requirement: 管理員驗證教練（已由審核狀態機取代）
-`PUT /api/admin/providers/{id}/toggle-verified` 已於 2026-06-12 移除——單鍵切換允許繞過審核狀態機（無原因駁回、未送審直接通過）。教練驗證狀態的變更一律透過 `PUT /api/admin/verifications/{userId}/approve|reject`（見 provider-verification 規格「Admin 審核佇列與裁決」）。
+系統 SHALL NOT 提供 `PUT /api/admin/providers/{id}/toggle-verified` 端點（已於 2026-06-12 移除——單鍵切換允許繞過審核狀態機，無原因駁回、未送審直接通過）。教練驗證狀態的變更 SHALL 一律透過 `PUT /api/admin/verifications/{userId}/approve|reject`（見 provider-verification 規格「Admin 審核佇列與裁決」）。
 
 #### Scenario: toggle 端點回 404
 - **WHEN** 管理員請求 `PUT /api/admin/providers/{id}/toggle-verified`

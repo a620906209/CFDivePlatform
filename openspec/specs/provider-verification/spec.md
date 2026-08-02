@@ -4,7 +4,7 @@
 
 定義教練資質審核的完整生命週期：教練上傳證照送審、Admin 審核裁決（通過/駁回含原因）、結果通知，以及「未通過審核（approved）之教練的課程不對公開端點曝光、不可接受新預約」的可見性約束。
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: 教練驗證狀態機
 `provider_profiles.verification_status` SHALL 為四狀態字串：`unsubmitted`（註冊預設）、`pending`、`approved`、`rejected`。合法轉移僅限：`unsubmitted→pending`（送審）、`pending→approved`（通過）、`pending→rejected`（駁回）、`rejected→pending`（重新送審，同時清空 `rejection_reason`）、`approved→rejected`（撤銷，原因必填）。原 boolean `is_verified` 欄位移除，API 輸出以 accessor 保留 `is_verified`（= status 為 approved）。

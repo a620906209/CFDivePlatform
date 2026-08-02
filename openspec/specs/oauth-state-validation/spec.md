@@ -1,4 +1,10 @@
-## ADDED Requirements
+# oauth-state-validation Specification
+
+## Purpose
+
+定義 Google OAuth 登入流程以 state 參數防範 CSRF 攻擊的產生、比對、單次使用與失敗導向規則。
+
+## Requirements
 
 ### Requirement: OAuth 授權流程帶 state 參數防 CSRF
 後端 SHALL 在 OAuth redirect 前產生隨機 state 字串（至少 32 bytes hex），存入 `session('oauth_state')`，並附加於 OAuth redirect URL 的 `state` query parameter。`stateless()` 呼叫 SHALL 被移除；Socialite 在 `redirect()` 內會自行寫入 `session('state')`，實作 SHALL 在 `redirect()` 呼叫後以同一 state 值覆蓋 `session('state')`，確保 Socialite 內建驗證與手動驗證使用相同值。callback 時 SHALL 從 request 讀取 `state` 並與 `session('oauth_state')` 比對（`hash_equals`）；比對成功後 SHALL 立即清除；不符或缺少時 SHALL redirect 至 `/login?error=oauth_failed`。
