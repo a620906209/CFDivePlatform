@@ -6,6 +6,9 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
+// TODO(2026-08-03): 尚未申請 S3 相容服務帳號，此指令目前無法在正式環境執行
+// （會因缺少 AWS_* credentials 連線失敗）。待 R2 帳號建立後才會實際使用，
+// 見 openspec/changes/cloud-ready-s3-storage/tasks.md 第 4-6 組。
 class MigrateStorageToS3 extends Command
 {
     protected $signature = 'storage:migrate-to-s3
