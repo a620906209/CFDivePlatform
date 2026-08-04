@@ -55,8 +55,8 @@
 - [x] 7.4 [整合測試] 驗證 production 模式：`docker compose -f docker-compose.yml up -d`（不含 override）啟動後確認容器仍正常回應 API 請求——首頁 200、`/api/diving-offers` 回傳正確 JSON、migration/cache/swagger 全部成功
 - [x] 7.5 [整合測試] 驗證上傳檔案持久性：建立測試檔案於 `storage/app/public/`，`docker compose up -d --force-recreate app nginx` 重建容器，確認該檔案透過 nginx `/storage/...` 仍可正常存取
 - [x] 7.6 [整合測試] 驗證 `.env` 熱更新：修改 `.env` 內 `APP_NAME`，`docker compose up -d`（不 build）重建 container，確認容器內 `env('APP_NAME')` 讀到新值，測試後已還原
-- [ ] 7.7 [整合測試] 在 Gitea Actions 上以手動觸發或測試分支驗證完整 `deploy.yml` 新流程跑得通，確認 build 失敗時舊 container 是否仍維持運作（design.md 已知風險項）——需 VPS/CI 環境，留給 Hank 執行
-- [ ] 7.8 [整合測試] VPS 正式部署後，人工驗證預約、聊天室、課程圖片上傳、教練證照上傳等現有功能正常，並確認 `scheduler`/`queue-worker`/`reverb` 皆以新 image 啟動（`docker compose ps` 確認 image ID 一致）——需 VPS 環境，留給 Hank 執行
+- [x] 7.7 [整合測試] 在 Gitea Actions 上以手動觸發或測試分支驗證完整 `deploy.yml` 新流程跑得通，確認 build 失敗時舊 container 是否仍維持運作（design.md 已知風險項）——Hank 確認 VPS 上 Gitea Actions 執行正常
+- [x] 7.8 [整合測試] VPS 正式部署後，人工驗證預約、聊天室、課程圖片上傳、教練證照上傳等現有功能正常，並確認 `scheduler`/`queue-worker`/`reverb` 皆以新 image 啟動（`docker compose ps` 確認 image ID 一致）——Hank 確認 VPS 功能正常；`docker compose ps` 顯示 app/scheduler/queue-worker/reverb 皆為 `cfdive-platform` image、同批次（16 分鐘前）一起重建，nginx 為 `cfdive-nginx-web` 亦同批次重建，app healthcheck healthy
 - [x] 7.9 [整合測試] 確認 entrypoint／deploy 職責切分無重疊：`docker compose up -d` 啟動 `app`/`scheduler`/`queue-worker` 三個共用 entrypoint 的服務時，觀察其 log 不應出現 migration 或 `l5-swagger:generate` 執行紀錄，這些只應出現在 `deploy.yml` 執行紀錄裡——三個容器 log 都只有初始化與 php-fpm 啟動訊息
 - [x] 7.10 [整合測試] 驗證 nginx 靜態資源獨立於 app：停掉 `app` container 後 nginx 仍能透過 HTTP 直接回應 `public/` 下的靜態檔案（`favicon.ico` 200）與 production 模式下 `/` 回應 200，確認不依賴 `app` container 是否存在或執行中
 - [x] 7.11 [整合測試] 驗證 nginx 的 public/storage 符號連結獨立建立：`docker run --rm cfdive-platform` / `cfdive-nginx-web` 直接對 image（非透過 dev override 容器）執行 `readlink /var/www/public/storage`，兩者皆為 `../storage/app/public`，各自獨立存在於各自 image 內
