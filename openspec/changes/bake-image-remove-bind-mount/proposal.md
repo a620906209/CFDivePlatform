@@ -21,7 +21,7 @@
 
 ## Impact
 
-- **受影響檔案**：`Dockerfile`（改為 multi-stage：`app` + `web`）、`.dockerignore`（新增）、`docker-compose.yml`、`.gitea/workflows/deploy.yml`、`docker/php/docker-entrypoint.sh`
+- **受影響檔案**：`Dockerfile`（改為 multi-stage：`app` + `web`）、`.dockerignore`（新增，含 `public/storage` 排除本機既有符號連結）、`docker-compose.yml`（`app` 服務需明確 `target: app`，否則預設建到最後一個 stage）、`.gitea/workflows/deploy.yml`、`docker/php/docker-entrypoint.sh`、`compose.override.yml`；另因 `env_file:` 讓 `.env` 全部變數成為真實環境變數而牽動 `tests/bootstrap.php`、`phpunit.xml`（擴大既有測試環境隔離的強制覆蓋範圍，非新增機制，詳見 design.md 實作驗證後追加）
 - **受影響服務**：app、nginx（改為本地 build 而非拉取 `nginx:alpine`）、scheduler、queue-worker、reverb（全部五個掛 bind mount 的服務）
 - **受影響流程**：VPS 部署流程（Gitea Actions self-hosted runner）、本機開發流程（開發者需改用 `docker compose build` 才能讓程式碼變動生效，或另外規劃開發環境仍用 bind mount 的 override 方案）
 - **不受影響**：`file-storage-s3`（本次不強制切換到 S3，上傳檔案改走具名 volume 過渡）、`compose-cloud-baseline`（healthcheck／開發工具隔離邏輯不變）

@@ -134,3 +134,11 @@ env_file:
 ## Open Questions
 
 （本次規劃階段已收斂的問題不再列於此——volume 命名已定名為 `storage-app-public`，見 Decision 3；`compose.override.yml` 版控狀態已查證澄清，見 Decision 2；nginx 程式碼來源與 symlink 策略已定案，見 Decision 4、5。目前無待決問題。）
+
+## 實作驗證後追加（2026-08-04）
+
+本機完整跑過 `docker compose build` + `up -d`（含 override 與 production 兩種模式）後，發現並修復三個規劃階段未預見的問題：
+
+1. **`app` 服務的 `build:` 必須明確指定 `target: app`**：`Dockerfile` 改 multi-stage 後，若 `build:` 未指定 `target:`，Docker 預設建到 Dockerfile 中**最後一個** stage（本例是 `web`）。這代表 `cfdive-platform` image 若沒補上 `target: app`，實際內容會是 nginx 而非 php-fpm——`docker image inspect` 驗證過（entrypoint 顯示為 `nginx -g daemon off;`），屬於會讓整個 `app` container 完全無法運作的嚴重錯誤。已在 `docker-compose.yml` 的 `app` 服務 `build:` 區塊加上 `target: app` 修正，`nginx` 服務原本就有 `target: web` 不受影響。**這是本次多階段 Dockerfile 設計裡容易被忽略的一點：每一個引用同一份 multi-stage Dockerfile 的 compose service，都必須明確宣告自己要的 target，不能依賴預設值。**
+2. **`.dockerignore` 需額外排除 `public/storage`**：本機開發環境長期有一個先前用 `php artisan storage:link`（Laravel 預設，非本次新增的相對路徑版本）建立的 `public/storage` 符號連結，指向絕對路徑 `/var/www/storage/app/public`。這個符號連結若留在 build context 內，會讓 Docker Desktop for Windows 在打包 build context 時因為 Windows 符號連結的檔案模式無法正確轉換而失敗（`archive/tar: unknown file mode`）。已加入 `.dockerignore`。
+3. **`env_file:` 讓 `.env` 全部變數成為真實環境變數，破壞既有測試隔離機制**：這個專案先前已經因為「compose `environment:` 把 `DB_CONNECTION`/`DB_DATABASE` 設成真實環境變數，導致 PHPUnit 測試在容器內清空開發用 MySQL」踩過一次坑（2026-06-12），並在 `tests/bootstrap.php` 寫了強制覆蓋 `$_SERVER`/`$_ENV`/`putenv` 三處的修復。但那次修復**只覆蓋了 `DB_CONNECTION`/`DB_DATABASE` 兩個 key**，因為當時只有這兩個透過 compose `environment:` 洩漏成真實環境變數。這次 Decision 7 把 `env_file: .env` 套用到 `app` 服務後，`.env` 檔案裡**所有**變數都變成真實環境變數，包括與 `phpunit.xml` 宣告的 testing 值衝突的 `APP_ENV=local`（非 `testing`）、`CACHE_STORE=redis`（非 `array`）、`SESSION_DRIVER=database`（非 `array`）、`QUEUE_CONNECTION=database`（非 `sync`）、`MAIL_MAILER=smtp`（非 `array`）、`BCRYPT_ROUNDS=12`（非 `4`）——由於 Laravel 的 `env()` 透過 phpdotenv 優先讀 `$_SERVER`，這些真實環境變數蓋掉了 `phpunit.xml` 的宣告值，造成 9 個測試失敗（快取跨測試污染、意外走真實 SMTP mailer、`APP_ENV` 非 testing 導致例外處理行為不同等）。**修復方式是把既有 `tests/bootstrap.php` 的強制覆蓋清單，從只有 2 個 key 擴大到涵蓋 `phpunit.xml` 宣告的全部 11 個 key**，同時在 `phpunit.xml` 補上 `force="true"` 做自我說明（實際生效仍是 `tests/bootstrap.php` 的 `$_SERVER` 寫入，`force="true"` 本身不夠）。這不是本次變更引入的新架構問題，而是既有測試隔離機制的覆蓋範圍需要跟著 `env_file:` 的採用範圍同步擴大——**未來任何時候擴大 `env_file:` 涵蓋的變數範圍，都要重新檢查 `tests/bootstrap.php` 的強制覆蓋清單是否需要同步更新**。

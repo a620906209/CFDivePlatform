@@ -1,0 +1,13 @@
+vendor/
+node_modules/
+.env
+.env.backup
+.env.production
+storage/app/public/*
+public/storage
+frontend/node_modules/
+frontend/dist/
+.git/
+.claude/
+.phpunit.cache/
+.phpunit.result.cache

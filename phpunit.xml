@@ -18,19 +18,21 @@
         </include>
     </source>
     <php>
-        <env name="APP_ENV" value="testing"/>
-        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="CACHE_STORE" value="array"/>
-        <!-- force：docker compose 將 DB_CONNECTION=mysql 設為真實環境變數，
-             phpunit 的 env 預設不覆蓋真實環境變數，導致容器內跑測試時
-             RefreshDatabase 直接清空開發用 MySQL（2026-06-12 實際發生兩次） -->
+        <!-- force="true" 全部套用：docker-compose.yml 改用 env_file: 注入 .env 後，
+             .env 內所有變數都變成真實環境變數，phpunit 的 env 預設不覆蓋真實環境變數。
+             實際生效仍依賴 tests/bootstrap.php 同步寫入 $_SERVER（force="true" 本身
+             只覆蓋 $_ENV/putenv，Laravel env() 優先讀 $_SERVER），這裡的 force="true"
+             是與 bootstrap.php 保持一致、自我說明用途 -->
+        <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
+        <env name="BCRYPT_ROUNDS" value="4" force="true"/>
+        <env name="CACHE_STORE" value="array" force="true"/>
         <env name="DB_CONNECTION" value="sqlite" force="true"/>
         <env name="DB_DATABASE" value=":memory:" force="true"/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="PULSE_ENABLED" value="false"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <env name="PULSE_ENABLED" value="false" force="true"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
+        <env name="TELESCOPE_ENABLED" value="false" force="true"/>
     </php>
 </phpunit>

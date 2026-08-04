@@ -15,10 +15,30 @@ jobs:
           flock /tmp/cfdive-deploy.lock git fetch origin
           git reset --hard origin/master
 
-      - name: Install Composer dependencies
+      - name: Build images
         run: |
           cd /root/myproject/CFDivePlatform
-          docker compose exec -T app composer install --no-dev --optimize-autoloader
+          docker compose build
+
+      - name: Start containers with new images
+        run: |
+          cd /root/myproject/CFDivePlatform
+          docker compose up -d --remove-orphans
+
+      - name: Wait for app container healthy
+        run: |
+          cd /root/myproject/CFDivePlatform
+          for i in $(seq 1 30); do
+            status=$(docker inspect --format='{{.State.Health.Status}}' cfdive-app 2>/dev/null || echo "starting")
+            if [ "$status" = "healthy" ]; then
+              echo "✅ app container healthy"
+              exit 0
+            fi
+            echo "⏳ waiting for app healthy... ($status)"
+            sleep 2
+          done
+          echo "❌ app container did not become healthy in time"
+          exit 1
 
       - name: Run migrations
         run: |
@@ -37,11 +57,6 @@ jobs:
         run: |
           cd /root/myproject/CFDivePlatform
           docker compose exec -T app php artisan l5-swagger:generate
-
-      - name: Restart queue worker
-        run: |
-          cd /root/myproject/CFDivePlatform
-          docker compose restart queue-worker
 
       - name: Rebuild frontend (if changed)
         run: |

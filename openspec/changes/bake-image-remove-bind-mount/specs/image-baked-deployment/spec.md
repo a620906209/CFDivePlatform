@@ -78,6 +78,17 @@
 - **WHEN** 執行 `docker compose -f docker-compose.yml up -d`
 - **THEN** 五個服務容器內的 `/var/www` 內容與 image build 時內嵌的內容一致，即使主機端程式碼目錄被刪除，容器仍正常運作
 
+### Requirement: 每個 compose service 明確指定 multi-stage build target
+`docker-compose.yml` 中依賴這份 multi-stage `Dockerfile` 建置的每一個服務（`app` 與 `nginx`）SHALL 在其 `build:` 設定明確指定 `target:`（`app` 服務指定 `target: app`，`nginx` 服務指定 `target: web`），不得省略。
+
+#### Scenario: app 服務建置出的是 php-fpm image 而非 nginx
+- **WHEN** 執行 `docker compose build app`
+- **THEN** 建置完成的 `cfdive-platform` image 其 entrypoint／預設指令為啟動 php-fpm，而非 nginx（`docker image inspect cfdive-platform` 確認 `Config.Cmd` 為 `["php-fpm"]`）
+
+#### Scenario: 省略 target 會建到 Dockerfile 最後一個 stage
+- **WHEN** 某服務的 `build:` 未指定 `target:`
+- **THEN** Docker 依規範建置到 Dockerfile 中定義的最後一個 stage，可能與該服務實際需要的 stage 不同——此為本次 multi-stage 化後所有服務都必須明確宣告 target 的原因
+
 ### Requirement: 本機開發環境透過 override 疊加 bind mount
 `compose.override.yml` SHALL 為 `app`、`nginx`、`scheduler`、`queue-worker`、`reverb` 定義 `./:/var/www` bind mount，供本機開發時「改 code 立即生效」使用；此 override 檔案不影響 production compose 行為。
 

@@ -6,36 +6,32 @@ services:
     build:
       context: .  # 使用當前目錄作為構建上下文
       dockerfile: Dockerfile  # 指定 Dockerfile 路徑
+      target: app  # 明確指定 build target，避免預設建到最後一個 stage（web/nginx）
     image: cfdive-platform  # 構建的鏡像名稱
     container_name: cfdive-app  # 容器名稱
     restart: unless-stopped  # 自動重啟策略：除非手動停止，否則自動重啟
     working_dir: /var/www/  # 工作目錄
-    
-    # 卷掛載：將本地代碼掛載到容器中
+
+    # 上傳檔案在 image 重建後仍保留（過渡方案，待正式切 S3 後可移除）
     volumes:
-      - ./:/var/www  # 本地代碼目錄掛載到容器中的 /var/www
-    
-    # 環境變數：設置 Laravel 數據庫連接
-    environment:
-      - DB_CONNECTION=mysql  # 數據庫類型
-      - DB_HOST=db  # 數據庫主機名
-      - DB_PORT=3306  # 數據庫端口
-      - DB_DATABASE=${DB_DATABASE:-CFDivePlatform}  # 數據庫名稱
-      - DB_USERNAME=${DB_USERNAME:-cfdiveuser}  # 數據庫用戶名
-      - DB_PASSWORD=${DB_PASSWORD}  # 數據庫密碼
-    
+      - storage-app-public:/var/www/storage/app/public
+
+    # 環境變數：以 env_file 注入 .env 內容，不會在容器內生成實體 .env 檔案
+    env_file:
+      - .env
+
     # 網絡配置
     networks:
       - cfdive-network  # 連接到自定義網絡
       - proxy_net
-    
+
     # 依賴關係：確保 db 和 redis 服務先啟動
     depends_on:
       db:  # 依賴 db 服務
         condition: service_healthy  # 等待數據庫健康檢查通過
       redis:  # 依賴 redis 服務
         condition: service_started  # 等待服務啟動
-    
+
     # 健康檢查配置
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 9000 || exit 1"]
@@ -45,14 +41,19 @@ services:
       start_period: 40s
 
   nginx:
-    image: nginx:alpine
+    # 從 Dockerfile 的 web 階段本地建置，取得 public/ 靜態資源，
+    # 不再拉取官方 nginx:alpine image、也不依賴任何執行期共享機制取得程式碼
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    image: cfdive-nginx-web
     container_name: cfdive-nginx
     restart: unless-stopped
     ports:
       - "127.0.0.1:8080:80"
     volumes:
-      - ./:/var/www
-      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - storage-app-public:/var/www/storage/app/public
     networks:
       - cfdive-network
       - proxy_net
@@ -116,15 +117,8 @@ services:
     restart: unless-stopped
     working_dir: /var/www/
     command: php artisan schedule:work
-    volumes:
-      - ./:/var/www
-    environment:
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=${DB_DATABASE:-CFDivePlatform}
-      - DB_USERNAME=${DB_USERNAME:-cfdiveuser}
-      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env
     networks:
       - cfdive-network
     depends_on:
@@ -137,15 +131,8 @@ services:
     restart: unless-stopped
     working_dir: /var/www/
     command: php artisan queue:work --sleep=3 --tries=3 --timeout=60
-    volumes:
-      - ./:/var/www
-    environment:
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=${DB_DATABASE:-CFDivePlatform}
-      - DB_USERNAME=${DB_USERNAME:-cfdiveuser}
-      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env
     networks:
       - cfdive-network
     depends_on:
@@ -175,22 +162,8 @@ services:
     entrypoint: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
     ports:
       - "127.0.0.1:8085:8080"
-    volumes:
-      - ./:/var/www
-    environment:
-      - APP_KEY=${APP_KEY}
-      - REVERB_APP_ID=${REVERB_APP_ID}
-      - REVERB_APP_KEY=${REVERB_APP_KEY}
-      - REVERB_APP_SECRET=${REVERB_APP_SECRET}
-      - REVERB_HOST=reverb
-      - REVERB_PORT=8080
-      - REDIS_HOST=redis
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=${DB_DATABASE:-CFDivePlatform}
-      - DB_USERNAME=${DB_USERNAME:-cfdiveuser}
-      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env
     networks:
       - cfdive-network
       - proxy_net
@@ -208,4 +181,6 @@ volumes:
   mysql-data:
     driver: local
   redis-data:
+    driver: local
+  storage-app-public:
     driver: local
