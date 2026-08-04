@@ -1,4 +1,26 @@
 services:
+  # 本機開發用：疊加 bind mount，維持「改 code 立即生效」的體驗
+  # production（docker-compose.yml 單獨執行，不吃這份 override）不受影響
+  app:
+    volumes:
+      - ./:/var/www
+
+  nginx:
+    volumes:
+      - ./:/var/www
+
+  scheduler:
+    volumes:
+      - ./:/var/www
+
+  queue-worker:
+    volumes:
+      - ./:/var/www
+
+  reverb:
+    volumes:
+      - ./:/var/www
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: cfdive-phpmyadmin
