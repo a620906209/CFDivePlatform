@@ -105,7 +105,7 @@
 - 所有寫入型 child 預設**不 push、不 merge**，由主 agent 驗證 diff 後整合
 
 ### 待辦
-- [x] 決定 subagent 定義的存放位置：已決定放 `.pi/agents/`（Pi 負責審查）；`.claude/agents/` 暫不放
+- [x] 決定 subagent 定義的存放位置：`.pi/agents/` 與 `.claude/agents/` 各放一份
 - [x] 先建立兩個唯讀角色：改為移植自 ProjectC 的 `spec-reviewer`（對應 spec-auditor）與 `strict-reviewer`（涵蓋 security-reviewer 並加入測試執行）；`design-hardener` 暫不移植
 - [ ] 試用一輪後再決定是否建立寫入型角色
 
@@ -128,7 +128,7 @@
 - OpenSpec CLI 已由 1.3.1 升級至 1.14.1（2026-10-14）：`openspec update` 重新產生 `.claude/` 內的 OpenSpec skill 與指令，先前加在 `openspec-apply-change` 的「測試對應檢查」自訂區塊隨之移除，改放到 `openspec/config.yaml` 的 `operations.apply.guidance`（`openspec update` 不會覆蓋）；`operations.archive.guidance` 另提醒歸檔後更新 config.yaml 的 context
 - 已知限制：`operations.*.guidance` 屬於「建議性」提示（OpenSpec 文件明寫為 prompt-level 行為契約，非可強制的檢查），硬性規則仍以 CLAUDE.md 為準
 - 升級後 `openspec validate --specs --strict` 有 3 份 spec 的 Requirement 超過 500 字元會失敗（account-lockout、booking-lifecycle、image-baked-deployment）；一般模式 39 份全過。日後若要在 CI 使用 `--strict`，需先另開 change 拆分這些 Requirement
-- Subagent：已移植 `spec-reviewer`、`strict-reviewer` 至 `.pi/agents/`，並在 CLAUDE.md 新增「審查流程」；尚未實際跑過，需以真實 change 或 H1 漏洞試跑驗證
+- Subagent：已移植 `spec-reviewer`、`strict-reviewer` 至 `.pi/agents/`（gpt-5.6-terra，跨家族審查）並複製一份到 `.claude/agents/`（sonnet，與實作端同家族），CLAUDE.md 新增「審查流程」；兩套需保持同步；尚未實際跑過，需以真實 change 或 H1 漏洞試跑驗證
 - 尚待處理：`security-checklist`、`add-endpoint`、`design-hardener`（視需要）
 
 ## 需要你決定的事項（歷史紀錄，下列 1 已決定）

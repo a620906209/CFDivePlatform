@@ -171,9 +171,16 @@
 
 ---
 
-## 審查流程（Pi agent 的 subagent）
+## 審查流程（subagent）
 
-審查角色定義在 `.pi/agents/`，由 Pi agent 調用；兩者都是**唯讀**（只讀取與執行測試，不修改檔案、不 commit、不 push），模型為 `github-copilot/gpt-5.6-terra`，與實作端的 Claude 屬不同模型家族。Claude Code 不會載入這些角色，請在 Pi 中呼叫。
+審查角色有兩套定義，內容相同，分別給兩個工具載入；兩者都是**唯讀**（只讀取與執行白名單內的驗證命令，不修改檔案、不 commit、不 push）：
+
+| 工具 | 位置 | 模型 | 備註 |
+|------|------|------|------|
+| Pi agent | `.pi/agents/` | `github-copilot/gpt-5.6-terra` | 與實作端的 Claude 屬不同模型家族，跨家族審查，**優先使用** |
+| Claude Code | `.claude/agents/` | `sonnet` | 與實作端同家族，只是 context 隔離的審查，不是跨家族獨立審查；適合快速自檢 |
+
+兩套內容需保持同步：修改其中一套時，必須同步更新另一套（差異僅有 frontmatter 的 `tools`、`model`，以及工具名稱的寫法）。
 
 | 時機 | 角色 | 輸入 | 用途 |
 |------|------|------|------|
