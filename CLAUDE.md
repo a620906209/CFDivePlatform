@@ -16,12 +16,23 @@
 
 ---
 
+## 工具分工
+
+- **Claude Code**：主要的實作工具（OpenSpec 流程、寫程式、提交）。專案的 skill 與指令放在 `.claude/`
+- **Pi agent**：目前用於審查（review）與環境、工具調整；不負責主要實作
+- `CLAUDE.md` 是兩個工具共同讀取的規則來源；`.claude/skills/`、`.claude/commands/` 僅 Claude Code 讀取，Pi 不會載入
+- 因此跨工具都必須遵守的規則一律寫在本檔，不要只寫在 skill 裡
+
+---
+
 ## 禁止行為
 
 - 禁止在未確認 spec 對應關係的情況下開始實作
 - 禁止使用 raw SQL query（除非有明確說明理由）
 - 禁止在前端直接使用 `innerHTML` 渲染未經處理的使用者輸入
 - 禁止在 Acceptance Criteria 未對應測試任務的情況下開始實作
+- 禁止直接 push 或 force push `master`（push master 會觸發自動部署，一律走 PR）
+- 禁止在未檢查呼叫者角色的情況下新增 member / provider 路由（見「授權規範」）
 
 ---
 
@@ -129,6 +140,45 @@
 
 - **重複邏輯**：這段邏輯是否已存在於 codebase 中，應該抽共用？
 - **命名一致性**：變數、函式、API endpoint 命名是否與現有規範一致？
+
+---
+
+## 專案慣例
+
+- API 回應格式：成功 `{ status: true, message?, data }`；失敗 `{ status: false, message, errors? }`
+- Controller 位於 `app/Http/Controllers/API/`；路由集中於 `routes/api.php`
+- Swagger 註解集中於 `app/Docs/`，新增或修改端點時同步更新
+- OpenSpec 的專案背景與撰寫規則以 `openspec/config.yaml` 為準，本檔不重複維護
+- 目前尚無 `app/Services/`、`app/Http/Requests/`；新增業務邏輯時優先抽成 Service，不要再擴大 Controller（既有 `AuthController` 的重構見 `docs/analysis/2026-10-14-project-review-todo.md` M1）
+
+---
+
+## 授權規範
+
+- 已知缺口：`routes/api.php` 的 `member`、`provider` 路由群組只有 `auth:sanctum`，**沒有角色 middleware**；只有 `admin` 群組有 `EnsureAdmin`（待辦見 `docs/analysis/2026-10-14-project-review-todo.md` H1）
+- 在 middleware 補上之前：新增或修改 member / provider 路由時，Controller 必須明確檢查呼叫者角色與資源所有權，不可假設路由群組已有保護
+- middleware 補上之後：新路由必須掛對應角色 middleware，並保留 Controller 內的資源所有權檢查
+- 每個涉及權限的路由都必須有跨角色測試（member / provider / admin / 未登入各自的預期結果，參考 `tests/Feature/AdminEndpointAuthTest.php`）
+
+---
+
+## 驗證指令
+
+- 測試：`php artisan test`（`phpunit.xml` 強制使用 SQLite `:memory:`，因此 `lockForUpdate` 等行鎖行為在測試中不具驗證力，不可據此宣稱已驗證併發安全）
+- 格式：`./vendor/bin/pint --test <變更的檔案>`；只針對本次變更的檔案，避免全專案格式化造成無關 diff
+- OpenSpec：`openspec validate --specs`、`openspec status --change <name>`
+- 完成 task 後的回報格式見 `.claude/skills/verify-and-report/SKILL.md`
+
+---
+
+## Git 與 PR 流程
+
+- 遠端：`vps`（自架 Gitea，PR 與部署）為主；`origin`（GitHub）為鏡像，非必要不需推送
+- 分支前綴：`feat/`、`fix/`、`chore/`、`docs/`、`security/`、`test/`、`perf/`；kebab-case 英文
+- Commit：`type(scope): 繁體中文描述`，type 同分支前綴（另有 `ci`、`refactor`）
+- OpenSpec 變更分成獨立 PR：change 規劃、實作、歸檔各自一個 PR，不混在一起
+- 功能分支推送到 `vps` 後由使用者在 Gitea 開 PR 並合併；合併後再 `git checkout master && git pull vps master`，並刪除本機分支
+- 不要在輸出或 commit 中顯示 remote URL（`git remote -v` 的輸出可能含有憑證）
 
 ---
 
