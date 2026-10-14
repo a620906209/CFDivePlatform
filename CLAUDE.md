@@ -171,6 +171,22 @@
 
 ---
 
+## 審查流程（Pi agent 的 subagent）
+
+審查角色定義在 `.pi/agents/`，由 Pi agent 調用；兩者都是**唯讀**（只讀取與執行測試，不修改檔案、不 commit、不 push），模型為 `github-copilot/gpt-5.6-terra`，與實作端的 Claude 屬不同模型家族。Claude Code 不會載入這些角色，請在 Pi 中呼叫。
+
+| 時機 | 角色 | 輸入 | 用途 |
+|------|------|------|------|
+| OpenSpec 文件（proposal、design、tasks、specs）寫完、**實作之前** | `spec-reviewer` | change 名稱或 `openspec/changes/<name>/` | 檢查需求完整性、安全與權限、AC 與測試任務的雙向對應、與既有規格一致性 |
+| 程式碼變更**全部完成**、提 PR 之前 | `strict-reviewer` | 分支（`git diff HEAD`）或指定範圍 | 檢查分層、Eloquent、安全與授權、測試與專案慣例，並執行 `php artisan test`、`pint` |
+
+- 結果為 `FAIL` 或 `BLOCKED` 時，必須先修正或解除限制再重新審查，不可直接進入下一階段
+- 審查結果是參考意見，不取代使用者判斷；審查者與實作者意見不同時，由使用者決定
+- `strict-reviewer` 的測試使用 SQLite，不能驗證行鎖併發行為，這類變更需另外人工確認
+- 審查使用的分支、提交與 PR 仍依下方「Git 與 PR 流程」進行
+
+---
+
 ## Git 與 PR 流程
 
 - 遠端：`vps`（自架 Gitea，PR 與部署）為主；`origin`（GitHub）為鏡像，非必要不需推送
