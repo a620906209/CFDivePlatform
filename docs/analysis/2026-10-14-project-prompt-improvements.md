@@ -27,23 +27,23 @@
 ### 建議修改
 
 #### 1. `openspec/config.yaml`
-- [ ] 更新「已完成模組」：Admin Panel、預約與時段、即時訊息、評價與投票、通知、課程圖片、教練審核、S3 儲存、鎖定與限流、Token Refresh
-- [ ] 更新「尚未實作」：金流整合、訂閱方案（`subscriptions`／`plans` 尚無 API）
-- [ ] 修正前端儲存描述（以實際程式為準，改前先重新確認 coach 端）
-- [ ] 加入 `rules.proposal`：必須列出受影響的主規格
-- [ ] 加入 `rules.specs`：每個 Requirement 至少一個 `#### Scenario`；Scenario 需可轉為測試
-- [ ] 加入 `rules.tasks`：每個 Scenario 至少對應一個 `[整合測試]` task，否則不得標記 apply-ready
-- [ ] 加入 `rules.design`：觸及安全觸發條件時，必須附上「安全確認」段落（回應 P9）
+- [x] 更新「已完成模組」：Admin Panel、預約與時段、即時訊息、評價與投票、通知、課程圖片、教練審核、S3 儲存、鎖定與限流、Token Refresh
+- [x] 更新「尚未實作」：金流整合、訂閱方案（`subscriptions`／`plans` 尚無 API）
+- [x] 修正前端儲存描述（以實際程式為準，改前先重新確認 coach 端）
+- [x] 加入 `rules.proposal`：必須列出受影響的主規格
+- [x] 加入 `rules.specs`：每個 Requirement 至少一個 `#### Scenario`；Scenario 需可轉為測試
+- [x] 加入 `rules.tasks`：每個 Scenario 至少對應一個 `[整合測試]` task，否則不得標記 apply-ready
+- [x] 加入 `rules.design`：觸及安全觸發條件時，必須附上「安全確認」段落（回應 P9）
 
 #### 2. `CLAUDE.md`（新增區塊，避免與 config.yaml 重複規則）
-- [ ] **專案慣例**：API 回應 `{ status, message?, data }`、Controller 位於 `app/Http/Controllers/API/`、Swagger 註解位於 `app/Docs/`
-- [ ] **驗證指令**：`php artisan test`、`./vendor/bin/pint`；說明測試預設使用 SQLite，涉及行鎖的測試需另行確認
-- [ ] **Git 流程**：分支前綴 `feat/`、`fix/`、`chore/`、`docs/`；commit 使用 Conventional Commits 加繁中描述；一律走 PR；**禁止直接 push master（會觸發自動部署）**；推送 remote 為 `vps`
-- [ ] **授權規範**：新增路由必須掛角色 middleware，並附跨角色 403 測試
-- [ ] 以一句話指向 `openspec/config.yaml`，OpenSpec 細節規則只維護一份
+- [x] **專案慣例**：API 回應 `{ status, message?, data }`、Controller 位於 `app/Http/Controllers/API/`、Swagger 註解位於 `app/Docs/`
+- [x] **驗證指令**：`php artisan test`、`./vendor/bin/pint`；說明測試預設使用 SQLite，涉及行鎖的測試需另行確認
+- [x] **Git 流程**：分支前綴 `feat/`、`fix/`、`chore/`、`docs/`；commit 使用 Conventional Commits 加繁中描述；一律走 PR；**禁止直接 push master（會觸發自動部署）**；推送 remote 為 `vps`
+- [x] **授權規範**：新增路由必須掛角色 middleware，並附跨角色 403 測試
+- [x] 以一句話指向 `openspec/config.yaml`，OpenSpec 細節規則只維護一份
 
 #### 3. `.windsurf/rules/`
-- [ ] 三選一，**需你決定**：
+- [x] 三選一（已決定：刪除 ponytail 規則；Pi 與 Claude Code 皆讀取 CLAUDE.md，不需另外相容）：
   - 刪除 ponytail 規則，改為指向 CLAUDE.md（建議，單一事實來源）
   - 保留但改寫，移除與 SOLID 衝突的條款
   - 保留，但明確標註「僅用於快速原型，不用於本專案正式程式」
@@ -72,10 +72,10 @@
 
 ### 建議修改
 
-- [ ] **修改 `openspec-apply-change`**：開始前檢查 tasks.md 中每個 Scenario／AC 是否有對應測試 task，缺漏則停止並回報
-- [ ] **修正 `branch-and-propose`**：`vps` 小寫、處理非 master 起點、說明分支前綴規則
-- [ ] **新增 `verify-and-report`**：執行 `php artisan test`、`pint`，並依 CLAUDE.md 輸出固定格式報告（spec 同步狀態、偏差點、重複邏輯、命名一致性、AC 測試涵蓋）
-- [ ] **新增 `finish-and-pr`**：確認測試通過、依 Conventional Commits 提交、推送分支（不推 master）、提示開 PR；歸檔另走 `openspec-archive-change`
+- [x] **修改 `openspec-apply-change`**：開始前檢查 tasks.md 中每個 Scenario／AC 是否有對應測試 task，缺漏則停止並回報
+- [x] **修正 `branch-and-propose`**：`vps` 小寫、處理非 master 起點、說明分支前綴規則
+- [x] **新增 `verify-and-report`**：執行 `php artisan test`、`pint`，並依 CLAUDE.md 輸出固定格式報告（spec 同步狀態、偏差點、重複邏輯、命名一致性、AC 測試涵蓋）
+- [x] **新增 `finish-and-pr`**：確認測試通過、依 Conventional Commits 提交、推送分支（不推 master）、提示開 PR；歸檔另走 `openspec-archive-change`
 - [ ] **新增 `security-checklist`**：從 CLAUDE.md 抽出必答問題，碰到五類觸發條件時載入
 - [ ] **新增 `add-endpoint`**：新增 API 端點的檢核流程
 - [ ] 決定 `commands/opsx` 與 `skills/openspec-*` 是否保留雙份（由 OpenSpec CLI 產生，建議不手動合併，只記錄於升級流程）
@@ -121,7 +121,14 @@
 6. 建立唯讀 subagent（spec-auditor、security-reviewer）
 7. 視需要補 `security-checklist`、`add-endpoint`
 
-## 需要你決定的事項
+## 進度紀錄（2026-10-14）
+
+- 已完成：config.yaml 更新、CLAUDE.md 補充、移除 `.windsurf` ponytail 規則、修正 `branch-and-propose`、`openspec-apply-change` 加入測試對應檢查、新增 `verify-and-report` 與 `finish-and-pr`
+- 工具分工：Claude Code 為主要實作工具，Pi agent 目前用於審查與環境調整；`.claude/` 保留
+- 注意：`openspec-apply-change`（skill 與 `commands/opsx/apply.md`）為 OpenSpec 產生的檔案，已加入標註「CFDive 自訂區塊」，執行 `openspec update` 後需確認並重新加回
+- 尚待處理：subagent 定義、`security-checklist`、`add-endpoint`
+
+## 需要你決定的事項（歷史紀錄，下列 1 已決定）
 
 1. `.windsurf` ponytail 規則：刪除、改寫、還是標註用途？
 2. subagent 存放位置與主要工具鏈（Claude Code、Pi、Windsurf）
