@@ -186,8 +186,10 @@
 |------|------|------|------|
 | OpenSpec 文件（proposal、design、tasks、specs）寫完、**實作之前** | `spec-reviewer` | change 名稱或 `openspec/changes/<name>/` | 檢查需求完整性、安全與權限、AC 與測試任務的雙向對應、與既有規格一致性 |
 | `spec-reviewer` 通過後、**實作之前**，且 change 符合觸發條件 | `design-hardener` | change 名稱或 `openspec/changes/<name>/` | 條件式設計加固：安全原語、Docker 與部署 runtime、Composer／npm 相依、migration 與自動部署、失效模式（不符合觸發條件時直接 PASS，可略過） |
+| Controller／Service 的程式碼變更**全部完成、確定不會再改**之後，呼叫 `strict-reviewer` 之前 | `hardener`（Claude Code skill，位於 `.claude/skills/hardener/`，Pi 不會載入） | 本次變更的方法 | 補強防禦性檢查：參數驗證、資源存在性與擁有權、狀態機、併發、例外邊界、日誌；回答 CLAUDE.md 安全確認問題。只補缺漏，不重寫已正確的程式碼 |
 | 程式碼變更**全部完成**、提 PR 之前 | `strict-reviewer` | 分支（`git diff HEAD`）或指定範圍 | 檢查分層、Eloquent、安全與授權、測試與專案慣例，並執行 `php artisan test`、`pint` |
 
+- 若套用 `hardener` 後因此又修改了程式碼，改完再呼叫 `strict-reviewer`；若套用後確認既有程式碼已符合檢查清單、沒有修改，不需要重複呼叫
 - 結果為 `FAIL` 或 `BLOCKED` 時，必須先修正或解除限制再重新審查，不可直接進入下一階段
 - 審查結果是參考意見，不取代使用者判斷；審查者與實作者意見不同時，由使用者決定
 - `strict-reviewer` 的測試使用 SQLite，不能驗證行鎖併發行為，這類變更需另外人工確認
