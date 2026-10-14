@@ -185,6 +185,7 @@
 | 時機 | 角色 | 輸入 | 用途 |
 |------|------|------|------|
 | OpenSpec 文件（proposal、design、tasks、specs）寫完、**實作之前** | `spec-reviewer` | change 名稱或 `openspec/changes/<name>/` | 檢查需求完整性、安全與權限、AC 與測試任務的雙向對應、與既有規格一致性 |
+| `spec-reviewer` 通過後、**實作之前**，且 change 符合觸發條件 | `design-hardener` | change 名稱或 `openspec/changes/<name>/` | 條件式設計加固：安全原語、Docker 與部署 runtime、Composer／npm 相依、migration 與自動部署、失效模式（不符合觸發條件時直接 PASS，可略過） |
 | 程式碼變更**全部完成**、提 PR 之前 | `strict-reviewer` | 分支（`git diff HEAD`）或指定範圍 | 檢查分層、Eloquent、安全與授權、測試與專案慣例，並執行 `php artisan test`、`pint` |
 
 - 結果為 `FAIL` 或 `BLOCKED` 時，必須先修正或解除限制再重新審查，不可直接進入下一階段

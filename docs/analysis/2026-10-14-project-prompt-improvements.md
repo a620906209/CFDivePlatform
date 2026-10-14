@@ -106,7 +106,7 @@
 
 ### 待辦
 - [x] 決定 subagent 定義的存放位置：`.pi/agents/` 與 `.claude/agents/` 各放一份
-- [x] 先建立兩個唯讀角色：改為移植自 ProjectC 的 `spec-reviewer`（對應 spec-auditor）與 `strict-reviewer`（涵蓋 security-reviewer 並加入測試執行）；`design-hardener` 暫不移植
+- [x] 先建立兩個唯讀角色：改為移植自 ProjectC 的 `spec-reviewer`（對應 spec-auditor）與 `strict-reviewer`（涵蓋 security-reviewer 並加入測試執行）；`design-hardener` 後續也已補上（見下方進度）
 - [ ] 試用一輪後再決定是否建立寫入型角色
 
 ---
@@ -129,7 +129,9 @@
 - 已知限制：`operations.*.guidance` 屬於「建議性」提示（OpenSpec 文件明寫為 prompt-level 行為契約，非可強制的檢查），硬性規則仍以 CLAUDE.md 為準
 - 升級後 `openspec validate --specs --strict` 有 3 份 spec 的 Requirement 超過 500 字元會失敗（account-lockout、booking-lifecycle、image-baked-deployment）；一般模式 39 份全過。日後若要在 CI 使用 `--strict`，需先另開 change 拆分這些 Requirement
 - Subagent：已移植 `spec-reviewer`、`strict-reviewer` 至 `.pi/agents/`（gpt-5.6-terra，跨家族審查）並複製一份到 `.claude/agents/`（sonnet，與實作端同家族），CLAUDE.md 新增「審查流程」；兩套需保持同步；尚未實際跑過，需以真實 change 或 H1 漏洞試跑驗證
-- 尚待處理：`security-checklist`、`add-endpoint`、`design-hardener`（視需要）
+- 已補上 `design-hardener`（`.pi/agents/` 與 `.claude/agents/` 各一份），針對 Laravel／Docker 自動部署重寫：新增 migration 與自動 `migrate --force`、`config:cache` 與 `env()`、`trustProxies(at: ['*'])`、Redis fail-open／fail-closed、queue worker 與 image 烘焙等檢查；流程為 spec-reviewer 通過後、實作前，符合觸發條件才需執行
+- 工具與流程：H1 等實際開發由使用者規劃後以 Claude Code 執行，本次不開始
+- 尚待處理：`security-checklist`、`add-endpoint`（低優先）
 
 ## 需要你決定的事項（歷史紀錄，下列 1 已決定）
 

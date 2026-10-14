@@ -297,7 +297,7 @@ model: sonnet
 
 ## 下一步
 
-- **PASS**：可進入 implementation 階段。
+- **PASS**：若符合 `design-hardener` 的觸發條件(安全、部署、相依性、migration、失效模式),先執行 `design-hardener`;否則可進入 implementation 階段。
 - **FAIL**：先修正上述 Blocking Issues，再重新審查。
 - **BLOCKED**：先解除文件或工具存取限制，再重新審查。
 
