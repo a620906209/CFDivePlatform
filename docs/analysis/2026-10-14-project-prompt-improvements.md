@@ -131,6 +131,8 @@
 - Subagent：已移植 `spec-reviewer`、`strict-reviewer` 至 `.pi/agents/`（gpt-5.6-terra，跨家族審查）並複製一份到 `.claude/agents/`（sonnet，與實作端同家族），CLAUDE.md 新增「審查流程」；兩套需保持同步；尚未實際跑過，需以真實 change 或 H1 漏洞試跑驗證
 - 已補上 `design-hardener`（`.pi/agents/` 與 `.claude/agents/` 各一份），針對 Laravel／Docker 自動部署重寫：新增 migration 與自動 `migrate --force`、`config:cache` 與 `env()`、`trustProxies(at: ['*'])`、Redis fail-open／fail-closed、queue worker 與 image 烘焙等檢查；流程為 spec-reviewer 通過後、實作前，符合觸發條件才需執行
 - 工具與流程：H1 等實際開發由使用者規劃後以 Claude Code 執行，本次不開始
+- 已新增 `hardener` skill（`.claude/skills/hardener/`，Claude Code 專用）：改寫自 ProjectC 的 C# 版，替換為 Laravel 慣例；流程為實作完成後、`strict-reviewer` 之前執行，規則已寫入 CLAUDE.md「審查流程」
+- ProjectC 其餘 skill 評估後不帶入：`spec-scope`（本專案已有約 40 份 spec）、UI 設計類 skill 與 `output-skill`（暫無 UI 改版計畫，且第三方授權未確認）
 - 尚待處理：`security-checklist`、`add-endpoint`（低優先）
 
 ## 需要你決定的事項（歷史紀錄，下列 1 已決定）
