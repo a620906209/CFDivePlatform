@@ -16,12 +16,12 @@
 | H2 | 🔴 高 | 正式環境 `APP_DEBUG` 與預設值風險 | 否（設定確認）+ 視情況改 `.env.example` | — |
 | M1 | 🟡 中 | AuthController 過大、無 FormRequest／Service 層 | 是 | `refactor-auth-controller` |
 | M2 | 🟡 中 | 預約名額邏輯重複 | 是 | `extract-booking-service` |
-| M3 | 🟡 中 | 通知同步發送且例外被吞掉 | 是 | `queue-booking-notifications` |
+| M3 | 🟡 中（已下修，見內文） | 通知派送的例外處理與失敗可觀測性 | 視範圍而定 | `harden-notification-dispatch` |
 | M4 | 🟡 中 | 前端 token 儲存不一致（admin 用 localStorage） | 是 | `unify-frontend-token-storage` |
 | M5 | 🟡 中 | CORS 在正式環境仍允許 localhost | 是（小） | `restrict-cors-by-env` |
 | M6 | 🟡 中 | CI 使用 SQLite，鎖定／超賣測試可能假綠 | 是 | `ci-mysql-test-job` |
 
-建議順序：H1 → H2 → M6 → M5 → M3 → M2 → M1 → M4。
+建議順序：H1 → H2 → M6 → M5 → M2 → M1 → M4 → M3（M3 已下修，可視驗證結果延後或關閉）。
 理由：H1 是安全漏洞；M6 先建立可信的測試基礎，後續重構（M1、M2）才有安全網。
 
 ---
@@ -120,21 +120,31 @@
 
 ---
 
-## M3　通知同步發送，例外被吞掉
+## M3　通知派送的例外處理與失敗可觀測性
+
+> 2026-10-14 更新：初版誤判為「通知同步發送」。實際檢查後，9 個 Notification 中 8 個已實作 `ShouldQueue` 並設有 `public int $tries = 3`，`cfdive-queue` 容器也已在跑。原本的風險大幅降低，本項由「中」下修，並縮小範圍。
 
 **現況**
-`MemberBookingController`、`ProviderBookingController` 多處以 `try { notify() } catch (\Throwable) { Log::error }` 發送通知。
+- `BookingCreated`、`BookingConfirmed`、`BookingRejected`、`BookingCancelled`、`BookingCompleted`、`ProviderVerificationApproved`、`ProviderVerificationRejected`、`ReviewReceived`：皆為 `ShouldQueue`，`tries = 3`
+- `NewBookingMessageNotification`：**未**實作 `ShouldQueue`，檔案內註解說明是刻意同步，讓後續的 `NotificationCreated` broadcast 能立刻讓前端拉到正確的未讀數
+- `MemberBookingController`、`ProviderBookingController` 仍以 `try { notify() } catch (\Throwable) { Log::error }` 包住派送
 
-**風險**
-- 若 Notification 未實作 `ShouldQueue`，會在請求內同步寄信，拖慢回應
-- 失敗只留 log，沒有重試，也沒有告警（Sentry 不會收到被吞掉的例外）
+**仍存在的風險**
+- try/catch 現在只會攔到「派送入列」階段的失敗（例如 Redis 無法連線），這可能是刻意讓預約流程不因通知失敗而中斷；但例外只進 log，不會送 Sentry，也沒有補送機制
+- 8 個 Notification 都只設了 `tries`，沒有 `backoff`，重試會立刻連續發生，對暫時性故障（SMTP、Redis 抖動）幫助有限
+- 沒有 `failed()` 處理：重試用完後只留在 `failed_jobs`，是否會送到 Sentry **我不確定，需要驗證**
+- `NewBookingMessageNotification` 同步發送，聊天頻繁時會增加請求延遲（且有 Redis broadcast 依賴）
 
 **待辦**
-- [ ] 檢查 `app/Notifications/*` 是否皆實作 `ShouldQueue`
-- [ ] 改為交由 queue worker 處理（`cfdive-queue` 容器已存在），並設定 `tries`／`backoff`
-- [ ] 移除 Controller 內的 try/catch，改用 queue 失敗處理；必要時以 `report($e)` 送 Sentry
-- [ ] 更新 `NotificationTriggerTest` 使用 `Queue::fake()` 或 `Notification::fake()`
-- [ ] 更新 spec：`notification-core`、`notification-triggers`、`notification-email`
+- [ ] 先驗證：讓一個 Notification job 失敗，確認 Sentry 是否收到；確認 `failed_jobs` 是否有人監看
+- [ ] 為 8 個 queued Notification 補上 `backoff`（例如 `[10, 60, 300]`）
+- [ ] 將 Controller 內的 `Log::error` 改為 `report($e)`，讓 Sentry 收到派送失敗，並保留「不中斷主流程」的行為
+- [ ] 評估 `NewBookingMessageNotification` 是否能在不破壞未讀數即時性的前提下改為 queued（可能需調整 broadcast 時序），不可行則在 spec 註明為刻意設計
+- [ ] 更新 `NotificationTriggerTest` 涵蓋失敗情境
+- [ ] 如行為有變更，更新 spec：`notification-core`、`notification-triggers`、`notification-email`
+
+**備註**
+若驗證後發現 Sentry 已能收到失敗，且 Redis 故障非實際風險，本項可降為低優先或直接關閉。
 
 ---
 
