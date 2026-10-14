@@ -125,7 +125,9 @@
 
 - 已完成：config.yaml 更新、CLAUDE.md 補充、移除 `.windsurf` ponytail 規則、修正 `branch-and-propose`、`openspec-apply-change` 加入測試對應檢查、新增 `verify-and-report` 與 `finish-and-pr`
 - 工具分工：Claude Code 為主要實作工具，Pi agent 目前用於審查與環境調整；`.claude/` 保留
-- 注意：`openspec-apply-change`（skill 與 `commands/opsx/apply.md`）為 OpenSpec 產生的檔案，已加入標註「CFDive 自訂區塊」，執行 `openspec update` 後需確認並重新加回
+- OpenSpec CLI 已由 1.3.1 升級至 1.14.1（2026-10-14）：`openspec update` 重新產生 `.claude/` 內的 OpenSpec skill 與指令，先前加在 `openspec-apply-change` 的「測試對應檢查」自訂區塊隨之移除，改放到 `openspec/config.yaml` 的 `operations.apply.guidance`（`openspec update` 不會覆蓋）；`operations.archive.guidance` 另提醒歸檔後更新 config.yaml 的 context
+- 已知限制：`operations.*.guidance` 屬於「建議性」提示（OpenSpec 文件明寫為 prompt-level 行為契約，非可強制的檢查），硬性規則仍以 CLAUDE.md 為準
+- 升級後 `openspec validate --specs --strict` 有 3 份 spec 的 Requirement 超過 500 字元會失敗（account-lockout、booking-lifecycle、image-baked-deployment）；一般模式 39 份全過。日後若要在 CI 使用 `--strict`，需先另開 change 拆分這些 Requirement
 - 尚待處理：subagent 定義、`security-checklist`、`add-endpoint`
 
 ## 需要你決定的事項（歷史紀錄，下列 1 已決定）
