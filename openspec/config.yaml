@@ -3,55 +3,84 @@ schema: spec-driven
 context: |
   ## 專案：CFDivePlatform
   潛水課程媒合平台，連結潛水教練（Provider）與學員（Member）。
+  各功能的行為以 `openspec/specs/` 為準；本段只描述專案背景與慣例，不逐項複製規格內容。
+  每次歸檔（archive）後，請檢查本段是否需要更新。
 
   ## 架構
-  - 後端：Laravel 11 + Sanctum（Bearer token）+ MySQL，跑在 Docker（cfdive-app / cfdive-nginx:8080）
+  - 後端：Laravel 11 + Sanctum（Bearer token）+ MySQL 8 + Redis（cache / session / queue）
+  - 即時通訊：Laravel Reverb（WebSocket），前端以 Laravel Echo 連線
+  - 檔案儲存：`public` disk，支援切換為 S3 相容物件儲存（見 `file-storage-s3` spec）
   - 前端：Vue 3 + Vite + Tailwind CSS + Pinia + Vue Router 4 + Axios
     - 原始碼在 `frontend/`（同一個 repo）
-    - Docker image: cfdive-frontend，對外 port 5173
-  - DB：MySQL 8（Docker），ORM 使用 Eloquent
-  - 部署：docker-compose，`docker-compose up --build` 即可啟動全部服務
+  - 部署：Docker Compose，程式碼與 vendor 烘進 image，不使用 bind mount（見 `image-baked-deployment` spec）
+    - 服務：app（php-fpm）、nginx、frontend、db、redis、reverb、queue-worker、scheduler
+    - push master 會觸發 Gitea Actions 自動部署，因此變更一律走 PR，禁止直接 push master
+  - 測試：PHPUnit Feature / Unit，CI 與本機預設使用 SQLite；涉及 `lockForUpdate` 等行鎖行為的測試在 SQLite 上不具驗證力
 
   ## 使用者角色
-  - `member`：一般會員，瀏覽/搜尋課程，Google OAuth 登入
-  - `provider`：教練/業者，管理自己的課程（CRUD），使用 ProviderProfile
-  - `admin`：平台管理員，尚未實作
+  - `member`：一般會員，瀏覽/搜尋課程、預約、聊天、評價；Email 或 Google OAuth 登入
+  - `provider`：教練/業者，管理課程、時段、預約；需通過資格審核才會公開課程與接受預約
+  - `admin`：平台管理員；帳號只能由主機端 `php artisan app:create-admin` 建立，不提供公開註冊
+  - 角色存於 `users.role`，三種角色各有獨立的登入端點與 Profile 資料表
 
-  ## 已完成模組
-  - Member Portal（`/`、`/courses`、`/login`、`/register`、`/profile`）
-  - Coach Portal（`/coach/*`）：登入、註冊、課程 CRUD Dashboard、個人資料
-  - Diving Offers 公開 API（`GET /api/diving-offers`、`GET /api/diving-offers/{id}`）
-  - Provider Auth API（`/api/provider/login|register|logout|profile`）
-  - Provider Offers API（`/api/provider/offers` CRUD，含 provider_id 所有權驗證）
+  ## 已實作範圍（細節見對應 spec）
+  - Member Portal、Coach Portal（`/coach/*`）、Admin Panel（`/admin/*`）
+  - 認證：三角色登入、Token Refresh、登入限流、帳號鎖定、OAuth state 驗證
+  - 課程（diving offers）公開查詢與教練 CRUD、課程圖片上傳（含伺服器端壓縮）
+  - 課程時段、預約生命週期（pending → confirmed → completed / 取消）、名額超賣防護
+  - 預約即時訊息（文字 + 圖片、已讀回執）、使用者在線狀態
+  - 評價（含匿名、編輯紀錄、有幫助投票）
+  - 站內通知與 Email 通知（除即時訊息通知外皆經 Queue 處理）
+  - 教練資格審核（證照上傳、送審、通過 / 駁回 / 撤銷）
+  - 排程：逾期 pending 預約自動失效、已結束預約自動完成
+  - Swagger（l5-swagger）API 文件，註解集中於 `app/Docs/`
+
+  ## 尚未實作
+  - 金流整合
+  - 訂閱方案（`subscriptions` / `plans` 資料表已於 2026-05-25 移除）
 
   ## 關鍵資料模型
-  - `users`：role enum（member / provider / admin），`is_active`
-  - `provider_profiles`：業者資料（business_name、certifications、dive_sites 等）
-  - `member_profiles`：會員資料（birthday、gender、emergency_contact 等）
-  - `diving_offers`：課程（title、location、spot、price、region、tag、badges JSON、provider_id nullable FK）
-  - `subscriptions` / `plans`：訂閱方案（尚未實作 API）
+  - `users`：role（member / provider / admin）、`is_active`
+  - `provider_profiles`：業者資料與 `verification_status`；`provider_certifications`：證照
+  - `member_profiles`、`admin_profiles`
+  - `diving_offers`（含 `provider_id`、`cover_image`）、`course_images`
+  - `course_schedules`（含 `max_participants` / `current_participants`）、`bookings`
+  - `reviews`、`review_edits`、`review_votes`
+  - `booking_messages`、`notifications`、`social_accounts`
 
   ## 前端慣例
-  - Member 認證：`src/stores/auth.js`，localStorage key `token` / `user`
-  - Coach 認證：`src/stores/coachAuth.js`，localStorage key `coach_token` / `coach_user`
-  - Member Axios：`src/api/axios.js`
-  - Coach Axios：`src/api/coachAxios.js`
-  - Coach 頁面包在 `src/layouts/CoachLayout.vue`（含 CoachNavBar）
-  - 所有 `/coach/*` protected 路由：`meta: { requiresCoach: true }`
+  - 三組認證各自獨立：Axios 實例、Pinia store、storage key 皆分開
+    - Member：`src/stores/auth.js`、`src/api/axios.js`，sessionStorage `token` / `user`
+    - Coach：`src/stores/coachAuth.js`、`src/api/coachAxios.js`，sessionStorage `coach_token` / `coach_user`
+    - Admin：`src/stores/adminAuth.js`、`src/api/adminAxios.js`，localStorage `admin_token` / `admin_user`
+      （與其他兩者不一致為已知議題，見 docs/analysis/2026-10-14-project-review-todo.md M4）
+  - Coach 頁面包在 `CoachLayout.vue`，Admin 頁面包在 `AdminLayout.vue`
+  - Protected 路由以 route meta 標示：`requiresAuth`（member）、`requiresCoach`、`requiresAdmin`
+  - 401 時自動以 refresh token 換新並重試
+
+  ## 後端慣例
+  - Controller 位於 `app/Http/Controllers/API/`，Swagger 註解位於 `app/Docs/`
+  - 路由集中於 `routes/api.php`；admin 群組以 `admin` middleware 保護
+  - member / provider 路由群組目前僅有 `auth:sanctum`，角色檢查需在 Controller 內自行處理
+    （已知缺口，見 docs/analysis/2026-10-14-project-review-todo.md H1；新增路由時不可假設已有角色保護）
 
   ## API 回應格式
   成功：`{ status: true, message?: "...", data: {...} 或 [...] }`
   失敗：`{ status: false, message: "...", errors?: {...} }`
 
-  ## 尚未實作
-  - Admin Panel
-  - 預約/訂單系統
-  - 金流整合
-  - 課程圖片上傳
-  - 教練審核流程
-
 rules:
+  proposal:
+    - 必須列出受影響的主規格（`openspec/specs/` 下的 capability 名稱）
+    - 必須說明是否影響既有 API 回應格式或前端行為
+  specs:
+    - 每個 Requirement 至少要有一個 `#### Scenario`
+    - Scenario 必須具體到可直接轉成測試（明確的前置條件、動作、預期的 HTTP 狀態碼與回應內容）
+    - 涉及角色權限的 Requirement，必須明確寫出各角色（member / provider / admin / 未登入）的預期結果
+  design:
+    - 若涉及 CLAUDE.md 列出的安全觸發條件（外部輸入、資料庫讀寫、身份驗證/授權、檔案上傳、外部 API），必須包含「安全確認」段落，回答輸入驗證、資料庫存取方式、權限檢查層級
+    - 新增或修改的路由必須註明所掛的角色 middleware 或 Controller 內的所有權檢查
   tasks:
     - 後端任務標記 [後端]，前端任務標記 [前端]，整合測試標記 [整合測試]
     - 每個 task 描述應包含具體的檔案路徑或方法名稱
+    - 每個 spec 的 Scenario 至少要對應一個 [整合測試] task，缺少對應者不得進入實作
     - 手動驗證類 task 放在最後一個 group
