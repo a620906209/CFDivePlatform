@@ -5,6 +5,7 @@
 > 低優先項目未列入本文（分頁、範本殘留檔、CHANGELOG 等），需要時另行整理。
 > 搭配閱讀：《2026-06-11-spec-implementation-audit.md》。
 > 實作原則：以下每一項只要涉及行為變更，都必須先走 OpenSpec（`/opsx:propose`），AC 對應測試後才可實作。
+> 更新紀錄：2026-10-14 新增 M7、M8（撰寫 `hardener` skill 時，閱讀預約相關程式碼發現；以程式碼閱讀判斷，**尚未重現驗證**）。
 
 ---
 
@@ -20,9 +21,11 @@
 | M4 | 🟡 中 | 前端 token 儲存不一致（admin 用 localStorage） | 是 | `unify-frontend-token-storage` |
 | M5 | 🟡 中 | CORS 在正式環境仍允許 localhost | 是（小） | `restrict-cors-by-env` |
 | M6 | 🟡 中 | CI 使用 SQLite，鎖定／超賣測試可能假綠 | 是 | `ci-mysql-test-job` |
+| M7 | 🟡 中 | 預約流程 `catch (RuntimeException)` 把例外訊息直接回給使用者 | 是（小） | `fix-booking-exception-handling` |
+| M8 | 🟡 中（影響資料正確性，需並發才觸發） | 預約取消／確認的狀態在鎖之前讀取，並發下名額可能重複增減 | 是 | `fix-booking-state-race`（建議併入 M2） |
 
-建議順序：H1 → H2 → M6 → M5 → M2 → M1 → M4 → M3（M3 已下修，可視驗證結果延後或關閉）。
-理由：H1 是安全漏洞；M6 先建立可信的測試基礎，後續重構（M1、M2）才有安全網。
+建議順序：H1 → H2 → M7 → M6 → M5 → M8 與 M2 合併處理 → M1 → M4 → M3（M3 已下修，可視驗證結果延後或關閉）。
+理由：H1 是安全漏洞；M7 範圍小、可立即降低資訊洩漏；M6 先建立可信的測試基礎，後續 M8、M2、M1 才有安全網；M8 的修法（鎖內重讀狀態）本來就是 M2 抽出 `BookingService` 時要統一的邏輯，建議同一個 change 處理。
 
 ---
 
@@ -194,6 +197,82 @@ CI 綠燈不代表正式環境（MySQL）行為正確，尤其是併發情境。
 - [ ] 評估 `BookingOversellTest` 是否真的測到併發（單程序測試無法驗證行鎖，可能需要多程序測試或接受其限制並在文件註明）
 - [ ] `deploy.yml` 與 `test.yml` 目前互相獨立；評估是否讓部署依賴測試通過
 - [ ] 更新 spec：`feature-test-coverage` 或新增 `ci-pipeline` spec
+
+---
+
+## M7　預約流程 `catch (RuntimeException)` 把例外訊息直接回給使用者
+
+> 來源：撰寫 `hardener` skill 時閱讀程式碼發現。以下為程式碼閱讀結果，尚未實際觸發驗證。
+
+**現況**
+- `app/Http/Controllers/API/MemberBookingController.php:92`（`store`）與 `app/Http/Controllers/API/ProviderBookingController.php:57`（`confirm`）都是：
+  `catch (\RuntimeException $e) { return response()->json(['status' => false, 'message' => $e->getMessage()], 422); }`
+- 閉包內刻意拋出的業務訊息（「名額不足」「您已預約此時段」）依賴這個 catch 轉成 422
+
+**風險**
+- `Illuminate\Database\QueryException` 繼承 `PDOException`，而 `PDOException` 是 `RuntimeException` 的子類別。交易內的資料庫錯誤（死結、逾時、約束違反、連線中斷）也會被這個 catch 接住
+- 結果是資料庫錯誤訊息（可能含 SQL 與資料表結構）被當成 422 回給使用者，屬於資訊洩漏
+- 這類錯誤被當成「可預期的業務失敗」處理，不會經過 Laravel 例外處理器，**不會被 Sentry 收到**，營運端看不到
+- 狀態碼為 422（客戶端錯誤），實際是伺服器端故障，監控與前端錯誤處理都會誤判
+
+**待辦**
+- [ ] 定義單一窄型的業務例外（例如 `BookingRuleViolationException`），交易閉包內改拋它；Controller 只 catch 該型別，其他例外讓它往外傳播
+- [ ] 回應內容只使用自己拋出的、已知安全的訊息；不再回傳任意 `$e->getMessage()`
+- [ ] 確認資料庫類例外會被 Sentry 收到、回應為 500 且訊息通用
+- [ ] 檢查其他 Controller 是否有相同寫法（目前 grep 僅發現這兩處 `RuntimeException`）
+- [ ] 補測試：讓交易內拋出 `QueryException`（例如以 `DB::listen` 或 mock 模擬），斷言回應為 500 且 body 不含 SQL 與資料表名稱；業務失敗（名額不足、重複預約）仍回 422 與原訊息
+- [ ] 更新 spec：`booking-lifecycle`（錯誤處理行為）；注意該 spec 有一條 Requirement 超過 500 字元，修改時可順便拆分
+
+**驗收條件（草案，需轉為 spec Scenario）**
+1. 名額不足、重複預約仍回 422 與既有訊息
+2. 交易內發生資料庫例外時回 500，回應不含 SQL、資料表或欄位資訊
+3. 上述資料庫例外會被記錄並送到 Sentry
+
+**安全確認（CLAUDE.md 必答）**
+- 輸入驗證位置：既有 `$request->validate()`，不變
+- 資料庫存取：Eloquent，不變
+- 權限：不變；本項只改例外處理與回應內容
+
+---
+
+## M8　預約取消／確認的狀態在鎖之前讀取，並發下名額可能重複增減
+
+> 來源：撰寫 `hardener` skill 時閱讀程式碼發現。以下為程式碼閱讀判斷，**尚未重現驗證**；而且 `phpunit.xml` 使用 SQLite，無法在現有測試中重現行鎖行為（見 M6）。
+
+**現況**（皆為「交易外讀狀態、交易內才鎖 schedule」的模式）
+- `MemberBookingController::destroy`：在交易外以 `$booking->status` 判斷可否取消，並記下 `$wasConfirmed`；進入交易後才 `lockForUpdate` 鎖 schedule，`booking` 本身沒有鎖，且仍使用鎖之前讀到的舊狀態
+- `ProviderBookingController::cancel`、`confirm`、`reject`、`complete`：同樣先用 `canTransitionTo()` 判斷（交易外、無鎖），交易內才鎖 schedule
+- `AdminBookingController::complete`、排程 `app:complete-finished-bookings`、`app:expire-pending-bookings`：以交易外或批次方式直接改狀態，沒有與其他寫入者序列化
+
+**可能的後果（需並發才觸發）**
+- 同一筆 `confirmed` 預約被會員與教練（或同一方重複點擊）**同時取消**：兩個請求都通過檢查，各自扣減一次 `current_participants`，名額被**重複釋放**，後續可能超賣；`current_participants` 為 `unsignedInteger`，若剛好扣到負數，在 MySQL 嚴格模式下會報錯變成 500
+- 同一筆 `pending` 預約被**同時確認兩次**：各自增加一次 `current_participants`，名額被重複占用
+- `confirm` 與 `reject`／`expire` 同時發生：預約可能最後是 `confirmed` 卻已被標成 `expired`，或名額已增加但狀態被覆蓋
+- 既有的 `BookingOversellTest` 只涵蓋單程序情境，無法抓到這類問題
+
+**待辦**
+- [ ] 先驗證：以兩個程序或 MySQL 上的並發請求重現「同一預約重複取消」與「同一預約重複確認」，確認名額是否真的重複增減（驗證環境需為 MySQL，見 M6）
+- [ ] 狀態轉換統一在交易內：先鎖住預約本身（`Booking::lockForUpdate()->find(...)`）或先鎖 schedule 再重讀預約，**鎖之後**再以最新狀態判斷 `canTransitionTo()` 與 `$wasConfirmed`
+- [ ] 以條件式更新輔助：例如 `where('status', 'confirmed')->update(...)` 並檢查受影響列數，為 0 代表別人已先處理
+- [ ] 取得鎖的順序需一致（例如一律先 schedule 後 booking），避免新增鎖後產生死結
+- [ ] 統一抽到單一入口（併入 M2 的 `BookingService`），所有取消與確認路徑共用
+- [ ] 評估排程指令（`complete-finished-bookings`、`expire-pending-bookings`）是否也需要用同樣的條件式更新，避免與使用者操作互相覆蓋
+- [ ] 補測試：雖然 SQLite 無法驗證行鎖，仍應補「同一預約連續取消兩次，第二次回 422 且名額只釋放一次」等可確定性的測試；真正的並發驗證放在 MySQL CI（M6）或人工驗證
+- [ ] 更新 spec：`booking-lifecycle`（狀態轉換與名額一致性）
+
+**驗收條件（草案，需轉為 spec Scenario）**
+1. 同一筆預約重複取消，名額只釋放一次，第二次請求回 422
+2. 同一筆預約重複確認，名額只占用一次，第二次請求回 422
+3. 狀態轉換的判斷使用鎖之後的最新狀態
+4. 現有 `BookingLifecycleTest`、`BookingOversellTest` 全綠
+
+**安全確認（CLAUDE.md 必答）**
+- 資料庫存取：Eloquent，不使用 raw SQL
+- 是否需要悲觀鎖：是；需序列化的資源是「單一預約」與其所屬的 schedule
+- 權限檢查：不變，各端點既有的擁有權檢查保留
+
+**備註**
+- 此問題的完整驗證依賴 M6（MySQL CI）。在 M6 完成之前，只能以程式碼審查與可確定性測試降低風險，不能宣稱已驗證併發安全
 
 ---
 
