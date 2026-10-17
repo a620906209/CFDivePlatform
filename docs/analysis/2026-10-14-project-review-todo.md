@@ -5,7 +5,7 @@
 > 低優先項目未列入本文（分頁、範本殘留檔、CHANGELOG 等），需要時另行整理。
 > 搭配閱讀：《2026-06-11-spec-implementation-audit.md》。
 > 實作原則：以下每一項只要涉及行為變更，都必須先走 OpenSpec（`/opsx:propose`），AC 對應測試後才可實作。
-> 更新紀錄：2026-10-14 新增 M7、M8（撰寫 `hardener` skill 時，閱讀預約相關程式碼發現；以程式碼閱讀判斷，**尚未重現驗證**）。
+> 更新紀錄：2026-10-14 新增 M7、M8（撰寫 `hardener` skill 時，閱讀預約相關程式碼發現；以程式碼閱讀判斷，**尚未重現驗證**）；2026-10-17 新增「功能與延後項目」F1–F7（彙整既有規劃文件與已歸檔 change 的未完成任務）。
 
 ---
 
@@ -273,6 +273,22 @@ CI 綠燈不代表正式環境（MySQL）行為正確，尤其是併發情境。
 
 **備註**
 - 此問題的完整驗證依賴 M6（MySQL CI）。在 M6 完成之前，只能以程式碼審查與可確定性測試降低風險，不能宣稱已驗證併發安全
+
+---
+
+## 功能與延後項目（非本次審視來源）
+
+> 來源：既有規劃文件與已歸檔 change 的未完成任務，2026-10-17 彙整並對照程式碼確認仍未完成。優先順序未排入上方建議順序。
+
+| # | 項目 | 來源 | 狀態／前置條件 |
+|---|------|------|----------------|
+| F1 | 金流整合（`awaiting_payment` 或獨立 `payments` 表、Webhook 冪等） | `2026-06-11-future-roadmap-feasibility.md` §2.2 | 未開工；需先定案金流商（評估建議綠界）與退款政策；建議 M6、H1 先完成 |
+| F2 | 上傳檔案正式切換 S3 相容儲存（R2） | 已歸檔 `2026-08-02-cloud-ready-s3-storage` tasks 4–6 | 程式碼已完成，VPS 仍為 `FILESYSTEM_DISK=local`；需先申請帳號，接續時另開新 change |
+| F3 | 預約列表端點補分頁（member／provider／admin bookings 皆 `->get()` 全量） | `2026-06-11-performance-optimization-plan.md` O3.2 | 未開工；建議金流上線前完成 |
+| F4 | 課程搜尋強化（地區、價格區間、可預約日期篩選） | 可行性評估 §2.5 | 未開工；cache key 需納入新篩選參數 |
+| F5 | 前端載入體感（列表 skeleton、搜尋 debounce 300ms） | 效能計畫 O3.3 | 未開工（`frontend/src` 無 skeleton／debounce） |
+| F6 | 聊天圖片壓縮改用 `CompressesImages` trait | O3.1 歸檔時留待後續 | `BookingMessageController` 仍自行 `scaleDown`／`toJpeg`；屬重複邏輯，改動前需先補聊天圖片上傳測試 |
+| F7 | 正式環境 OPcache `validate_timestamps=0` | 效能計畫「生產環境註記」 | 目前僅有 `docker/php/local.ini`（=1）；程式碼已烘進 image，可評估於正式環境關閉 |
 
 ---
 
