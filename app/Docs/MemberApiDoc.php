@@ -93,7 +93,8 @@ class MemberApiDoc
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Booking")),
      *             @OA\Property(property="meta", ref="#/components/schemas/PaginationMeta")
      *         )
-     *     )
+     *     ),
+     *     @OA\Response(response=403, description="非 member 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function listMemberBookings()
@@ -119,7 +120,7 @@ class MemberApiDoc
      *         )
      *     ),
      *     @OA\Response(response=404, description="預約不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
-     *     @OA\Response(response=403, description="無權限存取", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 member 角色或非本人預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function getMemberBooking()
@@ -145,7 +146,7 @@ class MemberApiDoc
      *             @OA\Property(property="message", type="string", example="預約已取消")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="無權限或狀態不允許取消", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 member 角色、非本人預約或狀態不允許取消", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=404, description="預約不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -186,7 +187,7 @@ class MemberApiDoc
      *             @OA\Property(property="data", ref="#/components/schemas/Review")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="預約未完成或非本人預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 member 角色、預約未完成或非本人預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=422, description="驗證失敗", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -220,7 +221,7 @@ class MemberApiDoc
      *             @OA\Property(property="data", ref="#/components/schemas/Review")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人評價", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 member 角色或非本人評價", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=404, description="評價不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -246,7 +247,7 @@ class MemberApiDoc
      *             @OA\Property(property="message", type="string", example="評價已刪除")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人評價", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 member 角色或非本人評價", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=404, description="評價不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */

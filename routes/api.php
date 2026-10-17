@@ -37,7 +37,7 @@ Route::middleware([\Illuminate\Session\Middleware\StartSession::class])->group(f
 });
 
 // 會員專屬 API（需登入）
-Route::middleware(['auth:sanctum'])->prefix('member')->group(function () {
+Route::middleware(['auth:sanctum', 'member'])->prefix('member')->group(function () {
     // 會員登出
     Route::post('/logout', [AuthController::class, 'logoutMember']);
     // Token Refresh
@@ -67,7 +67,7 @@ Route::post('/provider/register', [AuthController::class, 'registerProvider']);
 Route::middleware('throttle:10,1')->post('/provider/login', [AuthController::class, 'loginProvider']);
 
 // 服務提供者專屬 API（需登入）
-Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
+Route::middleware(['auth:sanctum', 'provider'])->prefix('provider')->group(function () {
     // 服務提供者登出
     Route::post('/logout', [AuthController::class, 'logoutProvider']);
     // Token Refresh

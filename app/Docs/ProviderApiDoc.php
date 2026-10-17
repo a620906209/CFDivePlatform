@@ -64,7 +64,7 @@ class ProviderApiDoc
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=403, description="無權限", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 provider 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function getProviderVerification()
@@ -105,7 +105,7 @@ class ProviderApiDoc
      *         )
      *     ),
      *     @OA\Response(response=422, description="圖片驗證失敗", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
-     *     @OA\Response(response=403, description="無權限", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 provider 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function uploadCertification()
@@ -131,7 +131,7 @@ class ProviderApiDoc
      *             @OA\Property(property="message", type="string", example="證照已刪除")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="無權限或當前狀態不可刪除", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色、非本人證照或當前狀態不可刪除", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=404, description="證照不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -158,7 +158,7 @@ class ProviderApiDoc
      *         )
      *     ),
      *     @OA\Response(response=422, description="尚未上傳證照或當前狀態不可送審", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
-     *     @OA\Response(response=403, description="無權限", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 provider 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function submitVerification()
@@ -189,7 +189,8 @@ class ProviderApiDoc
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/DivingOffer")),
      *             @OA\Property(property="meta", ref="#/components/schemas/PaginationMeta")
      *         )
-     *     )
+     *     ),
+     *     @OA\Response(response=403, description="非 provider 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function listProviderOffers()
@@ -228,7 +229,7 @@ class ProviderApiDoc
      *         )
      *     ),
      *     @OA\Response(response=422, description="驗證失敗", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
-     *     @OA\Response(response=403, description="無權限", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 provider 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function createProviderOffer()
@@ -254,7 +255,7 @@ class ProviderApiDoc
      *             @OA\Property(property="data", ref="#/components/schemas/DivingOffer")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=404, description="課程不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -292,7 +293,7 @@ class ProviderApiDoc
      *             @OA\Property(property="data", ref="#/components/schemas/DivingOffer")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=422, description="驗證失敗", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -318,7 +319,7 @@ class ProviderApiDoc
      *             @OA\Property(property="message", type="string", example="課程已刪除")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=404, description="課程不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -360,7 +361,7 @@ class ProviderApiDoc
      *         )
      *     ),
      *     @OA\Response(response=422, description="圖片驗證失敗", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
-     *     @OA\Response(response=403, description="非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function uploadOfferCover()
@@ -385,7 +386,7 @@ class ProviderApiDoc
      *             @OA\Property(property="message", type="string", example="封面圖片已刪除")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function deleteOfferCover()
@@ -427,7 +428,7 @@ class ProviderApiDoc
      *         )
      *     ),
      *     @OA\Response(response=422, description="圖片驗證失敗", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
-     *     @OA\Response(response=403, description="非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function uploadOfferImages()
@@ -452,7 +453,7 @@ class ProviderApiDoc
      *             @OA\Property(property="message", type="string", example="圖片已刪除")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人圖片", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人圖片", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=404, description="圖片不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -482,7 +483,8 @@ class ProviderApiDoc
      *             @OA\Property(property="status", type="boolean", example=true),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/CourseSchedule"))
      *         )
-     *     )
+     *     ),
+     *     @OA\Response(response=403, description="非 provider 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function listProviderSchedules()
@@ -517,7 +519,7 @@ class ProviderApiDoc
      *         )
      *     ),
      *     @OA\Response(response=422, description="驗證失敗", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
-     *     @OA\Response(response=403, description="非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function createProviderSchedule()
@@ -551,7 +553,7 @@ class ProviderApiDoc
      *             @OA\Property(property="data", ref="#/components/schemas/CourseSchedule")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人時段", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人時段", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=404, description="時段不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -577,7 +579,7 @@ class ProviderApiDoc
      *             @OA\Property(property="message", type="string", example="時段已刪除")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人時段", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人時段", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=404, description="時段不存在", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -609,7 +611,8 @@ class ProviderApiDoc
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Booking")),
      *             @OA\Property(property="meta", ref="#/components/schemas/PaginationMeta")
      *         )
-     *     )
+     *     ),
+     *     @OA\Response(response=403, description="非 provider 角色", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
     public function listProviderBookings()
@@ -635,7 +638,7 @@ class ProviderApiDoc
      *             @OA\Property(property="data", ref="#/components/schemas/Booking")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人課程的預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程的預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=422, description="狀態不允許確認", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -662,7 +665,7 @@ class ProviderApiDoc
      *             @OA\Property(property="data", ref="#/components/schemas/Booking")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人課程的預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程的預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=422, description="狀態不允許拒絕", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -689,7 +692,7 @@ class ProviderApiDoc
      *             @OA\Property(property="data", ref="#/components/schemas/Booking")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人課程的預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程的預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=422, description="狀態不允許完成", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */
@@ -716,7 +719,7 @@ class ProviderApiDoc
      *             @OA\Property(property="data", ref="#/components/schemas/Booking")
      *         )
      *     ),
-     *     @OA\Response(response=403, description="非本人課程的預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
+     *     @OA\Response(response=403, description="非 provider 角色或非本人課程的預約", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse")),
      *     @OA\Response(response=422, description="狀態不允許取消", @OA\JsonContent(ref="#/components/schemas/ApiErrorResponse"))
      * )
      */

@@ -16,12 +16,12 @@ use Tests\TestCase;
  * 預約列表端點資料隔離（booking-lifecycle 規格）。
  *
  * 路由對應（routes/api.php 已確認）：
- *   GET /api/member/bookings   → MemberBookingController::index（auth:sanctum，無 role check）
- *   GET /api/provider/bookings → ProviderBookingController::index（auth:sanctum，無 role check）
+ *   GET /api/member/bookings   → MemberBookingController::index（auth:sanctum + member middleware）
+ *   GET /api/provider/bookings → ProviderBookingController::index（auth:sanctum + provider middleware）
  *   GET /api/admin/bookings    → AdminBookingController::index（auth:sanctum + admin middleware）
  *
- * 資料隔離靠 controller query 條件，不靠 middleware role 強制，
- * 因此測試需分別以正確角色 actingAs 驗證隔離邊界。
+ * 角色 middleware 只擋跨角色呼叫（見 RoleAuthorizationTest）；同角色之間的資料隔離
+ * 靠 controller query 條件，因此測試需分別以正確角色 actingAs 驗證隔離邊界。
  */
 class BookingListTest extends TestCase
 {
