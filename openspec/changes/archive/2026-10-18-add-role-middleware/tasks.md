@@ -37,8 +37,8 @@
 
 ## 5. 手動驗證
 
-- [ ] 5.1 [整合測試]（手動，非自動化測試）本機 Docker 環境以 member token 呼叫 `POST /api/provider/offers`，以 provider token 呼叫 `POST /api/member/bookings`，確認兩者皆回 403
-- [ ] 5.2 [整合測試]（手動，非自動化測試）本機前端：會員端登入後瀏覽「我的預約」、教練端登入後瀏覽課程／時段／預約／審核頁，確認功能正常、沒有出現 403
+- [x] 5.1 [整合測試]（手動，非自動化測試）本機 Docker 環境以 member token 呼叫 `POST /api/provider/offers`，以 provider token 呼叫 `POST /api/member/bookings`，確認兩者皆回 403
+- [x] 5.2 [整合測試]（手動，非自動化測試）本機前端：會員端登入後瀏覽「我的預約」、教練端登入後瀏覽課程／時段／預約／審核頁，確認功能正常、沒有出現 403
 
 ## Workflow follow-up
 

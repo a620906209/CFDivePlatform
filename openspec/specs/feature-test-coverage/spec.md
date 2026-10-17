@@ -126,8 +126,8 @@
 
 ### Requirement: 預約列表端點測試覆蓋
 測試套件 SHALL 驗證下列三個路由的資料隔離行為：
-- `GET /api/member/bookings`（middleware: `auth:sanctum`，隔離靠 `where member_id = auth()->id()`）
-- `GET /api/provider/bookings`（middleware: `auth:sanctum`，隔離靠 `whereHas schedule.provider_id`）
+- `GET /api/member/bookings`（middleware: `auth:sanctum` + `member`，非 member 角色於 middleware 層強制 403；隔離靠 `where member_id = auth()->id()`）
+- `GET /api/provider/bookings`（middleware: `auth:sanctum` + `provider`，非 provider 角色於 middleware 層強制 403；隔離靠 `whereHas schedule.provider_id`）
 - `GET /api/admin/bookings`（middleware: `auth:sanctum` + `admin`，EnsureAdmin 於 middleware 層強制 403）
 
 #### Scenario: Member 只能看到自己的預約
