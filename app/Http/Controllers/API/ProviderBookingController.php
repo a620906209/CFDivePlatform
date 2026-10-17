@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Enums\BookingStatus;
 use App\Enums\ScheduleStatus;
+use App\Exceptions\BookingRuleViolationException;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Notifications\BookingCancelledNotification;
@@ -43,7 +44,7 @@ class ProviderBookingController extends Controller
                 $remaining = $schedule->max_participants - $schedule->current_participants;
 
                 if ($booking->participants > $remaining) {
-                    throw new \RuntimeException('名額不足，無法確認此預約');
+                    throw new BookingRuleViolationException('名額不足，無法確認此預約');
                 }
 
                 $booking->update(['status' => BookingStatus::Confirmed]);
@@ -54,7 +55,7 @@ class ProviderBookingController extends Controller
                     $schedule->update(['status' => ScheduleStatus::Full]);
                 }
             });
-        } catch (\RuntimeException $e) {
+        } catch (BookingRuleViolationException $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 422);
         }
 

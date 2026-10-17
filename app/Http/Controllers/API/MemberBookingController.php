@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Enums\BookingStatus;
 use App\Enums\ScheduleStatus;
+use App\Exceptions\BookingRuleViolationException;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\CourseSchedule;
@@ -68,7 +69,7 @@ class MemberBookingController extends Controller
                 // Layer 2：lockForUpdate 後二次驗證
                 $schedule = CourseSchedule::lockForUpdate()->find($schedule->id);
                 if ($data['participants'] > $schedule->remainingSpots()) {
-                    throw new \RuntimeException('名額不足，請重新選擇');
+                    throw new BookingRuleViolationException('名額不足，請重新選擇');
                 }
 
                 // 重複預約檢查
@@ -77,7 +78,7 @@ class MemberBookingController extends Controller
                     ->whereIn('status', [BookingStatus::Pending->value, BookingStatus::Confirmed->value])
                     ->exists();
                 if ($duplicate) {
-                    throw new \RuntimeException('您已預約此時段');
+                    throw new BookingRuleViolationException('您已預約此時段');
                 }
 
                 return Booking::create([
@@ -89,7 +90,7 @@ class MemberBookingController extends Controller
                     'notes'        => $data['notes'] ?? null,
                 ]);
             });
-        } catch (\RuntimeException $e) {
+        } catch (BookingRuleViolationException $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 422);
         }
 
