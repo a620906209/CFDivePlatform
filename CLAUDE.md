@@ -155,9 +155,9 @@
 
 ## 授權規範
 
-- 已知缺口：`routes/api.php` 的 `member`、`provider` 路由群組只有 `auth:sanctum`，**沒有角色 middleware**；只有 `admin` 群組有 `EnsureAdmin`（待辦見 `docs/analysis/2026-10-14-project-review-todo.md` H1）
-- 在 middleware 補上之前：新增或修改 member / provider 路由時，Controller 必須明確檢查呼叫者角色與資源所有權，不可假設路由群組已有保護
-- middleware 補上之後：新路由必須掛對應角色 middleware，並保留 Controller 內的資源所有權檢查
+- `routes/api.php` 的 `member`、`provider`、`admin` 路由群組分別掛 `auth:sanctum` + `member`／`provider`／`admin` 角色 middleware（`EnsureMember`／`EnsureProvider`／`EnsureAdmin`，規格見 `openspec/specs/role-authorization/`）
+- 新路由必須掛對應角色 middleware，並保留 Controller 內的資源所有權檢查（middleware 只擋跨角色，不擋同角色存取他人資源）
+- member + provider 共用的路由（通知、即時訊息）沒有角色 middleware，Controller 必須自行檢查資源所有權；admin 能否存取這類路由尚未定案
 - 每個涉及權限的路由都必須有跨角色測試（member / provider / admin / 未登入各自的預期結果，參考 `tests/Feature/AdminEndpointAuthTest.php`）
 
 ---

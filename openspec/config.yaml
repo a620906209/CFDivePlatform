@@ -61,8 +61,8 @@ context: |
   ## 後端慣例
   - Controller 位於 `app/Http/Controllers/API/`，Swagger 註解位於 `app/Docs/`
   - 路由集中於 `routes/api.php`；admin 群組以 `admin` middleware 保護
-  - member / provider 路由群組目前僅有 `auth:sanctum`，角色檢查需在 Controller 內自行處理
-    （已知缺口，見 docs/analysis/2026-10-14-project-review-todo.md H1；新增路由時不可假設已有角色保護）
+  - member / provider 路由群組以 `member`／`provider` middleware 保護（role-authorization spec）；
+    middleware 只擋跨角色，資源所有權仍需在 Controller 內檢查
 
   ## API 回應格式
   成功：`{ status: true, message?: "...", data: {...} 或 [...] }`
