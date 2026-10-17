@@ -34,22 +34,22 @@ class BookingListTest extends TestCase
 
         $offer = DivingOffer::create([
             'provider_id' => $provider->id,
-            'title'       => 'Dive Course',
-            'location'    => 'Kenting',
-            'price'       => 3000,
-            'region'      => '南部',
-            'rating'      => 0,
-            'reviews'     => 0,
+            'title' => 'Dive Course',
+            'location' => 'Kenting',
+            'price' => 3000,
+            'region' => '南部',
+            'rating' => 0,
+            'reviews' => 0,
         ]);
 
         $schedule = CourseSchedule::create([
-            'diving_offer_id'      => $offer->id,
-            'provider_id'          => $provider->id,
-            'scheduled_date'       => now()->addDays(30)->toDateString(),
-            'start_time'           => '09:00',
-            'max_participants'     => 10,
+            'diving_offer_id' => $offer->id,
+            'provider_id' => $provider->id,
+            'scheduled_date' => now()->addDays(30)->toDateString(),
+            'start_time' => '09:00',
+            'max_participants' => 10,
             'current_participants' => 0,
-            'status'               => ScheduleStatus::Open,
+            'status' => ScheduleStatus::Open,
         ]);
 
         return [$provider, $schedule];
@@ -58,11 +58,11 @@ class BookingListTest extends TestCase
     private function makePendingBooking(User $member, CourseSchedule $schedule): Booking
     {
         return Booking::create([
-            'schedule_id'  => $schedule->id,
-            'member_id'    => $member->id,
+            'schedule_id' => $schedule->id,
+            'member_id' => $member->id,
             'participants' => 1,
-            'total_price'  => 3000,
-            'status'       => BookingStatus::Pending,
+            'total_price' => 3000,
+            'status' => BookingStatus::Pending,
         ]);
     }
 
@@ -71,8 +71,8 @@ class BookingListTest extends TestCase
     public function test_member_sees_only_own_bookings(): void
     {
         [$provider, $schedule] = $this->makeProviderWithSchedule();
-        $memberA  = User::factory()->create(['role' => 'member']);
-        $memberB  = User::factory()->create(['role' => 'member']);
+        $memberA = User::factory()->create(['role' => 'member']);
+        $memberB = User::factory()->create(['role' => 'member']);
         $bookingA = $this->makePendingBooking($memberA, $schedule);
         $bookingB = $this->makePendingBooking($memberB, $schedule);
 
@@ -90,7 +90,7 @@ class BookingListTest extends TestCase
     {
         [$providerA, $scheduleA] = $this->makeProviderWithSchedule();
         [$providerB, $scheduleB] = $this->makeProviderWithSchedule();
-        $member   = User::factory()->create(['role' => 'member']);
+        $member = User::factory()->create(['role' => 'member']);
         $bookingA = $this->makePendingBooking($member, $scheduleA);
         $bookingB = $this->makePendingBooking($member, $scheduleB);
 
@@ -106,11 +106,11 @@ class BookingListTest extends TestCase
 
     public function test_admin_sees_all_bookings(): void
     {
-        $admin    = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'admin']);
         [$providerA, $scheduleA] = $this->makeProviderWithSchedule();
         [$providerB, $scheduleB] = $this->makeProviderWithSchedule();
-        $memberA  = User::factory()->create(['role' => 'member']);
-        $memberB  = User::factory()->create(['role' => 'member']);
+        $memberA = User::factory()->create(['role' => 'member']);
+        $memberB = User::factory()->create(['role' => 'member']);
         $bookingA = $this->makePendingBooking($memberA, $scheduleA);
         $bookingB = $this->makePendingBooking($memberB, $scheduleB);
 
