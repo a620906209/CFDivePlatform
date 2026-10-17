@@ -13,8 +13,8 @@
 
 | # | 優先 | 項目 | 是否走 OpenSpec | 建議 change 名稱 |
 |---|------|------|----------------|------------------|
-| H1 | 🔴 高 | member／provider 路由缺角色 middleware | 是 | `add-role-middleware` |
-| H2 | 🔴 高 | 正式環境 `APP_DEBUG` 與預設值風險 | 否（設定確認）+ 視情況改 `.env.example` | — |
+| H1 | ✅ 已完成（PR #71、#72） | member／provider 路由缺角色 middleware | 是 | `add-role-middleware` |
+| H2 | ✅ 已完成（2026-10-18 確認） | 正式環境 `APP_DEBUG` 與預設值風險 | 否（設定確認）+ 視情況改 `.env.example` | — |
 | M1 | 🟡 中 | AuthController 過大、無 FormRequest／Service 層 | 是 | `refactor-auth-controller` |
 | M2 | 🟡 中 | 預約名額邏輯重複 | 是 | `extract-booking-service` |
 | M3 | 🟡 中（已下修，見內文） | 通知派送的例外處理與失敗可觀測性 | 視範圍而定 | `harden-notification-dispatch` |
@@ -40,12 +40,12 @@
 - 目前只有 `ReviewController`、refresh 端點自己檢查角色，其餘端點無防護。
 
 **待辦**
-- [ ] 新增 `EnsureMember`、`EnsureProvider` middleware（仿 `app/Http/Middleware/EnsureAdmin.php`），並在 `bootstrap/app.php` 註冊 alias
-- [ ] 套用到 `member`、`provider` 路由群組
-- [ ] 通知、即時訊息這類「member + provider 共用」群組維持現狀，但需確認 admin 是否應被排除
-- [ ] 新增 Feature 測試（仿 `tests/Feature/AdminEndpointAuthTest.php`）：每個角色 × 每組路由，期望 403
-- [ ] 更新 spec：`provider-auth`、`admin-auth`；視需要新增 `role-authorization` spec
-- [ ] 更新 Swagger 註解（`app/Docs/*`）的 403 回應
+- [x] 新增 `EnsureMember`、`EnsureProvider` middleware（仿 `app/Http/Middleware/EnsureAdmin.php`），並在 `bootstrap/app.php` 註冊 alias
+- [x] 套用到 `member`、`provider` 路由群組
+- [ ] 通知、即時訊息這類「member + provider 共用」群組維持現狀，但需確認 admin 是否應被排除（未定案：本次維持現狀，admin 是否排除另案決定）
+- [x] 新增 Feature 測試（仿 `tests/Feature/AdminEndpointAuthTest.php`）：每個角色 × 每組路由，期望 403
+- [x] 更新 spec：`provider-auth`、`admin-auth`；視需要新增 `role-authorization` spec（實際做法：新增 `role-authorization` 主規格，未修改 `provider-auth`、`admin-auth`）
+- [x] 更新 Swagger 註解（`app/Docs/*`）的 403 回應
 
 **驗收條件（草案，需轉為 spec Scenario）**
 1. member 呼叫任一 `/api/provider/*` 回 403
@@ -70,11 +70,11 @@
 若 VPS 上 `.env` 沿用相同值，錯誤頁會洩漏堆疊追蹤、環境變數與 SQL。
 
 **待辦**
-- [ ] **需要你確認**：登入 VPS 檢查實際 `.env` 的 `APP_DEBUG`、`APP_ENV`（我無法從此環境確認）
-- [ ] 確認 `config:cache` 後的實際值：`docker compose exec app php artisan tinker --execute="dump(config('app.debug'));"`
-- [ ] `.env.example` 加註解說明正式環境必須 `APP_DEBUG=false`
-- [ ] 評估是否在 deploy.yml 加入啟動檢查：`APP_ENV=production` 且 `APP_DEBUG` 為 false，否則部署失敗
-- [ ] 本機 `.env` 中的 DB 密碼為弱密碼（`cfdivepass`），確認正式環境未使用
+- [x] **需要你確認**：登入 VPS 檢查實際 `.env` 的 `APP_DEBUG`、`APP_ENV`（我無法從此環境確認）（2026-10-18：`APP_DEBUG=false`、`APP_ENV=production`）
+- [x] 確認 `config:cache` 後的實際值：`docker compose exec app php artisan tinker --execute="dump(config('app.debug'));"`
+- [x] `.env.example` 加註解說明正式環境必須 `APP_DEBUG=false`
+- [x] 評估是否在 deploy.yml 加入啟動檢查：`APP_ENV=production` 且 `APP_DEBUG` 為 false，否則部署失敗（2026-10-18 決定暫不做：正式環境已確認，需要時另開 change）
+- [x] 本機 `.env` 中的 DB 密碼為弱密碼（`cfdivepass`），確認正式環境未使用（2026-10-18：正式環境未使用預設密碼，且 MySQL 未對外開 port）
 
 **備註**
 這項大多是設定確認，不一定需要 OpenSpec change；若加入部署檢查則屬 `env-cloud-annotations` spec 範圍。
