@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Enums\BookingStatus;
 use App\Enums\ScheduleStatus;
+use App\Exceptions\BookingRuleViolationException;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Notifications\BookingCancelledNotification;
@@ -20,10 +21,10 @@ class ProviderBookingController extends Controller
     {
         $provider = $request->user();
         $bookings = Booking::with(['member', 'schedule.divingOffer'])
-            ->whereHas('schedule', fn($q) => $q->where('provider_id', $provider->id))
+            ->whereHas('schedule', fn ($q) => $q->where('provider_id', $provider->id))
             ->orderByDesc('created_at')
             ->get()
-            ->map(fn($b) => $this->formatBooking($b));
+            ->map(fn ($b) => $this->formatBooking($b));
 
         return response()->json(['status' => true, 'data' => $bookings]);
     }
@@ -33,7 +34,7 @@ class ProviderBookingController extends Controller
         $booking = Booking::with('schedule')->findOrFail($id);
         $this->authorizeProvider($request, $booking);
 
-        if (!$booking->canTransitionTo(BookingStatus::Confirmed)) {
+        if (! $booking->canTransitionTo(BookingStatus::Confirmed)) {
             return response()->json(['status' => false, 'message' => '當前狀態無法確認'], 422);
         }
 
@@ -43,7 +44,7 @@ class ProviderBookingController extends Controller
                 $remaining = $schedule->max_participants - $schedule->current_participants;
 
                 if ($booking->participants > $remaining) {
-                    throw new \RuntimeException('名額不足，無法確認此預約');
+                    throw new BookingRuleViolationException('名額不足，無法確認此預約');
                 }
 
                 $booking->update(['status' => BookingStatus::Confirmed]);
@@ -54,7 +55,7 @@ class ProviderBookingController extends Controller
                     $schedule->update(['status' => ScheduleStatus::Full]);
                 }
             });
-        } catch (\RuntimeException $e) {
+        } catch (BookingRuleViolationException $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 422);
         }
 
@@ -62,7 +63,7 @@ class ProviderBookingController extends Controller
             $booking->load('member');
             $booking->member->notify(new BookingConfirmedNotification($booking));
         } catch (\Throwable $e) {
-            Log::error('BookingConfirmedNotification failed: ' . $e->getMessage());
+            Log::error('BookingConfirmedNotification failed: '.$e->getMessage());
         }
 
         return response()->json(['status' => true, 'message' => '預約已確認', 'data' => $this->formatBooking($booking->fresh(['member', 'schedule.divingOffer']))]);
@@ -73,7 +74,7 @@ class ProviderBookingController extends Controller
         $booking = Booking::with('schedule')->findOrFail($id);
         $this->authorizeProvider($request, $booking);
 
-        if (!$booking->canTransitionTo(BookingStatus::Rejected)) {
+        if (! $booking->canTransitionTo(BookingStatus::Rejected)) {
             return response()->json(['status' => false, 'message' => '當前狀態無法拒絕'], 422);
         }
 
@@ -83,7 +84,7 @@ class ProviderBookingController extends Controller
             $booking->load('member');
             $booking->member->notify(new BookingRejectedNotification($booking));
         } catch (\Throwable $e) {
-            Log::error('BookingRejectedNotification failed: ' . $e->getMessage());
+            Log::error('BookingRejectedNotification failed: '.$e->getMessage());
         }
 
         return response()->json(['status' => true, 'message' => '預約已拒絕']);
@@ -94,7 +95,7 @@ class ProviderBookingController extends Controller
         $booking = Booking::with('schedule')->findOrFail($id);
         $this->authorizeProvider($request, $booking);
 
-        if (!$booking->canTransitionTo(BookingStatus::ProviderCancelled)) {
+        if (! $booking->canTransitionTo(BookingStatus::ProviderCancelled)) {
             return response()->json(['status' => false, 'message' => '當前狀態無法取消'], 422);
         }
 
@@ -114,7 +115,7 @@ class ProviderBookingController extends Controller
             $booking->load('member');
             $booking->member->notify(new BookingCancelledNotification($booking, cancelledBy: 'provider'));
         } catch (\Throwable $e) {
-            Log::error('BookingCancelledNotification(provider) failed: ' . $e->getMessage());
+            Log::error('BookingCancelledNotification(provider) failed: '.$e->getMessage());
         }
 
         return response()->json(['status' => true, 'message' => '預約已取消']);
@@ -125,7 +126,7 @@ class ProviderBookingController extends Controller
         $booking = Booking::with('schedule')->findOrFail($id);
         $this->authorizeProvider($request, $booking);
 
-        if (!$booking->canTransitionTo(BookingStatus::Completed)) {
+        if (! $booking->canTransitionTo(BookingStatus::Completed)) {
             return response()->json(['status' => false, 'message' => '只有已確認的預約才能標記完成'], 422);
         }
 
@@ -135,7 +136,7 @@ class ProviderBookingController extends Controller
             $booking->load('member');
             $booking->member->notify(new BookingCompletedNotification($booking));
         } catch (\Throwable $e) {
-            Log::error('BookingCompletedNotification failed: ' . $e->getMessage());
+            Log::error('BookingCompletedNotification failed: '.$e->getMessage());
         }
 
         return response()->json(['status' => true, 'message' => '預約已標記為完成']);
@@ -151,17 +152,17 @@ class ProviderBookingController extends Controller
     private function formatBooking(Booking $b): array
     {
         return [
-            'id'             => $b->id,
-            'member_name'    => $b->member?->name,
-            'member_email'   => $b->member?->email,
-            'offer_title'    => $b->schedule?->divingOffer?->title,
+            'id' => $b->id,
+            'member_name' => $b->member?->name,
+            'member_email' => $b->member?->email,
+            'offer_title' => $b->schedule?->divingOffer?->title,
             'scheduled_date' => $b->schedule?->scheduled_date?->toDateString(),
-            'start_time'     => $b->schedule?->start_time,
-            'participants'   => $b->participants,
-            'total_price'    => $b->total_price,
-            'status'         => $b->status->value,
-            'notes'          => $b->notes,
-            'created_at'     => $b->created_at?->toISOString(),
+            'start_time' => $b->schedule?->start_time,
+            'participants' => $b->participants,
+            'total_price' => $b->total_price,
+            'status' => $b->status->value,
+            'notes' => $b->notes,
+            'created_at' => $b->created_at?->toISOString(),
         ];
     }
 }
