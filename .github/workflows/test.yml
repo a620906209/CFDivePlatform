@@ -1,0 +1,37 @@
+name: Run Tests
+
+# 只供 GitHub 鏡像使用；Gitea 有 .gitea/workflows 時不會讀取本目錄。
+# 部署只走 Gitea 的 deploy.yml，這裡刻意不放 deploy。
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 版本對齊正式環境 Dockerfile 的 php:8.2-fpm（Gitea runner 受限於 Alpine 只能用 php84）
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, dom, fileinfo, gd, pdo_sqlite, sqlite3, xml, simplexml, curl, openssl
+          coverage: none
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Run tests
+        run: php artisan test
