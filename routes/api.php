@@ -1,22 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\DivingOfferController;
-use App\Http\Controllers\API\ProviderOfferController;
-use App\Http\Controllers\API\ScheduleController;
-use App\Http\Controllers\API\ProviderBookingController;
-use App\Http\Controllers\API\MemberBookingController;
-use App\Http\Controllers\API\ReviewController;
-use App\Http\Controllers\API\AdminReviewController;
 use App\Http\Controllers\API\AdminBookingController;
-use App\Http\Controllers\API\CourseImageController;
+use App\Http\Controllers\API\AdminOfferController;
+use App\Http\Controllers\API\AdminReviewController;
 use App\Http\Controllers\API\AdminStatsController;
 use App\Http\Controllers\API\AdminUserController;
-use App\Http\Controllers\API\AdminOfferController;
+use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\BookingMessageController;
+use App\Http\Controllers\API\CourseImageController;
+use App\Http\Controllers\API\DivingOfferController;
+use App\Http\Controllers\API\MemberBookingController;
 use App\Http\Controllers\API\NotificationController;
+use App\Http\Controllers\API\ProviderBookingController;
+use App\Http\Controllers\API\ProviderOfferController;
+use App\Http\Controllers\API\ReviewController;
+use App\Http\Controllers\API\ScheduleController;
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Route;
 
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
@@ -24,7 +24,7 @@ Broadcast::routes(['middleware' => ['auth:sanctum']]);
 Route::get('/diving-offers', [DivingOfferController::class, 'index']);
 Route::get('/diving-offers/{id}', [DivingOfferController::class, 'show']);
 Route::get('/diving-offers/{id}/schedules', [ScheduleController::class, 'publicList']);
-Route::get('/diving-offers/{id}/reviews',  [ReviewController::class, 'publicList']);
+Route::get('/diving-offers/{id}/reviews', [ReviewController::class, 'publicList']);
 
 // 會員註冊／登入
 Route::post('/member/register', [AuthController::class, 'registerMember']);
@@ -37,7 +37,7 @@ Route::middleware([\Illuminate\Session\Middleware\StartSession::class])->group(f
 });
 
 // 會員專屬 API（需登入）
-Route::middleware(['auth:sanctum'])->prefix('member')->group(function () {
+Route::middleware(['auth:sanctum', 'member'])->prefix('member')->group(function () {
     // 會員登出
     Route::post('/logout', [AuthController::class, 'logoutMember']);
     // Token Refresh
@@ -49,14 +49,14 @@ Route::middleware(['auth:sanctum'])->prefix('member')->group(function () {
     // 修改密碼
     Route::put('/change-password', [AuthController::class, 'changeMemberPassword']);
     // 預約
-    Route::get('/bookings',          [MemberBookingController::class, 'index']);
-    Route::post('/bookings',         [MemberBookingController::class, 'store']);
-    Route::get('/bookings/{id}',     [MemberBookingController::class, 'show']);
-    Route::delete('/bookings/{id}',  [MemberBookingController::class, 'destroy']);
+    Route::get('/bookings', [MemberBookingController::class, 'index']);
+    Route::post('/bookings', [MemberBookingController::class, 'store']);
+    Route::get('/bookings/{id}', [MemberBookingController::class, 'show']);
+    Route::delete('/bookings/{id}', [MemberBookingController::class, 'destroy']);
     // 評價
-    Route::post('/reviews',       [ReviewController::class, 'store']);
-    Route::put('/reviews/{id}',   [ReviewController::class, 'update']);
-    Route::delete('/reviews/{id}',[ReviewController::class, 'destroy']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
+    Route::put('/reviews/{id}', [ReviewController::class, 'update']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
 });
 
 // 有幫助投票（需登入，但不限 member prefix）
@@ -67,7 +67,7 @@ Route::post('/provider/register', [AuthController::class, 'registerProvider']);
 Route::middleware('throttle:10,1')->post('/provider/login', [AuthController::class, 'loginProvider']);
 
 // 服務提供者專屬 API（需登入）
-Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
+Route::middleware(['auth:sanctum', 'provider'])->prefix('provider')->group(function () {
     // 服務提供者登出
     Route::post('/logout', [AuthController::class, 'logoutProvider']);
     // Token Refresh
@@ -79,32 +79,32 @@ Route::middleware(['auth:sanctum'])->prefix('provider')->group(function () {
     // 修改密碼
     Route::put('/change-password', [AuthController::class, 'changeProviderPassword']);
     // 教練課程管理
-    Route::get('/offers',          [ProviderOfferController::class, 'index']);
-    Route::post('/offers',         [ProviderOfferController::class, 'store']);
-    Route::get('/offers/{id}',     [ProviderOfferController::class, 'show']);
-    Route::put('/offers/{id}',     [ProviderOfferController::class, 'update']);
-    Route::delete('/offers/{id}',  [ProviderOfferController::class, 'destroy']);
+    Route::get('/offers', [ProviderOfferController::class, 'index']);
+    Route::post('/offers', [ProviderOfferController::class, 'store']);
+    Route::get('/offers/{id}', [ProviderOfferController::class, 'show']);
+    Route::put('/offers/{id}', [ProviderOfferController::class, 'update']);
+    Route::delete('/offers/{id}', [ProviderOfferController::class, 'destroy']);
     // 驗證申請（證照送審）
-    Route::get('/verification',                          [\App\Http\Controllers\API\ProviderVerificationController::class, 'show']);
-    Route::post('/verification/certifications',          [\App\Http\Controllers\API\ProviderVerificationController::class, 'uploadCertification']);
-    Route::delete('/verification/certifications/{id}',   [\App\Http\Controllers\API\ProviderVerificationController::class, 'deleteCertification']);
-    Route::post('/verification/submit',                  [\App\Http\Controllers\API\ProviderVerificationController::class, 'submit']);
+    Route::get('/verification', [\App\Http\Controllers\API\ProviderVerificationController::class, 'show']);
+    Route::post('/verification/certifications', [\App\Http\Controllers\API\ProviderVerificationController::class, 'uploadCertification']);
+    Route::delete('/verification/certifications/{id}', [\App\Http\Controllers\API\ProviderVerificationController::class, 'deleteCertification']);
+    Route::post('/verification/submit', [\App\Http\Controllers\API\ProviderVerificationController::class, 'submit']);
     // 課程圖片
-    Route::post('/offers/{id}/cover',    [CourseImageController::class, 'uploadCover']);
-    Route::delete('/offers/{id}/cover',  [CourseImageController::class, 'deleteCover']);
-    Route::post('/offers/{id}/images',   [CourseImageController::class, 'uploadImage']);
-    Route::delete('/images/{id}',        [CourseImageController::class, 'deleteImage']);
+    Route::post('/offers/{id}/cover', [CourseImageController::class, 'uploadCover']);
+    Route::delete('/offers/{id}/cover', [CourseImageController::class, 'deleteCover']);
+    Route::post('/offers/{id}/images', [CourseImageController::class, 'uploadImage']);
+    Route::delete('/images/{id}', [CourseImageController::class, 'deleteImage']);
     // 時段管理
-    Route::get('/schedules',            [ScheduleController::class, 'index']);
-    Route::post('/schedules',           [ScheduleController::class, 'store']);
-    Route::put('/schedules/{id}',       [ScheduleController::class, 'update']);
-    Route::delete('/schedules/{id}',    [ScheduleController::class, 'destroy']);
+    Route::get('/schedules', [ScheduleController::class, 'index']);
+    Route::post('/schedules', [ScheduleController::class, 'store']);
+    Route::put('/schedules/{id}', [ScheduleController::class, 'update']);
+    Route::delete('/schedules/{id}', [ScheduleController::class, 'destroy']);
     // 預約管理
-    Route::get('/bookings',                      [ProviderBookingController::class, 'index']);
-    Route::put('/bookings/{id}/confirm',         [ProviderBookingController::class, 'confirm']);
-    Route::put('/bookings/{id}/reject',          [ProviderBookingController::class, 'reject']);
-    Route::put('/bookings/{id}/cancel',          [ProviderBookingController::class, 'cancel']);
-    Route::put('/bookings/{id}/complete',        [ProviderBookingController::class, 'complete']);
+    Route::get('/bookings', [ProviderBookingController::class, 'index']);
+    Route::put('/bookings/{id}/confirm', [ProviderBookingController::class, 'confirm']);
+    Route::put('/bookings/{id}/reject', [ProviderBookingController::class, 'reject']);
+    Route::put('/bookings/{id}/cancel', [ProviderBookingController::class, 'cancel']);
+    Route::put('/bookings/{id}/complete', [ProviderBookingController::class, 'complete']);
 });
 
 // 管理員登入（帳號建立僅限主機端 php artisan app:create-admin，不提供公開註冊）
@@ -129,42 +129,42 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     // 統計數據
     Route::get('/stats', [AdminStatsController::class, 'index']);
     // 用戶管理
-    Route::get('/members',                          [AdminUserController::class, 'members']);
-    Route::get('/members/{id}',                     [AdminUserController::class, 'member']);
-    Route::put('/members/{id}/toggle-active',       [AdminUserController::class, 'toggleMemberActive']);
-    Route::get('/providers',                        [AdminUserController::class, 'providers']);
-    Route::get('/providers/{id}',                   [AdminUserController::class, 'provider']);
-    Route::put('/providers/{id}/toggle-active',     [AdminUserController::class, 'toggleProviderActive']);
+    Route::get('/members', [AdminUserController::class, 'members']);
+    Route::get('/members/{id}', [AdminUserController::class, 'member']);
+    Route::put('/members/{id}/toggle-active', [AdminUserController::class, 'toggleMemberActive']);
+    Route::get('/providers', [AdminUserController::class, 'providers']);
+    Route::get('/providers/{id}', [AdminUserController::class, 'provider']);
+    Route::put('/providers/{id}/toggle-active', [AdminUserController::class, 'toggleProviderActive']);
     // 教練審核（toggle-verified 已由審核狀態機取代）
-    Route::get('/verifications',                    [\App\Http\Controllers\API\AdminVerificationController::class, 'index']);
-    Route::put('/verifications/{userId}/approve',   [\App\Http\Controllers\API\AdminVerificationController::class, 'approve']);
-    Route::put('/verifications/{userId}/reject',    [\App\Http\Controllers\API\AdminVerificationController::class, 'reject']);
+    Route::get('/verifications', [\App\Http\Controllers\API\AdminVerificationController::class, 'index']);
+    Route::put('/verifications/{userId}/approve', [\App\Http\Controllers\API\AdminVerificationController::class, 'approve']);
+    Route::put('/verifications/{userId}/reject', [\App\Http\Controllers\API\AdminVerificationController::class, 'reject']);
     // 課程管理
-    Route::get('/offers',           [AdminOfferController::class, 'index']);
-    Route::delete('/offers/{id}',   [AdminOfferController::class, 'destroy']);
+    Route::get('/offers', [AdminOfferController::class, 'index']);
+    Route::delete('/offers/{id}', [AdminOfferController::class, 'destroy']);
     // 預約管理
-    Route::get('/bookings',                   [AdminBookingController::class, 'index']);
-    Route::put('/bookings/{id}/complete',     [AdminBookingController::class, 'complete']);
+    Route::get('/bookings', [AdminBookingController::class, 'index']);
+    Route::put('/bookings/{id}/complete', [AdminBookingController::class, 'complete']);
     // 評價管理
-    Route::get('/reviews',          [AdminReviewController::class, 'index']);
-    Route::delete('/reviews/{id}',  [AdminReviewController::class, 'destroy']);
+    Route::get('/reviews', [AdminReviewController::class, 'index']);
+    Route::delete('/reviews/{id}', [AdminReviewController::class, 'destroy']);
 });
 
 // 通知（Member + Provider 共用）
 Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
-    Route::get('/',          [NotificationController::class, 'index']);
+    Route::get('/', [NotificationController::class, 'index']);
     Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
-    Route::patch('/read-all',   [NotificationController::class, 'markAllRead']);
-    Route::patch('/{id}/read',  [NotificationController::class, 'markRead']);
-    Route::delete('/{id}',      [NotificationController::class, 'destroy']);
+    Route::patch('/read-all', [NotificationController::class, 'markAllRead']);
+    Route::patch('/{id}/read', [NotificationController::class, 'markRead']);
+    Route::delete('/{id}', [NotificationController::class, 'destroy']);
 });
 
 // 即時訊息（Member + Provider 共用，依 booking 參與方驗證）
 Route::middleware('auth:sanctum')->group(function () {
     // unread-counts 必須在 {booking} 之前，否則會被 route model binding 吃掉
-    Route::get('/bookings/messages/unread-counts',   [BookingMessageController::class, 'unreadCounts']);
-    Route::get('/bookings/{booking}/messages',       [BookingMessageController::class, 'index']);
-    Route::post('/bookings/{booking}/messages',      [BookingMessageController::class, 'store']);
+    Route::get('/bookings/messages/unread-counts', [BookingMessageController::class, 'unreadCounts']);
+    Route::get('/bookings/{booking}/messages', [BookingMessageController::class, 'index']);
+    Route::post('/bookings/{booking}/messages', [BookingMessageController::class, 'store']);
     Route::post('/bookings/{booking}/messages/read', [BookingMessageController::class, 'markRead']);
 });
 

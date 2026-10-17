@@ -16,12 +16,12 @@ use Tests\TestCase;
  * 預約列表端點資料隔離（booking-lifecycle 規格）。
  *
  * 路由對應（routes/api.php 已確認）：
- *   GET /api/member/bookings   → MemberBookingController::index（auth:sanctum，無 role check）
- *   GET /api/provider/bookings → ProviderBookingController::index（auth:sanctum，無 role check）
+ *   GET /api/member/bookings   → MemberBookingController::index（auth:sanctum + member middleware）
+ *   GET /api/provider/bookings → ProviderBookingController::index（auth:sanctum + provider middleware）
  *   GET /api/admin/bookings    → AdminBookingController::index（auth:sanctum + admin middleware）
  *
- * 資料隔離靠 controller query 條件，不靠 middleware role 強制，
- * 因此測試需分別以正確角色 actingAs 驗證隔離邊界。
+ * 角色 middleware 只擋跨角色呼叫（見 RoleAuthorizationTest）；同角色之間的資料隔離
+ * 靠 controller query 條件，因此測試需分別以正確角色 actingAs 驗證隔離邊界。
  */
 class BookingListTest extends TestCase
 {
@@ -34,22 +34,22 @@ class BookingListTest extends TestCase
 
         $offer = DivingOffer::create([
             'provider_id' => $provider->id,
-            'title'       => 'Dive Course',
-            'location'    => 'Kenting',
-            'price'       => 3000,
-            'region'      => '南部',
-            'rating'      => 0,
-            'reviews'     => 0,
+            'title' => 'Dive Course',
+            'location' => 'Kenting',
+            'price' => 3000,
+            'region' => '南部',
+            'rating' => 0,
+            'reviews' => 0,
         ]);
 
         $schedule = CourseSchedule::create([
-            'diving_offer_id'      => $offer->id,
-            'provider_id'          => $provider->id,
-            'scheduled_date'       => now()->addDays(30)->toDateString(),
-            'start_time'           => '09:00',
-            'max_participants'     => 10,
+            'diving_offer_id' => $offer->id,
+            'provider_id' => $provider->id,
+            'scheduled_date' => now()->addDays(30)->toDateString(),
+            'start_time' => '09:00',
+            'max_participants' => 10,
             'current_participants' => 0,
-            'status'               => ScheduleStatus::Open,
+            'status' => ScheduleStatus::Open,
         ]);
 
         return [$provider, $schedule];
@@ -58,11 +58,11 @@ class BookingListTest extends TestCase
     private function makePendingBooking(User $member, CourseSchedule $schedule): Booking
     {
         return Booking::create([
-            'schedule_id'  => $schedule->id,
-            'member_id'    => $member->id,
+            'schedule_id' => $schedule->id,
+            'member_id' => $member->id,
             'participants' => 1,
-            'total_price'  => 3000,
-            'status'       => BookingStatus::Pending,
+            'total_price' => 3000,
+            'status' => BookingStatus::Pending,
         ]);
     }
 
@@ -71,8 +71,8 @@ class BookingListTest extends TestCase
     public function test_member_sees_only_own_bookings(): void
     {
         [$provider, $schedule] = $this->makeProviderWithSchedule();
-        $memberA  = User::factory()->create(['role' => 'member']);
-        $memberB  = User::factory()->create(['role' => 'member']);
+        $memberA = User::factory()->create(['role' => 'member']);
+        $memberB = User::factory()->create(['role' => 'member']);
         $bookingA = $this->makePendingBooking($memberA, $schedule);
         $bookingB = $this->makePendingBooking($memberB, $schedule);
 
@@ -90,7 +90,7 @@ class BookingListTest extends TestCase
     {
         [$providerA, $scheduleA] = $this->makeProviderWithSchedule();
         [$providerB, $scheduleB] = $this->makeProviderWithSchedule();
-        $member   = User::factory()->create(['role' => 'member']);
+        $member = User::factory()->create(['role' => 'member']);
         $bookingA = $this->makePendingBooking($member, $scheduleA);
         $bookingB = $this->makePendingBooking($member, $scheduleB);
 
@@ -106,11 +106,11 @@ class BookingListTest extends TestCase
 
     public function test_admin_sees_all_bookings(): void
     {
-        $admin    = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'admin']);
         [$providerA, $scheduleA] = $this->makeProviderWithSchedule();
         [$providerB, $scheduleB] = $this->makeProviderWithSchedule();
-        $memberA  = User::factory()->create(['role' => 'member']);
-        $memberB  = User::factory()->create(['role' => 'member']);
+        $memberA = User::factory()->create(['role' => 'member']);
+        $memberB = User::factory()->create(['role' => 'member']);
         $bookingA = $this->makePendingBooking($memberA, $scheduleA);
         $bookingB = $this->makePendingBooking($memberB, $scheduleB);
 
